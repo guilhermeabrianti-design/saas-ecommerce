@@ -42,7 +42,7 @@ export function SystemStatusPage() {
   return (
     <div className="mx-auto max-w-3xl">
       <p className="text-brand font-mono text-xs font-medium tracking-widest uppercase">
-        Fase 1 · Setup
+        Fase 2 · Autenticação
       </p>
       <h1 className="mt-2 text-2xl font-semibold tracking-tight">Status do sistema</h1>
       <p className="text-muted mt-1 text-sm">

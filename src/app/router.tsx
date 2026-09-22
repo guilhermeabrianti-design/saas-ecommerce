@@ -1,15 +1,46 @@
 import { createBrowserRouter } from 'react-router';
 import { AppShell } from '@/layouts/AppShell';
-import { SystemStatusPage } from '@/pages/SystemStatusPage';
+import { AuthLayout } from '@/layouts/AuthLayout';
+import { RedirectIfAuthenticated, RequireAuth } from '@/features/auth/guards';
+import { AccountPage } from '@/features/auth/pages/AccountPage';
+import { ForgotPasswordPage } from '@/features/auth/pages/ForgotPasswordPage';
+import { ResetPasswordPage } from '@/features/auth/pages/ResetPasswordPage';
+import { SignInPage } from '@/features/auth/pages/SignInPage';
+import { SignUpPage } from '@/features/auth/pages/SignUpPage';
+import { HomePage } from '@/pages/HomePage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
+import { SystemStatusPage } from '@/pages/SystemStatusPage';
 
 // Routes are added per phase. Only routes with working pages are registered
 // (no placeholder screens or dead links).
 export const router = createBrowserRouter([
   {
+    element: <AuthLayout />,
+    children: [
+      {
+        element: <RedirectIfAuthenticated />,
+        children: [
+          { path: 'entrar', element: <SignInPage /> },
+          { path: 'cadastro', element: <SignUpPage /> },
+          { path: 'recuperar-senha', element: <ForgotPasswordPage /> },
+        ],
+      },
+      // Needs the recovery session, so it is not behind RedirectIfAuthenticated.
+      { path: 'redefinir-senha', element: <ResetPasswordPage /> },
+    ],
+  },
+  {
     element: <AppShell />,
     children: [
-      { index: true, element: <SystemStatusPage /> },
+      // Public diagnostic page: must work before Supabase is configured.
+      { path: 'status', element: <SystemStatusPage /> },
+      {
+        element: <RequireAuth />,
+        children: [
+          { index: true, element: <HomePage /> },
+          { path: 'conta', element: <AccountPage /> },
+        ],
+      },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

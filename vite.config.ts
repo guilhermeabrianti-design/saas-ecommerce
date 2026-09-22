@@ -15,7 +15,8 @@ export default defineConfig({
   // (service role, OAuth secrets, OpenAI key) must never use this prefix.
   envPrefix: 'VITE_',
   server: {
-    port: 5173,
+    host: '127.0.0.1',
+    port: 3001,
     strictPort: true,
   },
   build: {

@@ -18,3 +18,12 @@ export const supabase: SupabaseClient | null = env.supabase
   : null;
 
 export const isSupabaseConfigured = supabase !== null;
+
+/**
+ * For code paths that only render when Supabase is configured (auth pages and
+ * protected routes are gated by AuthProvider's `unconfigured` status).
+ */
+export function getSupabase(): SupabaseClient {
+  if (!supabase) throw new Error('Supabase is not configured');
+  return supabase;
+}

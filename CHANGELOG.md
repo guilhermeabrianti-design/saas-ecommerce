@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.2.0] — Fase 2: Autenticação, sessão e RBAC
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20260922120000_auth_profiles.sql`): enum `app_role`
+  (`seller`, `supplier`, `admin`) e tabela `profiles` 1:1 com `auth.users`, criada por trigger no
+  cadastro. RLS habilitada; usuário lê/edita apenas o próprio perfil e só pode alterar `full_name`.
+  `admin` nunca é atribuído a partir dos metadados do cliente.
+- **Testes de banco sem Docker**: PGlite (Postgres em WASM) com emulação mínima do Supabase
+  (`src/test/db/supabase-sim.ts`); 12 testes de RLS/privilégios rodam em `npm test`.
+- **Telas**: Entrar, Criar conta (Vendedor/Fornecedor), Recuperar senha, Redefinir senha, Início e
+  Minha conta (editar nome, trocar senha com reautenticação por código, sair).
+- **Sessão**: `AuthProvider` (PKCE, restauração de sessão, cache do TanStack Query limpo ao sair ou
+  trocar de usuário).
+- **Rotas**: `RequireAuth` (preserva `?next`), `RedirectIfAuthenticated` (com proteção contra open
+  redirect), `RequireRole` (RBAC de UX; a autorização real é a RLS).
+- **Throttling de login**: backoff no cliente após 3 falhas (15s → 5min) + rate limit do Supabase
+  Auth reduzido para 15 tentativas/5min por IP.
+- Componentes de UI: `Button`, `TextField`, `Alert`, `PageLoader`. Navegação móvel no AppShell.
+- `/status` continua público (funciona sem Supabase configurado).
+
 ## [0.1.0] — Fase 1: Setup
 
 ### Adicionado

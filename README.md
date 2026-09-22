@@ -2,7 +2,7 @@
 
 SaaS multi-tenant para vendedores de e-commerce/dropshipping, fornecedores e equipe TheSigns.
 
-> **Status:** Fase 1 (Setup) concluída. Veja [CHANGELOG.md](CHANGELOG.md) para o progresso por fase.
+> **Status:** Fase 2 (Autenticação, sessão e RBAC) concluída. Veja [CHANGELOG.md](CHANGELOG.md) para o progresso por fase.
 
 ## Stack
 
@@ -24,7 +24,7 @@ SaaS multi-tenant para vendedores de e-commerce/dropshipping, fornecedores e equ
 ```bash
 npm install
 cp .env.example .env.local   # preencha apenas as variáveis VITE_*
-npm run dev                  # http://localhost:5173
+npm run dev                  # http://localhost:3001
 ```
 
 Sem Supabase configurado, o app roda e mostra **"Não configurado"** na página de status.
@@ -55,6 +55,7 @@ Copie a `API URL` e a `anon key` exibidas para `VITE_SUPABASE_URL` / `VITE_SUPAB
 - [ARCHITECTURE.md](ARCHITECTURE.md) — estrutura e princípios
 - [ENVIRONMENT.md](ENVIRONMENT.md) — variáveis e ambientes
 - [SECURITY.md](SECURITY.md) — modelo de segurança
+- [DATABASE.md](DATABASE.md) — schema, RLS e testes de banco
 - [CHANGELOG.md](CHANGELOG.md) — progresso por fase
 
-Os demais documentos (DATABASE, INTEGRATIONS, API, DEPLOYMENT, TESTING, TROUBLESHOOTING) são criados nas fases em que seu conteúdo passa a existir.
+Os demais documentos (INTEGRATIONS, API, DEPLOYMENT, TESTING, TROUBLESHOOTING) são criados nas fases em que seu conteúdo passa a existir.
