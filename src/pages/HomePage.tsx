@@ -1,5 +1,5 @@
 import { Link, Navigate } from 'react-router';
-import { Activity, Building2, ChevronRight, UserRound } from 'lucide-react';
+import { Activity, Building2, ChevronRight, Package, UserRound } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { useProfile } from '@/features/auth/profile';
@@ -27,6 +27,12 @@ export function HomePage() {
     ...(active
       ? [
           {
+            to: '/produtos',
+            label: 'Produtos',
+            detail: 'Catálogo interno da organização',
+            icon: Package,
+          },
+          {
             to: '/organizacao',
             label: active.organization.name,
             detail: `Organização · ${orgRoleLabels[active.role]}`,
@@ -51,8 +57,7 @@ export function HomePage() {
         </p>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight">Olá, {firstName}</h1>
         <p className="text-muted mt-1 text-sm">
-          Produtos, pedidos, estoque e integrações serão habilitados aqui conforme cada módulo for
-          liberado.
+          Pedidos, estoque e integrações serão habilitados aqui conforme cada módulo for liberado.
         </p>
       </div>
 

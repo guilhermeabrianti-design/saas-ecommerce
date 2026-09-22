@@ -24,6 +24,8 @@ export const orgPermissions = {
   rename: (role: OrgRole) => role === 'owner' || role === 'admin',
   manageInvitations: (role: OrgRole) => role === 'owner' || role === 'admin',
   changeRoles: (role: OrgRole) => role === 'owner',
+  /** Create/edit products and other catalog data. */
+  editCatalog: (role: OrgRole) => role === 'owner' || role === 'admin',
   /** Roles `role` may invite as. */
   invitableRoles: (role: OrgRole): OrgRole[] =>
     role === 'owner' ? ['member', 'admin'] : role === 'admin' ? ['member'] : [],

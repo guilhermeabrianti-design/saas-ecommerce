@@ -56,6 +56,13 @@ Documento vivo — cada fase acrescenta os controles que implementa. Status atua
 - Excluir um usuário no painel do Supabase remove suas participações; se ele for o único owner, a
   organização fica sem owner e precisa ser corrigida via SQL.
 
+## Implementado (Fase 4)
+
+- `products` segue o padrão de tenant: leitura por membros, escrita por owner/admin, `organization_id`
+  imutável e `created_by` definido pelo banco. Exclusão só de rascunhos.
+- Busca textual é saneada antes de virar filtro PostgREST (`sanitizeSearch`).
+- Dinheiro sempre em centavos inteiros, no banco e na conversão da UI.
+
 ### Configuração obrigatória no projeto Supabase cloud
 
 `supabase/config.toml` vale só para o ambiente local. Em staging/produção, replique no painel

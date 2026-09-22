@@ -10,6 +10,8 @@ import { SignUpPage } from '@/features/auth/pages/SignUpPage';
 import { RequireOrganization } from '@/features/organizations/guards';
 import { CreateOrganizationPage } from '@/features/organizations/pages/CreateOrganizationPage';
 import { OrganizationSettingsPage } from '@/features/organizations/pages/OrganizationSettingsPage';
+import { EditProductPage, NewProductPage } from '@/features/products/pages/ProductFormPage';
+import { ProductsPage } from '@/features/products/pages/ProductsPage';
 import { HomePage } from '@/pages/HomePage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { SystemStatusPage } from '@/pages/SystemStatusPage';
@@ -46,7 +48,12 @@ export const router = createBrowserRouter([
           { path: 'organizacao/nova', element: <CreateOrganizationPage /> },
           {
             element: <RequireOrganization />,
-            children: [{ path: 'organizacao', element: <OrganizationSettingsPage /> }],
+            children: [
+              { path: 'organizacao', element: <OrganizationSettingsPage /> },
+              { path: 'produtos', element: <ProductsPage /> },
+              { path: 'produtos/novo', element: <NewProductPage /> },
+              { path: 'produtos/:productId', element: <EditProductPage /> },
+            ],
           },
         ],
       },

@@ -1,6 +1,14 @@
 import { useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router';
-import { Activity, Building2, House, LogOut, UserRound, type LucideIcon } from 'lucide-react';
+import {
+  Activity,
+  Building2,
+  House,
+  LogOut,
+  Package,
+  UserRound,
+  type LucideIcon,
+} from 'lucide-react';
 import { Logo } from '@/components/brand/Logo';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { EnvBadge } from '@/components/ui/EnvBadge';
@@ -19,6 +27,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { to: '/', label: 'Início', icon: House, requiresAuth: true },
+  { to: '/produtos', label: 'Produtos', icon: Package, requiresAuth: true },
   { to: '/organizacao', label: 'Organização', icon: Building2, requiresAuth: true },
   { to: '/conta', label: 'Minha conta', icon: UserRound, requiresAuth: true },
   { to: '/status', label: 'Status do sistema', icon: Activity, requiresAuth: false },
@@ -66,7 +75,7 @@ export function AppShell() {
   const items = navItems.filter((item) => authenticated || !item.requiresAuth);
 
   const nav = items.map(({ to, label, icon: Icon }) => (
-    <NavLink key={to} to={to} end className={linkClass}>
+    <NavLink key={to} to={to} end={to === '/'} className={linkClass}>
       <Icon className="size-4" aria-hidden />
       {label}
     </NavLink>

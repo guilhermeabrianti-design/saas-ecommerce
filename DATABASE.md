@@ -81,6 +81,28 @@ por owner/admin da organização; o convidado vê os seus via `my_pending_invita
 `accept_invitation` / `decline_invitation` (exige e-mail confirmado e tipo de conta igual ao da
 organização).
 
+### `public.products` (Fase 4)
+
+Produto interno TheSigns — fonte da verdade para anúncios em marketplaces.
+
+| Coluna                                               | Tipo                    | Observação                                                          |
+| ---------------------------------------------------- | ----------------------- | ------------------------------------------------------------------- |
+| `organization_id`                                    | `uuid` FK               | só na criação; cascata ao excluir organização                       |
+| `sku`                                                | `text`                  | `[A-Za-z0-9][A-Za-z0-9._-]{0,59}`; único por org (case-insensitive) |
+| `name` / `description` / `brand`                     | `text`                  | 2–200 / até 5000 / 1–80                                             |
+| `gtin`                                               | `text`                  | 8, 12, 13 ou 14 dígitos (dígito verificador validado na UI)         |
+| `price_cents` / `cost_cents`                         | `bigint`                | centavos de BRL, ≥ 0; custo opcional                                |
+| `weight_grams`, `length_mm`, `width_mm`, `height_mm` | `integer`               | opcionais, > 0                                                      |
+| `status`                                             | `public.product_status` | `draft` \| `active` \| `archived`                                   |
+| `created_by`                                         | `uuid`                  | `auth.uid()` do criador; não gravável                               |
+
+| Operação | `authenticated`                                             |
+| -------- | ----------------------------------------------------------- |
+| SELECT   | membros da organização                                      |
+| INSERT   | owner/admin                                                 |
+| UPDATE   | owner/admin (exceto `organization_id`, `created_by`, datas) |
+| DELETE   | owner/admin, só `status = draft`                            |
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,

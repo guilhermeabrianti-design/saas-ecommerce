@@ -1,5 +1,42 @@
 # Changelog
 
+## [0.4.0] — Fase 4: Produtos (catálogo interno)
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20260922140000_products.sql`): tabela `products` por organização —
+  SKU (único por organização, sem diferenciar maiúsculas), nome, descrição, marca, GTIN, preço e
+  custo em **centavos** (`bigint`), peso/dimensões para frete e status `draft`/`active`/`archived`.
+- **Permissões**: membros leem; owner/admin criam e editam; só rascunhos podem ser excluídos
+  (os demais são arquivados). `organization_id`, `created_by` e datas não são graváveis pelo
+  cliente depois da criação (grants por coluna).
+- **Telas**: **Produtos** (busca por nome/SKU, filtro de status, paginação de 25, estado vazio) e
+  formulário de produto (criar/editar, margem bruta calculada, excluir rascunho). Membros veem em
+  modo leitura.
+- `src/utils/money.ts`: conversão BRL ↔ centavos só com aritmética de strings (sem erro de ponto
+  flutuante).
+- Validação de GTIN/EAN com dígito verificador GS1 no formulário.
+- **Testes**: 11 de RLS/regras de produtos, 21 de dinheiro, 23 de schema/busca/erros de produto.
+
+### Revisão de segurança (fechamento da fase)
+
+- Busca livre entra num filtro `or=(…)` do PostgREST: `sanitizeSearch` remove `,()"\` e curingas
+  antes de montar o filtro (coberto por teste). Mesmo um filtro manipulado continuaria limitado pela
+  RLS às organizações do usuário.
+- `UPDATE`/`DELETE` negados pela RLS retornam 0 linhas sem erro; o frontend trata "0 linhas" como
+  falha em vez de exibir sucesso falso.
+- Verificado: produto não muda de organização nem tem autoria forjada; membro comum não escreve;
+  usuário de outra organização não lê, edita nem exclui; `anon` sem acesso; tabela coberta pelas
+  invariantes de `rls-baseline.test.ts`.
+- `npm run check` verde: typecheck, lint, format, 157 testes, build.
+
+### Limitações conhecidas
+
+- Sem variações (cor/tamanho) e sem imagens: entram em fase própria.
+- Sem limite de produtos por organização (rate limiting é da Fase 22).
+- Excluir uma organização apaga seus produtos em cascata; quando houver pedidos, as referências
+  usarão `restrict`.
+
 ## [0.3.0] — Fase 3: Organizações (tenants) e RLS deny-by-default
 
 ### Adicionado
