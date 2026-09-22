@@ -1,5 +1,45 @@
 # Changelog
 
+## [0.3.0] — Fase 3: Organizações (tenants) e RLS deny-by-default
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20260922130000_organizations.sql`): `organizations`,
+  `organization_members` e `organization_invitations`, com papéis `owner`/`admin`/`member` e tipo
+  (`seller`/`supplier`) herdado da conta de quem cria.
+- **Deny-by-default**: tabelas, sequências e funções novas do schema `public` nascem sem acesso para
+  `anon`/`authenticated`; cada migração concede explicitamente o que precisa.
+- **Isolamento por tenant**: RLS com helpers `private.is_org_member` / `private.has_org_role`
+  (schema `private`, fora da API). Usuário só enxerga organizações das quais é membro.
+- **RPCs** com regras explícitas: criar organização, listar membros, convidar/revogar, aceitar/recusar
+  convite, alterar papel, remover membro/sair. Organização sempre mantém ao menos um owner (operações
+  serializadas por lock na organização).
+- **Testes**: 28 testes de isolamento/papéis/convites e 7 invariantes de schema
+  (`src/test/db/rls-baseline.test.ts`): RLS em toda tabela, `anon` sem privilégios, objetos novos sem
+  acesso, lista fechada de RPCs executáveis, `search_path` fixo em funções `security definer`.
+- **Telas**: onboarding "Configure sua organização" (criar ou aceitar convite), **Organização**
+  (dados, membros e papéis, convites, sair), convites pendentes na página inicial e seletor de
+  organização ativa no topo.
+- Componentes `Section`, `Select`, `ConfirmButton`.
+
+### Alterado
+
+- Testes nunca usam o Supabase real, mesmo com `.env.local` preenchido.
+- Banco de teste migrado uma vez por arquivo e restaurado de snapshot (suíte de banco ~3× mais
+  rápida).
+- `Section` extraído de Minha conta para `src/components/ui`.
+
+### Revisão de segurança (fechamento da fase)
+
+- Convites passaram a exigir e-mail **confirmado** no SQL (`email_confirmed_at`), sem depender só
+  da opção "Confirm email" do painel — do contrário, um cadastro com o e-mail de outra pessoa
+  aceitaria o convite dela. Coberto por teste.
+- `public.set_updated_at()` (Fase 2) tinha `EXECUTE` para `PUBLIC` por padrão; revogado.
+- Verificado: RPCs recusam organização alheia; ids de convite/organização adivinhados não revelam
+  existência (mesmo erro); `kind`/`created_by` e papéis não são alteráveis por `UPDATE` direto;
+  corrida entre dois owners se rebaixando é serializada por `select … for update`.
+- `npm run check` verde: typecheck, lint, format, 103 testes, build.
+
 ## [0.2.0] — Fase 2: Autenticação, sessão e RBAC
 
 ### Adicionado

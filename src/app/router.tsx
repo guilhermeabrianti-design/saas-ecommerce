@@ -7,6 +7,9 @@ import { ForgotPasswordPage } from '@/features/auth/pages/ForgotPasswordPage';
 import { ResetPasswordPage } from '@/features/auth/pages/ResetPasswordPage';
 import { SignInPage } from '@/features/auth/pages/SignInPage';
 import { SignUpPage } from '@/features/auth/pages/SignUpPage';
+import { RequireOrganization } from '@/features/organizations/guards';
+import { CreateOrganizationPage } from '@/features/organizations/pages/CreateOrganizationPage';
+import { OrganizationSettingsPage } from '@/features/organizations/pages/OrganizationSettingsPage';
 import { HomePage } from '@/pages/HomePage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { SystemStatusPage } from '@/pages/SystemStatusPage';
@@ -37,8 +40,14 @@ export const router = createBrowserRouter([
       {
         element: <RequireAuth />,
         children: [
+          // Home decides itself: staff accounts have no organization.
           { index: true, element: <HomePage /> },
           { path: 'conta', element: <AccountPage /> },
+          { path: 'organizacao/nova', element: <CreateOrganizationPage /> },
+          {
+            element: <RequireOrganization />,
+            children: [{ path: 'organizacao', element: <OrganizationSettingsPage /> }],
+          },
         ],
       },
       { path: '*', element: <NotFoundPage /> },

@@ -6,8 +6,18 @@ verdade: nada é criado manualmente pelo painel.
 ## Regras
 
 - **RLS em toda tabela do schema `public`**, sem exceção.
-- O Supabase concede `ALL` para `anon`/`authenticated` em tabelas novas; cada migração **revoga tudo**
-  e concede só o necessário (inclusive por coluna, quando aplicável).
+- **Deny-by-default** (desde a Fase 3): tabelas, sequências e funções novas de `public` nascem sem
+  privilégio para `anon`/`authenticated`. Cada migração concede só o necessário (inclusive por
+  coluna) e mesmo assim começa com `revoke all` explícito.
+- **Tabelas de negócio** têm `organization_id uuid not null references public.organizations on delete cascade`
+  e policies no formato:
+  ```sql
+  using (private.is_org_member(organization_id))                        -- leitura
+  with check (private.has_org_role(organization_id, '{owner,admin}'))   -- escrita restrita
+  ```
+- Helpers de autorização vivem no schema `private` (não exposto pela API).
+- Nova RPC executável por `authenticated` precisa entrar em `AUTHENTICATED_RPCS` em
+  `src/test/db/rls-baseline.test.ts` — o teste falha para qualquer função exposta sem intenção.
 - Funções `security definer` sempre com `set search_path = ''` e nomes totalmente qualificados.
 - Nunca confiar em `raw_user_meta_data` (é controlado pelo cliente) para conceder privilégios.
 
@@ -37,6 +47,46 @@ Promover alguém a admin (SQL editor, com service role):
 ```sql
 update public.profiles set role = 'admin' where id = '<uuid do usuário>';
 ```
+
+### `public.organizations` (Fase 3)
+
+Tenant. `kind` (`seller` | `supplier`) vem do tipo de conta de quem cria e é imutável.
+
+| Operação | `authenticated`                                          |
+| -------- | -------------------------------------------------------- |
+| SELECT   | membros                                                  |
+| UPDATE   | owner/admin, só `name`                                   |
+| INSERT   | — (RPC `create_organization`, que torna o criador owner) |
+| DELETE   | —                                                        |
+
+### `public.organization_members` (Fase 3)
+
+PK `(organization_id, user_id)`; `role` = `owner` | `admin` | `member`. Leitura por membros da mesma
+organização; escrita apenas pelas RPCs `accept_invitation`, `update_member_role`, `remove_member`.
+
+| Ação                 | owner | admin            | member |
+| -------------------- | ----- | ---------------- | ------ |
+| Renomear organização | ✓     | ✓                | —      |
+| Convidar             | ✓     | só como `member` | —      |
+| Alterar papéis       | ✓     | —                | —      |
+| Remover outra pessoa | ✓     | só `member`      | —      |
+| Sair                 | ✓\*   | ✓                | ✓      |
+
+\* O último owner não pode sair, ser removido nem rebaixado.
+
+### `public.organization_invitations` (Fase 3)
+
+Convite por e-mail (minúsculo), único por organização, válido por 7 dias; reenviar renova. Leitura
+por owner/admin da organização; o convidado vê os seus via `my_pending_invitations()` e responde com
+`accept_invitation` / `decline_invitation` (exige e-mail confirmado e tipo de conta igual ao da
+organização).
+
+### RPCs (Fase 3)
+
+`create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,
+`my_pending_invitations`, `accept_invitation`, `decline_invitation`, `update_member_role`,
+`remove_member`. Erros de regra usam mensagens estáveis `org.*`, traduzidas em
+`src/features/organizations/errors.ts`.
 
 ## Testes
 

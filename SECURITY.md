@@ -31,6 +31,31 @@ Documento vivo — cada fase acrescenta os controles que implementa. Status atua
 - **Open redirect**: `?next=` aceita apenas caminhos internos (`safeNextPath`).
 - Mensagens de erro do servidor nunca são exibidas cruas ao usuário.
 
+## Implementado (Fase 3)
+
+- **Deny-by-default**: privilégios padrão do schema `public` revogados para `anon`/`authenticated`
+  (tabelas, sequências e funções). Nada novo fica acessível sem `grant` explícito na migração.
+- **Isolamento por tenant**: toda tabela de negócio terá `organization_id` e RLS baseada em
+  `private.is_org_member` / `private.has_org_role`. O frontend nunca decide o tenant: um id de
+  organização forjado no `localStorage` só resulta em consultas vazias.
+- **Escritas sensíveis por RPC**: membros e convites não têm `INSERT/UPDATE/DELETE` direto; as RPCs
+  `security definer` validam papel, tipo de conta e a regra de "ao menos um owner" dentro de uma
+  transação com lock na organização.
+- **Convites**: aceitos apenas pelo dono do e-mail **confirmado** (`email_confirmed_at`), expiram em
+  7 dias; convite inexistente, expirado ou de outra pessoa retorna o mesmo erro. Limites: 10
+  organizações criadas por usuário, 100 convites ativos por organização.
+- **Invariantes testadas a cada `npm test`** (`src/test/db/rls-baseline.test.ts`): RLS em todas as
+  tabelas de `public`, `anon` sem privilégios, lista fechada de RPCs executáveis por
+  `authenticated`, `search_path` vazio em toda função `security definer`.
+- Contas `admin` (equipe TheSigns) não pertencem a organizações de clientes e não têm acesso a dados
+  de tenants pela API. Acesso de suporte será desenhado (com auditoria) na fase de administração.
+
+### Limitações conhecidas (Fase 3)
+
+- Convite não envia e-mail (a UI informa isso); o convidado vê o convite ao entrar.
+- Excluir um usuário no painel do Supabase remove suas participações; se ele for o único owner, a
+  organização fica sem owner e precisa ser corrigida via SQL.
+
 ### Configuração obrigatória no projeto Supabase cloud
 
 `supabase/config.toml` vale só para o ambiente local. Em staging/produção, replique no painel
@@ -47,7 +72,6 @@ Documento vivo — cada fase acrescenta os controles que implementa. Status atua
 
 | Controle                                                                    | Fase  |
 | --------------------------------------------------------------------------- | ----- |
-| RLS deny-by-default, isolamento por tenant, testes de RLS                   | 3     |
 | Criptografia de credenciais de marketplace, OAuth seguro                    | 11–16 |
 | Verificação de assinatura/HMAC, replay protection, idempotência de webhooks | 17    |
 | Ledger imutável, transações atômicas                                        | 19    |

@@ -1,36 +1,17 @@
-import { useState, type ReactNode } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LogOut } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { PageLoader } from '@/components/ui/PageLoader';
+import { Section } from '@/components/ui/Section';
 import { TextField } from '@/components/ui/TextField';
 import { useAuth } from '../auth-context';
 import { ChangePasswordForm } from '../components/ChangePasswordForm';
 import { useProfile, useUpdateFullName, type Profile } from '../profile';
 import { roleLabels } from '../roles';
 import { profileFormSchema, type ProfileFormValues } from '../schemas';
-
-function Section({
-  title,
-  description,
-  children,
-}: {
-  title: string;
-  description: string;
-  children: ReactNode;
-}) {
-  return (
-    <section className="border-border bg-surface rounded-xl border">
-      <div className="border-border border-b px-5 py-4">
-        <h2 className="text-sm font-semibold">{title}</h2>
-        <p className="text-muted text-sm">{description}</p>
-      </div>
-      <div className="p-5">{children}</div>
-    </section>
-  );
-}
 
 function ProfileForm({ profile, email }: { profile: Profile; email: string }) {
   const update = useUpdateFullName();

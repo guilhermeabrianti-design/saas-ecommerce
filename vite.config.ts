@@ -26,7 +26,11 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+    // Tests never talk to a real Supabase project, whatever .env.local says.
+    env: { VITE_APP_ENV: 'development', VITE_SUPABASE_URL: '', VITE_SUPABASE_ANON_KEY: '' },
     include: ['src/**/*.test.{ts,tsx}'],
     css: false,
+    // The first PGlite (Postgres WASM) boot per file can take >10s on slow machines.
+    hookTimeout: 60_000,
   },
 });

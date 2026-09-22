@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router';
-import { Activity, House, LogOut, UserRound, type LucideIcon } from 'lucide-react';
+import { Activity, Building2, House, LogOut, UserRound, type LucideIcon } from 'lucide-react';
 import { Logo } from '@/components/brand/Logo';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { EnvBadge } from '@/components/ui/EnvBadge';
 import { useAuth } from '@/features/auth/auth-context';
 import { useProfile } from '@/features/auth/profile';
 import { roleLabels } from '@/features/auth/roles';
+import { OrganizationSwitcher } from '@/features/organizations/components/OrganizationSwitcher';
 import { cn } from '@/utils/cn';
 
 interface NavItem {
@@ -18,6 +19,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { to: '/', label: 'Início', icon: House, requiresAuth: true },
+  { to: '/organizacao', label: 'Organização', icon: Building2, requiresAuth: true },
   { to: '/conta', label: 'Minha conta', icon: UserRound, requiresAuth: true },
   { to: '/status', label: 'Status do sistema', icon: Activity, requiresAuth: false },
 ];
@@ -87,7 +89,8 @@ export function AppShell() {
             <div className="md:hidden">
               <Logo />
             </div>
-            <div className="ml-auto flex items-center gap-3">
+            <div className="ml-auto flex min-w-0 items-center gap-3">
+              {authenticated && <OrganizationSwitcher />}
               <EnvBadge />
               <ThemeToggle />
               {authenticated ? (
