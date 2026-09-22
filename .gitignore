@@ -1,0 +1,33 @@
+# dependencies
+node_modules/
+
+# build
+dist/
+dist-ssr/
+*.tsbuildinfo
+coverage/
+
+# env / secrets — NEVER commit real values
+.env
+.env.*
+!.env.example
+supabase/.env
+supabase/functions/.env
+supabase/.temp/
+supabase/.branches/
+
+# logs
+*.log
+npm-debug.log*
+
+# editor / OS
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# test artifacts
+playwright-report/
+test-results/

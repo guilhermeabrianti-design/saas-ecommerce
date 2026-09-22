@@ -1,0 +1,68 @@
+@import 'tailwindcss';
+
+/* Dark mode is class-driven so the user can override the OS preference. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * Design tokens. Components use semantic names (bg-surface, text-muted…)
+ * so light/dark only redefine variables here.
+ */
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-canvas: var(--ts-canvas);
+  --color-surface: var(--ts-surface);
+  --color-surface-2: var(--ts-surface-2);
+  --color-border: var(--ts-border);
+  --color-fg: var(--ts-fg);
+  --color-muted: var(--ts-muted);
+  --color-brand: var(--ts-brand);
+  --color-brand-fg: var(--ts-brand-fg);
+  --color-accent: var(--ts-accent);
+  --color-success: var(--ts-success);
+  --color-warning: var(--ts-warning);
+  --color-danger: var(--ts-danger);
+}
+
+:root {
+  --ts-canvas: #f4f6fa;
+  --ts-surface: #ffffff;
+  --ts-surface-2: #eef1f6;
+  --ts-border: #dde2eb;
+  --ts-fg: #0d1321;
+  --ts-muted: #5b6477;
+  --ts-brand: #0891b2;
+  --ts-brand-fg: #ffffff;
+  --ts-accent: #65a30d;
+  --ts-success: #16a34a;
+  --ts-warning: #d97706;
+  --ts-danger: #dc2626;
+  color-scheme: light;
+}
+
+.dark {
+  --ts-canvas: #0a0e17;
+  --ts-surface: #111726;
+  --ts-surface-2: #182033;
+  --ts-border: #243049;
+  --ts-fg: #e6eaf2;
+  --ts-muted: #8a94a9;
+  --ts-brand: #22d3ee;
+  --ts-brand-fg: #04121a;
+  --ts-accent: #a3e635;
+  --ts-success: #4ade80;
+  --ts-warning: #fbbf24;
+  --ts-danger: #f87171;
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-canvas text-fg font-sans antialiased;
+}
