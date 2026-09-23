@@ -17,6 +17,7 @@ const AUTHENTICATED_RPCS = [
   'my_pending_invitations',
   'remove_member',
   'revoke_invitation',
+  'set_product_image_order',
   'update_member_role',
 ];
 

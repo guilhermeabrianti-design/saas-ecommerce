@@ -63,6 +63,14 @@ Documento vivo — cada fase acrescenta os controles que implementa. Status atua
 - Busca textual é saneada antes de virar filtro PostgREST (`sanitizeSearch`).
 - Dinheiro sempre em centavos inteiros, no banco e na conversão da UI.
 
+## Implementado (Fase 5)
+
+- Variações e imagens herdam o isolamento do produto por FK composta `(organization_id, product_id)`.
+- Bucket `product-images` privado, com policies por organização em `storage.objects`, limite de
+  tamanho/tipo no servidor e URLs assinadas de 1h. Sem sobrescrita de arquivos.
+- Triggers `security definer` não respondem regras de negócio a quem não tem papel na organização
+  (evita oráculo de SKU/contagem entre tenants).
+
 ### Configuração obrigatória no projeto Supabase cloud
 
 `supabase/config.toml` vale só para o ambiente local. Em staging/produção, replique no painel

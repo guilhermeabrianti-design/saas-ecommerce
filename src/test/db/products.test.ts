@@ -116,7 +116,7 @@ describe('products: isolamento e papéis', () => {
 describe('products: regras de dados', () => {
   it('SKU é único por organização sem diferenciar maiúsculas, mas pode repetir entre organizações', async () => {
     await insertProduct(owner, org, 'CAM-001');
-    await expect(insertProduct(owner, org, 'cam-001')).rejects.toThrow(/duplicate key/);
+    await expect(insertProduct(owner, org, 'cam-001')).rejects.toThrow(/products.sku_taken/);
     await expect(insertProduct(outsider, otherOrg, 'CAM-001')).resolves.toBeTruthy();
   });
 

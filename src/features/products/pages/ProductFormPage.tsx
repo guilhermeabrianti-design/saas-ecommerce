@@ -19,6 +19,8 @@ import {
   useUpdateProduct,
   type Product,
 } from '../api';
+import { ImagesSection } from '../components/ImagesSection';
+import { VariantsSection } from '../components/VariantsSection';
 import { productErrorMessage } from '../errors';
 import {
   emptyProductForm,
@@ -252,8 +254,18 @@ export function EditProductPage() {
       ) : product.data === null ? (
         <Alert tone="info">Produto não encontrado nesta organização.</Alert>
       ) : (
-        // Keyed so switching products (or organizations) resets the form.
-        <ProductForm key={`${orgId}:${product.data.id}`} product={product.data} />
+        // Keyed so switching products (or organizations) resets all local state.
+        <div key={`${orgId}:${product.data.id}`} className="space-y-6">
+          <ProductForm product={product.data} />
+          <VariantsSection
+            product={product.data}
+            canEdit={orgPermissions.editCatalog(active!.role)}
+          />
+          <ImagesSection
+            product={product.data}
+            canEdit={orgPermissions.editCatalog(active!.role)}
+          />
+        </div>
       )}
     </div>
   );

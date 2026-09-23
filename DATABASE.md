@@ -103,6 +103,32 @@ Produto interno TheSigns — fonte da verdade para anúncios em marketplaces.
 | UPDATE   | owner/admin (exceto `organization_id`, `created_by`, datas) |
 | DELETE   | owner/admin, só `status = draft`                            |
 
+### `public.product_variants` (Fase 5)
+
+Unidade vendável de um produto. FK composta `(organization_id, product_id)` → `products`.
+`attributes` é um objeto JSON com 1–3 pares texto→texto (ex.: `{"Cor": "Azul", "Tamanho": "M"}`),
+único por produto. `price_cents`, `gtin` e `weight_grams` nulos herdam do produto. Mesmas permissões
+de `products`; excluir só enquanto o produto é rascunho (senão, `is_active = false`).
+
+**SKU**: único por organização **entre `products` e `product_variants`** (trigger
+`private.enforce_org_sku_unique`, erro `products.sku_taken`).
+
+### `public.product_images` (Fase 5)
+
+Ordem das imagens de um produto (máx. 10). `storage_path` = `{organization_id}/{product_id}/{arquivo}.{jpg|png|webp}`,
+validado por constraint. `position` é definida pelo banco no insert e alterada só pela RPC
+`set_product_image_order(p_product, p_image_ids[])`.
+
+### Storage: bucket `product-images` (Fase 5)
+
+Privado, 5 MB, JPEG/PNG/WebP. Policies em `storage.objects` exigem que o caminho aponte para um
+produto existente da organização (`private.product_image_path_org`): membros leem (URLs assinadas),
+owner/admin enviam e excluem. Não há policy de `UPDATE` (sem sobrescrita).
+
+> Triggers `BEFORE` rodam **antes** do `WITH CHECK` da RLS. Trigger `security definer` que lança
+> erro de regra de negócio deve primeiro verificar se quem chama tem papel na organização; senão
+> vira oráculo entre tenants (ver CHANGELOG 0.5.0).
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,

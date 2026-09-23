@@ -1,5 +1,50 @@
 # Changelog
 
+## [0.5.0] — Fase 5: Variações e imagens de produto
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20260922150000_product_variants_images.sql`):
+  - `product_variants`: unidade vendável com SKU próprio, 1–3 atributos (ex.: Cor/Tamanho, validados
+    por `private.valid_variant_attributes`), preço/GTIN/peso opcionais que sobrescrevem os do
+    produto, ativa/inativa. Combinação de atributos única por produto.
+  - **SKU único na organização entre produtos e variações** (trigger com lock transacional por
+    organização).
+  - `product_images`: ordem das imagens (máx. 10 por produto, posição atribuída pelo banco) e RPC
+    `set_product_image_order` (security invoker).
+  - FKs compostas `(organization_id, product_id)`: filhos de um produto sempre pertencem à mesma
+    organização dele.
+  - **Storage**: bucket privado `product-images` (5 MB; JPEG/PNG/WebP) com policies em
+    `storage.objects` — caminho obrigatório `{organização}/{produto}/{arquivo}`; membros leem,
+    owner/admin enviam e excluem; sem sobrescrita.
+- **Telas** (página do produto): seções **Variações** (criar, editar, ativar/desativar, excluir em
+  rascunho; sugere os atributos já usados) e **Imagens** (envio múltiplo, capa, reordenar, excluir;
+  URLs assinadas de 1h).
+- Emulação mínima do Storage no banco de teste (`storage.buckets`, `storage.objects`).
+- **Testes**: 17 de banco (variações, imagens, storage) e 14 de lógica de frontend.
+
+### Revisão de segurança (fechamento da fase)
+
+- **Corrigido — oráculo entre tenants**: triggers `BEFORE INSERT` rodam antes do `WITH CHECK` da RLS.
+  Os triggers `security definer` de SKU e de limite de imagens respondiam `products.sku_taken` /
+  `products.image_limit` a quem tentasse inserir em organização alheia, revelando SKUs e contagem de
+  imagens de outro tenant. Agora, para usuário logado sem papel owner/admin na organização, os
+  triggers não fazem nada e a RLS recusa normalmente. Service role (sem `auth.uid()`) continua
+  sujeita às regras. Coberto por 2 testes de regressão.
+- Upload: o arquivo é removido se o registro em `product_images` for recusado (sem órfãos).
+- Exclusão de imagem apaga o registro antes do arquivo: o produto nunca aponta para arquivo ausente.
+- Verificado: variação/imagem não mudam de produto ou organização; caminho de imagem fora da pasta
+  do produto, com `..` ou extensão não permitida é recusado pelo banco; `anon` não lê o bucket.
+- `npm run check` verde: typecheck, lint, format, 185 testes, build.
+
+### Limitações conhecidas
+
+- Excluir um produto rascunho remove os registros das imagens, mas os arquivos ficam no bucket
+  (privados e inacessíveis pela API, pois a policy exige que o produto exista). Limpeza por job com
+  service role em fase futura.
+- Tipo/tamanho do arquivo são validados pelo Storage pelo `Content-Type` declarado, sem inspeção do
+  conteúdo; o bucket é privado e servido por URL assinada fora da origem do app.
+
 ## [0.4.0] — Fase 4: Produtos (catálogo interno)
 
 ### Adicionado
