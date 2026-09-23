@@ -129,6 +129,32 @@ owner/admin enviam e excluem. Não há policy de `UPDATE` (sem sobrescrita).
 > erro de regra de negócio deve primeiro verificar se quem chama tem papel na organização; senão
 > vira oráculo entre tenants (ver CHANGELOG 0.5.0).
 
+### `public.inventory_items` (Fase 6)
+
+Saldo por unidade vendável, criado por trigger ao inserir produto/variação. FKs compostas para
+`products` e `product_variants`. `reserved ≤ on_hand`, ambos ≥ 0. Cliente só altera `min_quantity`
+(owner/admin); saldos mudam apenas via `adjust_stock` / `set_stock`.
+
+### `public.inventory_movements` (Fase 6)
+
+Livro-razão **imutável** (trigger bloqueia `UPDATE`/`DELETE`/`TRUNCATE` para todos). Cada linha:
+`quantity_delta` (≠ 0), `on_hand_after`, `reason` (`purchase` | `return` | `adjustment` | `loss` |
+`count`), `note`, `created_by` (sem FK, sobrevive ao usuário) e `request_id` (único por organização,
+garante idempotência). Consequência: produto/variação com movimentações não pode ser excluído.
+
+### `public.inventory_levels` (view, Fase 6)
+
+`security_invoker`: aplica a RLS de quem consulta. Une saldo + produto + variação, calcula
+`available` e `is_low` e esconde o saldo de nível produto quando o produto tem variações.
+
+### RPCs de estoque (Fase 6)
+
+- `adjust_stock(p_item, p_delta, p_reason, p_note, p_request_id)`: compra/devolução > 0, perda < 0,
+  ajuste ≠ 0.
+- `set_stock(p_item, p_quantity, p_note, p_request_id)`: contagem; registra a diferença como `count`.
+
+Ambas: owner/admin, linha travada, sem saldo negativo, idempotentes. Erros `inventory.*`.
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router';
 import {
   Activity,
+  Boxes,
   Building2,
   House,
   LogOut,
@@ -28,6 +29,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { to: '/', label: 'Início', icon: House, requiresAuth: true },
   { to: '/produtos', label: 'Produtos', icon: Package, requiresAuth: true },
+  { to: '/estoque', label: 'Estoque', icon: Boxes, requiresAuth: true },
   { to: '/organizacao', label: 'Organização', icon: Building2, requiresAuth: true },
   { to: '/conta', label: 'Minha conta', icon: UserRound, requiresAuth: true },
   { to: '/status', label: 'Status do sistema', icon: Activity, requiresAuth: false },

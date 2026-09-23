@@ -71,6 +71,13 @@ Documento vivo — cada fase acrescenta os controles que implementa. Status atua
 - Triggers `security definer` não respondem regras de negócio a quem não tem papel na organização
   (evita oráculo de SKU/contagem entre tenants).
 
+## Implementado (Fase 6)
+
+- Estoque com livro-razão imutável (nem service role altera ou apaga movimentações).
+- Movimentações só por RPC, com papel checado antes do lock, saldo nunca negativo e idempotência
+  por `request_id` (proteção contra clique duplo e retry de rede).
+- View de saldos com `security_invoker` (sem bypass de RLS).
+
 ### Configuração obrigatória no projeto Supabase cloud
 
 `supabase/config.toml` vale só para o ambiente local. Em staging/produção, replique no painel

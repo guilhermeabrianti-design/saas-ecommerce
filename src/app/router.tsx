@@ -7,6 +7,8 @@ import { ForgotPasswordPage } from '@/features/auth/pages/ForgotPasswordPage';
 import { ResetPasswordPage } from '@/features/auth/pages/ResetPasswordPage';
 import { SignInPage } from '@/features/auth/pages/SignInPage';
 import { SignUpPage } from '@/features/auth/pages/SignUpPage';
+import { InventoryItemPage } from '@/features/inventory/pages/InventoryItemPage';
+import { InventoryPage } from '@/features/inventory/pages/InventoryPage';
 import { RequireOrganization } from '@/features/organizations/guards';
 import { CreateOrganizationPage } from '@/features/organizations/pages/CreateOrganizationPage';
 import { OrganizationSettingsPage } from '@/features/organizations/pages/OrganizationSettingsPage';
@@ -53,6 +55,8 @@ export const router = createBrowserRouter([
               { path: 'produtos', element: <ProductsPage /> },
               { path: 'produtos/novo', element: <NewProductPage /> },
               { path: 'produtos/:productId', element: <EditProductPage /> },
+              { path: 'estoque', element: <InventoryPage /> },
+              { path: 'estoque/:itemId', element: <InventoryItemPage /> },
             ],
           },
         ],

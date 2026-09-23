@@ -7,6 +7,10 @@ const messages: Partial<Record<string, string>> = {
     'Variações só podem ser excluídas enquanto o produto é rascunho. Desative-a em vez disso.',
   'products.image_limit': 'Limite de 10 imagens por produto.',
   'products.invalid_image_order': 'A lista de imagens mudou. Atualize a página e tente de novo.',
+  'inventory.product_has_stock':
+    'Zere o estoque do produto antes de criar variações (o saldo passa a ser por variação).',
+  'inventory.ledger_immutable':
+    'Este item tem histórico de estoque e não pode ser excluído. Arquive o produto ou desative a variação.',
 };
 
 /** Product errors first (SKU, delete rules, images), then the shared tenant errors. */

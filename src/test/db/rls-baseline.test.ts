@@ -10,6 +10,7 @@ import { createTestDatabase } from './supabase-sim';
 /** RPCs deliberately callable by signed-in users. Anything else must not be. */
 const AUTHENTICATED_RPCS = [
   'accept_invitation',
+  'adjust_stock',
   'create_organization',
   'decline_invitation',
   'invite_member',
@@ -18,6 +19,7 @@ const AUTHENTICATED_RPCS = [
   'remove_member',
   'revoke_invitation',
   'set_product_image_order',
+  'set_stock',
   'update_member_role',
 ];
 

@@ -1,5 +1,47 @@
 # Changelog
 
+## [0.6.0] — Fase 6: Estoque
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20260922160000_inventory.sql`):
+  - `inventory_items`: um saldo por unidade vendável (produto sem variações ou cada variação),
+    criado automaticamente pelo banco, com `on_hand`, `reserved` (para pedidos) e estoque mínimo.
+    Produtos e variações existentes recebem saldo zerado na migração.
+  - `inventory_movements`: **livro-razão imutável** — trigger bloqueia `UPDATE`, `DELETE` e
+    `TRUNCATE` para qualquer papel, inclusive service role. O saldo é sempre a soma das
+    movimentações.
+  - RPCs `adjust_stock` (entrada, devolução, perda, ajuste) e `set_stock` (contagem): linha travada,
+    saldo nunca negativo nem abaixo do reservado, sentido validado pelo motivo e **idempotência** por
+    `request_id` (clique duplo ou retry não duplicam movimentação).
+  - Regras de consistência: produto com variações só movimenta estoque nas variações; não se cria
+    variação em produto que ainda tem saldo próprio; produto/variação com histórico não pode ser
+    excluído (arquive/desative).
+  - View `inventory_levels` (`security_invoker`) com disponível e indicador de estoque baixo.
+- **Telas**: **Estoque** (busca, filtro de estoque baixo, paginação) e página do item (saldos,
+  movimentação com prévia do saldo resultante, estoque mínimo, histórico das últimas 50).
+- **Testes**: 17 de banco (livro-razão, idempotência, concorrência de regras, isolamento) e 16 de
+  lógica do formulário.
+
+### Revisão de segurança (fechamento da fase)
+
+- RPCs de estoque checam o papel na organização **antes** de travar a linha: usuário de outra
+  organização não consegue segurar locks de itens alheios.
+- Item inexistente, de outra organização ou sem permissão retornam o mesmo erro
+  (`inventory.item_not_found`).
+- `request_id` é único por organização: não colide nem vaza entre tenants.
+- Trigger de "produto com saldo" segue a regra da Fase 5 (não responde a quem não tem papel na
+  organização). Coberto por teste.
+- Saldo só muda pelas RPCs: sem privilégio de escrita em `on_hand`/`reserved` nem em
+  `inventory_movements`.
+- `npm run check` verde: typecheck, lint, format, 216 testes, build.
+
+### Limitações conhecidas
+
+- Um único local de estoque por organização (sem múltiplos depósitos).
+- `reserved` ainda não é alimentado: passa a ser usado quando houver pedidos.
+- Histórico mostra as últimas 50 movimentações (sem paginação/exportação).
+
 ## [0.5.0] — Fase 5: Variações e imagens de produto
 
 ### Adicionado

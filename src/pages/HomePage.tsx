@@ -1,5 +1,5 @@
 import { Link, Navigate } from 'react-router';
-import { Activity, Building2, ChevronRight, Package, UserRound } from 'lucide-react';
+import { Activity, Boxes, Building2, ChevronRight, Package, UserRound } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { useProfile } from '@/features/auth/profile';
@@ -33,6 +33,12 @@ export function HomePage() {
             icon: Package,
           },
           {
+            to: '/estoque',
+            label: 'Estoque',
+            detail: 'Saldos e movimentações',
+            icon: Boxes,
+          },
+          {
             to: '/organizacao',
             label: active.organization.name,
             detail: `Organização · ${orgRoleLabels[active.role]}`,
@@ -57,7 +63,7 @@ export function HomePage() {
         </p>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight">Olá, {firstName}</h1>
         <p className="text-muted mt-1 text-sm">
-          Pedidos, estoque e integrações serão habilitados aqui conforme cada módulo for liberado.
+          Pedidos e integrações serão habilitados aqui conforme cada módulo for liberado.
         </p>
       </div>
 
