@@ -31,3 +31,6 @@ Thumbs.db
 # test artifacts
 playwright-report/
 test-results/
+
+# Vitest reporter output
+.vitest
