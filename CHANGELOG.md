@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.10.0] — Fase 10: Integrações de marketplace (núcleo)
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20260923130000_integrations.sql`): conexões, segredo de webhook
+  inacessível pela API, vínculos de SKU, pedidos externos, log de eventos e outbox de estoque
+  (detalhes em `DATABASE.md`). `create_order` passou a delegar a `private.create_order_core`,
+  compartilhado com a ingestão de marketplace (mesmas regras, sem duplicação).
+- **Edge Function** `webhooks` (`POST /functions/v1/webhooks/<provedor>/<conexão>`): verifica
+  HMAC, normaliza e chama a ingestão. Normalizadores de **Shopify** e **WooCommerce** e utilitários
+  (dinheiro sem float, endereço, HMAC) em `supabase/functions/_shared/integrations/`.
+- **Telas**: **Integrações** (lista, nova conexão, próximos marketplaces) e página da conexão
+  (URL do webhook + instruções, troca de segredo, pausar/retomar/desconectar, vínculos de SKU,
+  atividade com reprocessamento).
+- **Testes**: 22 de banco (segredo, permissões, vínculos, ingestão idempotente, SKU sem vínculo +
+  reprocessar, preços conflitantes, dado inválido, pausa, outbox com concorrência e backoff), 14
+  de normalização/assinatura e 8 de frontend.
+
+### Limitações conhecidas
+
+- **Só Shopify e WooCommerce**, e só **entrada de pedidos**. Mercado Livre, Shopee e TikTok Shop
+  (OAuth, APIs próprias) ficam para fases próprias; aparecem como "em breve".
+- **O estoque é enfileirado, mas nenhum worker o envia ainda**: falta o cliente de API de cada
+  provedor (Shopify exige location/inventory item, Woo o id do produto). As RPCs de worker estão
+  prontas e testadas.
+- Sem devolução de rastreio/status ao marketplace; sem importação de catálogo; pedido entra
+  `pending` (o vendedor confirma, o que reserva o estoque).
+- Suposições de payload documentadas em `shopify.ts`/`woocommerce.ts` (número da rua a partir de
+  `address1`, bairro "Não informado" sem o plugin Brazilian Market, CPF só no Woo). Validadas
+  contra payloads de exemplo, **não** contra lojas reais.
+- A Edge Function não foi executada aqui (sem Deno/Supabase CLI).
+
 ## [0.9.0] — Fase 9: Financeiro
 
 ### Adicionado

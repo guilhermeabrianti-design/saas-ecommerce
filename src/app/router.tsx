@@ -14,6 +14,8 @@ import { CreateOrganizationPage } from '@/features/organizations/pages/CreateOrg
 import { OrganizationSettingsPage } from '@/features/organizations/pages/OrganizationSettingsPage';
 import { EditProductPage, NewProductPage } from '@/features/products/pages/ProductFormPage';
 import { FinancePage } from '@/features/finance/pages/FinancePage';
+import { IntegrationPage } from '@/features/integrations/pages/IntegrationPage';
+import { IntegrationsPage } from '@/features/integrations/pages/IntegrationsPage';
 import { NewOrderPage } from '@/features/orders/pages/NewOrderPage';
 import { OrderPage } from '@/features/orders/pages/OrderPage';
 import { OrdersPage } from '@/features/orders/pages/OrdersPage';
@@ -71,6 +73,8 @@ export const router = createBrowserRouter([
                 children: [
                   { path: 'catalogo', element: <CatalogPage /> },
                   { path: 'catalogo/:listingId', element: <CatalogListingPage /> },
+                  { path: 'integracoes', element: <IntegrationsPage /> },
+                  { path: 'integracoes/:connectionId', element: <IntegrationPage /> },
                   { path: 'pedidos', element: <OrdersPage /> },
                   { path: 'pedidos/novo', element: <NewOrderPage /> },
                   { path: 'pedidos/:orderId', element: <OrderPage /> },

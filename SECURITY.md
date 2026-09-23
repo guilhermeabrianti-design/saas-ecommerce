@@ -93,6 +93,32 @@ Documento vivo — cada fase acrescenta os controles que implementa. Status atua
 - Compartilhamento com o fornecedor limitado aos dados de entrega (minimização — LGPD).
 - Teste de invariante: funções internas do schema `private` não são executáveis pelo cliente.
 
+## Implementado (Fase 9)
+
+- Livro-razão financeiro **imutável** (trigger bloqueia update/delete/truncate, inclusive para o
+  service role); valor com sinal validado por tipo de lançamento.
+- Dados financeiros só para owner/admin; escrita somente por RPC (sem grants de escrita); saldos
+  do pedido protegidos por constraint (líquido recebido ≤ total).
+- Acerto com fornecedor atômico (débito + crédito na mesma transação) e não repetível.
+
+## Implementado (Fase 10)
+
+- **Segredo do webhook** em tabela sem nenhum privilégio para `anon`/`authenticated` (só o service
+  role lê); nunca devolvido por RPC ou consulta. Desconectar apaga o segredo.
+- **Assinatura HMAC-SHA256** verificada em tempo constante sobre o corpo bruto antes de qualquer
+  processamento; conexão inexistente, de outro provedor ou desconectada responde igual (sem oráculo).
+- **Idempotência**: mesmo pedido externo nunca cria dois pedidos (lock por pedido + request_id
+  determinístico + unicidade). Retransmissão do mesmo webhook é inofensiva (replay não duplica).
+- Payload de pedido com erro (dados do cliente) fica só no banco: a API expõe apenas o indicador
+  `retryable` (grant por coluna). Entra na política de retenção/LGPD do vendedor.
+- Ingestão e worker de estoque executáveis só pelo service role (invariante em
+  `rls-baseline.test.ts`).
+- Limite: o segredo do webhook está em texto no banco (só verificação de assinatura). Tokens OAuth
+  dos demais marketplaces exigirão criptografia com `CREDENTIALS_ENCRYPTION_KEY` antes de existirem.
+- A Edge Function `webhooks` **não foi executada** neste ambiente (sem Deno/Supabase CLI): a
+  normalização e a assinatura são testadas; o roteamento deve ser exercitado com
+  `supabase functions serve` antes de produção.
+
 ### Configuração obrigatória no projeto Supabase cloud
 
 `supabase/config.toml` vale só para o ambiente local. Em staging/produção, replique no painel

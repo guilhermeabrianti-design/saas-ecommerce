@@ -8,6 +8,7 @@ import {
   LogOut,
   Package,
   PackageCheck,
+  Plug,
   ReceiptText,
   Store,
   UserRound,
@@ -40,6 +41,7 @@ const navItems: NavItem[] = [
   { to: '/estoque', label: 'Estoque', icon: Boxes, requiresAuth: true },
   { to: '/pedidos', label: 'Pedidos', icon: ReceiptText, requiresAuth: true, orgKind: 'seller' },
   { to: '/catalogo', label: 'Catálogo', icon: Store, requiresAuth: true, orgKind: 'seller' },
+  { to: '/integracoes', label: 'Integrações', icon: Plug, requiresAuth: true, orgKind: 'seller' },
   {
     to: '/fornecimentos',
     label: 'Fornecimentos',

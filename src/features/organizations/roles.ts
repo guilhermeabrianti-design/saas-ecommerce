@@ -28,6 +28,8 @@ export const orgPermissions = {
   editCatalog: (role: OrgRole) => role === 'owner' || role === 'admin',
   /** Financeiro (recebimentos, estornos, livro-razão): só owner/admin. */
   viewFinance: (role: OrgRole) => role === 'owner' || role === 'admin',
+  /** Conexões com marketplaces, vínculos de SKU e reprocessamento de pedidos. */
+  manageIntegrations: (role: OrgRole) => role === 'owner' || role === 'admin',
   /** Roles `role` may invite as. */
   invitableRoles: (role: OrgRole): OrgRole[] =>
     role === 'owner' ? ['member', 'admin'] : role === 'admin' ? ['member'] : [],

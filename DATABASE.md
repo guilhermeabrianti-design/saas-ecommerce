@@ -219,6 +219,26 @@ RPCs: `record_order_payment` e `refund_order_payment` (idempotentes por `p_reque
 envio; o estado `paid_at` impede repetir) e `finance_summary(org, de, até)`. Erros `finance.*`,
 traduzidos em `src/features/finance/api.ts`. Mesma ordem de travas (pedido → fornecimento).
 
+### Integrações de marketplace (Fase 10)
+
+`integration_connections` (conexão por organização vendedora; Shopify e WooCommerce liberados),
+`integration_secrets` (segredo do webhook: **sem privilégio algum** para a API),
+`listing_links` (SKU do marketplace ↔ item de estoque próprio, sem dropshipping),
+`external_orders` (pedido externo → pedido; único por conexão), `integration_events` (log; o
+`payload` com dados do cliente não é legível pela API, só `retryable`) e `stock_sync_outbox`
+(uma pendência por vínculo, sem privilégio para a API). Leitura só para owner/admin.
+
+- **Entrada de pedidos**: `ingest_marketplace_order` (só service role) → `private.ingest_order`
+  → `private.create_order_core`, o **mesmo núcleo** de `create_order`. Retorna `created`,
+  `duplicate`, `unmapped`, `invalid` ou `inactive`; nunca lança por dado do pedido (vira evento
+  de erro com payload). `retry_integration_event` reprocessa depois de corrigir vínculos.
+  Pedidos entram como `pending` (sem reserva de estoque).
+- **Saída de estoque**: trigger enfileira o disponível (coalescendo por vínculo);
+  `claim_stock_sync`/`complete_stock_sync` (service role) com backoff e desistência após 5 falhas.
+  O envio a cada provedor **ainda não existe** (ver CHANGELOG 0.10.0).
+- RPCs do vendedor: `create_connection`, `rotate_connection_secret`, `set_connection_status`,
+  `link_listing`, `unlink_listing`, `retry_integration_event`. Erros `integrations.*`.
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,
