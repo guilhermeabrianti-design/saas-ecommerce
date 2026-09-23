@@ -1,6 +1,13 @@
 import { z } from 'zod';
 
-export const inventoryReasons = ['purchase', 'return', 'adjustment', 'loss', 'count'] as const;
+export const inventoryReasons = [
+  'purchase',
+  'return',
+  'adjustment',
+  'loss',
+  'count',
+  'sale',
+] as const;
 export type InventoryReason = (typeof inventoryReasons)[number];
 
 export const reasonLabels: Record<InventoryReason, string> = {
@@ -9,6 +16,7 @@ export const reasonLabels: Record<InventoryReason, string> = {
   adjustment: 'Ajuste',
   loss: 'Perda / avaria',
   count: 'Contagem de inventário',
+  sale: 'Venda (pedido)',
 };
 
 /** What the person picks in the form; each maps to one RPC call shape. */

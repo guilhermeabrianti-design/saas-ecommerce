@@ -13,8 +13,13 @@ import { RequireOrganization, RequireOrgKind } from '@/features/organizations/gu
 import { CreateOrganizationPage } from '@/features/organizations/pages/CreateOrganizationPage';
 import { OrganizationSettingsPage } from '@/features/organizations/pages/OrganizationSettingsPage';
 import { EditProductPage, NewProductPage } from '@/features/products/pages/ProductFormPage';
+import { NewOrderPage } from '@/features/orders/pages/NewOrderPage';
+import { OrderPage } from '@/features/orders/pages/OrderPage';
+import { OrdersPage } from '@/features/orders/pages/OrdersPage';
 import { CatalogListingPage } from '@/features/seller/pages/CatalogListingPage';
 import { CatalogPage } from '@/features/seller/pages/CatalogPage';
+import { SupplierOrderPage } from '@/features/supplier/pages/SupplierOrderPage';
+import { SupplierOrdersPage } from '@/features/supplier/pages/SupplierOrdersPage';
 import { ProductsPage } from '@/features/products/pages/ProductsPage';
 import { HomePage } from '@/pages/HomePage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
@@ -64,6 +69,19 @@ export const router = createBrowserRouter([
                 children: [
                   { path: 'catalogo', element: <CatalogPage /> },
                   { path: 'catalogo/:listingId', element: <CatalogListingPage /> },
+                  { path: 'pedidos', element: <OrdersPage /> },
+                  { path: 'pedidos/novo', element: <NewOrderPage /> },
+                  { path: 'pedidos/:orderId', element: <OrderPage /> },
+                ],
+              },
+              {
+                element: <RequireOrgKind kind="supplier" />,
+                children: [
+                  { path: 'fornecimentos', element: <SupplierOrdersPage /> },
+                  {
+                    path: 'fornecimentos/:supplierOrderId',
+                    element: <SupplierOrderPage />,
+                  },
                 ],
               },
             ],

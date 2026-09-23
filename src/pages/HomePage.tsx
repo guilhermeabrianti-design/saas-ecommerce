@@ -1,5 +1,15 @@
 import { Link, Navigate } from 'react-router';
-import { Activity, Boxes, Building2, ChevronRight, Package, Store, UserRound } from 'lucide-react';
+import {
+  Activity,
+  Boxes,
+  Building2,
+  ChevronRight,
+  Package,
+  PackageCheck,
+  ReceiptText,
+  Store,
+  UserRound,
+} from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { useProfile } from '@/features/auth/profile';
@@ -41,13 +51,26 @@ export function HomePage() {
           ...(active.organization.kind === 'seller'
             ? [
                 {
+                  to: '/pedidos',
+                  label: 'Pedidos',
+                  detail: 'Registre e acompanhe vendas',
+                  icon: ReceiptText,
+                },
+                {
                   to: '/catalogo',
                   label: 'Catálogo de fornecedores',
                   detail: 'Importe produtos para vender',
                   icon: Store,
                 },
               ]
-            : []),
+            : [
+                {
+                  to: '/fornecimentos',
+                  label: 'Pedidos de fornecimento',
+                  detail: 'Envie pedidos das lojas vendedoras',
+                  icon: PackageCheck,
+                },
+              ]),
           {
             to: '/organizacao',
             label: active.organization.name,
@@ -73,7 +96,7 @@ export function HomePage() {
         </p>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight">Olá, {firstName}</h1>
         <p className="text-muted mt-1 text-sm">
-          Pedidos e integrações serão habilitados aqui conforme cada módulo for liberado.
+          Integrações com marketplaces serão habilitadas aqui conforme cada módulo for liberado.
         </p>
       </div>
 

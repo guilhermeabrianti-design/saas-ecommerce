@@ -86,6 +86,13 @@ Documento vivo — cada fase acrescenta os controles que implementa. Status atua
   concorrentes.
 - Vínculo de origem de produtos importados não é gravável pelo cliente.
 
+## Implementado (Fase 8)
+
+- Pedidos e pedidos de fornecimento só alteráveis por RPC; reservas e baixas de estoque atômicas,
+  idempotentes e sem deadlock (ordem fixa de travas).
+- Compartilhamento com o fornecedor limitado aos dados de entrega (minimização — LGPD).
+- Teste de invariante: funções internas do schema `private` não são executáveis pelo cliente.
+
 ### Configuração obrigatória no projeto Supabase cloud
 
 `supabase/config.toml` vale só para o ambiente local. Em staging/produção, replique no painel

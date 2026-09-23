@@ -21,6 +21,8 @@ const levelSchema = z.object({
   available: z.number().int(),
   min_quantity: z.number().int().nullable(),
   is_low: z.boolean(),
+  price_cents: z.number().int(),
+  is_dropship: z.boolean(),
 });
 
 const movementSchema = z.object({
@@ -42,7 +44,7 @@ export interface InventoryFilters {
 }
 
 const LEVEL_COLUMNS =
-  'id, product_id, variant_id, sku, product_name, attributes, product_status, is_active, on_hand, reserved, available, min_quantity, is_low';
+  'id, product_id, variant_id, sku, product_name, attributes, product_status, is_active, on_hand, reserved, available, min_quantity, is_low, price_cents, is_dropship';
 
 export const inventoryKeys = {
   all: (orgId: string) => ['inventory', orgId] as const,

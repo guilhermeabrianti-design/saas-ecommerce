@@ -1,5 +1,57 @@
 # Changelog
 
+## [0.8.0] — Fase 8: Pedidos e encaminhamento ao fornecedor
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20260922180000_orders.sql`):
+  - `orders` / `order_items`: pedido do vendedor com cliente, endereço (CEP, UF), frete, desconto e
+    totais verificados por constraint; itens com **snapshot** de SKU, nome, atributos e preço;
+    numeração sequencial por organização; criação **idempotente** por `request_id`.
+  - Ciclo `pending → confirmed → shipped → delivered` (ou `cancelled` antes do envio) via RPCs
+    `create_order`, `confirm_order`, `ship_order`, `deliver_order`, `cancel_order`.
+  - **Estoque**: confirmar reserva (`reserved`), enviar dá baixa com movimentação `sale` no
+    livro-razão (idempotente pelo id do item), cancelar libera. Tudo ou nada; itens de estoque
+    travados em ordem de id (sem deadlock entre pedidos concorrentes).
+  - **Dropshipping**: itens importados do catálogo geram, na confirmação, um `supplier_orders` por
+    fornecedor, com atacado congelado e reserva no estoque do fornecedor. O fornecedor envia via
+    `ship_supplier_order` (transportadora + rastreio), que baixa o estoque dele. O vendedor só marca
+    o pedido como enviado depois de todos os fornecedores.
+  - `inventory_levels` ganhou `price_cents` e `is_dropship`; motivo de estoque `sale`.
+- **Telas**:
+  - Vendedor: **Pedidos** (busca por nº/cliente, filtro de situação), **Novo pedido** (seletor de
+    itens, validação de CPF/CNPJ e CEP, totais ao vivo) e página do pedido (ações, fornecedores com
+    rastreio, cliente, histórico).
+  - Fornecedor: **Fornecimentos** (lista) e página do pedido de fornecimento com confirmação de
+    envio.
+- `src/utils/br.ts`: CPF/CNPJ com dígito verificador, UFs, CEP.
+- **Testes**: 21 de banco (ciclo, atomicidade, reservas, dropshipping, privacidade, isolamento), 1
+  invariante novo de schema e 14 de frontend.
+
+### Revisão de segurança (fechamento da fase)
+
+- **Novo invariante**: `authenticated` só executa a lista fechada de helpers de policy do schema
+  `private`. As funções internas de reserva/baixa/numeração (que não checam papel por design) ficam
+  alcançáveis apenas pelas RPCs — antes isso dependia só dos privilégios padrão.
+- Fornecedor recebe apenas dados de entrega (nome, telefone, documento, endereço): nunca e-mail,
+  notas, preço de venda ou o pedido do vendedor. Coberto por teste.
+- RPCs checam papel antes de travar linhas; pedido de outra organização e sem permissão retornam o
+  mesmo erro (`orders.not_found`).
+- Escrita em pedidos só por RPC (sem grants de INSERT/UPDATE/DELETE); totais verificados por
+  constraint e recalculados no servidor.
+- `npm run check` verde: typecheck, lint, format, 269 testes, build.
+
+### Limitações conhecidas
+
+- Pedidos manuais apenas (marketplaces nas fases de integração); sem edição de pedido pendente
+  (cancele e recrie).
+- Sem devoluções/estorno após envio; sem pagamento/repasse ao fornecedor (ledger financeiro é fase
+  própria).
+- O vendedor vê ids internos do fornecedor em `supplier_orders`/`supplier_order_items` (apenas
+  identificadores, sem acesso a dados).
+- LGPD: o vendedor deve informar ao cliente que os dados de entrega são compartilhados com o
+  fornecedor responsável pelo envio.
+
 ## [0.7.0] — Fase 7: Catálogo de fornecedores
 
 ### Adicionado

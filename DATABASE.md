@@ -176,6 +176,34 @@ visíveis (`private.is_catalog_image`).
 > Prefira unicidade com `organization_id` para que a FK composta recuse dados de outro tenant antes
 > que um "duplicate key" revele existência (ver CHANGELOG 0.7.0).
 
+### `public.orders` / `public.order_items` (Fase 8)
+
+Pedido do vendedor. Leitura por membros; **nenhuma escrita direta** — só pelas RPCs. `number`
+sequencial por organização (`order_counters`), `request_id` único (idempotência), totais com
+`check (total = subtotal + frete − desconto)`. Itens guardam snapshot e `fulfillment`
+(`own_stock` | `supplier`, decidido pelo vínculo de origem do produto).
+
+| RPC                           | Efeito                                                                  |
+| ----------------------------- | ----------------------------------------------------------------------- |
+| `create_order(org, json, id)` | cria `pending` (não mexe em estoque)                                    |
+| `confirm_order(id)`           | reserva estoque próprio; cria `supplier_orders` e reserva no fornecedor |
+| `ship_order(id)`              | exige fornecedores enviados; baixa estoque próprio (`sale`)             |
+| `deliver_order(id)`           | `shipped → delivered`                                                   |
+| `cancel_order(id)`            | antes de qualquer envio; libera todas as reservas                       |
+
+### `public.supplier_orders` / `public.supplier_order_items` (Fase 8)
+
+Pedido de fornecimento (um por fornecedor por pedido). Lido pelo fornecedor e pelo vendedor.
+Snapshot **mínimo** do destinatário (nome, telefone, documento, endereço). Atacado congelado na
+confirmação. `ship_supplier_order(id, transportadora, rastreio)` baixa o estoque do fornecedor.
+
+**Concorrência**: ordem de travas pedido → fornecimento → itens de estoque (por id), igual em
+todas as RPCs.
+
+**Funções internas** (`private.reserve_stock`, `release_stock`, `consume_reserved_stock`,
+`next_order_number`, `lock_inventory_items`, `order_supplier_sources`) não checam papel e não são
+executáveis por `authenticated` — garantido por `rls-baseline.test.ts` (`POLICY_HELPERS`).
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,

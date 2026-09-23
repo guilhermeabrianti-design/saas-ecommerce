@@ -11,8 +11,12 @@ import { createTestDatabase } from './supabase-sim';
 const AUTHENTICATED_RPCS = [
   'accept_invitation',
   'adjust_stock',
+  'cancel_order',
+  'confirm_order',
+  'create_order',
   'create_organization',
   'decline_invitation',
+  'deliver_order',
   'get_catalog_listing',
   'import_catalog_listing',
   'invite_member',
@@ -23,7 +27,22 @@ const AUTHENTICATED_RPCS = [
   'search_catalog',
   'set_product_image_order',
   'set_stock',
+  'ship_order',
+  'ship_supplier_order',
   'update_member_role',
+];
+
+/** `private` functions used inside RLS policies/check constraints (evaluated as the caller). */
+const POLICY_HELPERS = [
+  'current_email',
+  'has_org_role',
+  'is_catalog_image',
+  'is_org_member',
+  'is_seller_member',
+  'org_kind',
+  'org_role_of',
+  'product_image_path_org',
+  'valid_variant_attributes',
 ];
 
 let db: PGlite;
@@ -95,6 +114,18 @@ describe('RLS deny-by-default', () => {
       order by p.proname
     `);
     expect(res.rows.map((r) => r.proname)).toEqual(AUTHENTICATED_RPCS);
+  });
+
+  it('authenticated executa apenas os helpers de policy do schema private', async () => {
+    // Internals such as reserve_stock / consume_reserved_stock / next_order_number
+    // skip role checks by design and must stay reachable only through the RPCs.
+    const res = await db.query<{ proname: string }>(`
+      select p.proname from pg_proc p
+      join pg_namespace n on n.oid = p.pronamespace
+      where n.nspname = 'private' and has_function_privilege('authenticated', p.oid, 'execute')
+      order by p.proname
+    `);
+    expect(res.rows.map((r) => r.proname)).toEqual(POLICY_HELPERS);
   });
 
   it('toda função security definer fixa search_path vazio', async () => {
