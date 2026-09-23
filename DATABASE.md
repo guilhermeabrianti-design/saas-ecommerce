@@ -239,6 +239,12 @@ traduzidos em `src/features/finance/api.ts`. Mesma ordem de travas (pedido → f
 - RPCs do vendedor: `create_connection`, `rotate_connection_secret`, `set_connection_status`,
   `link_listing`, `unlink_listing`, `retry_integration_event`. Erros `integrations.*`.
 
+### Analytics (Fase 11)
+
+Sem tabelas: `analytics_overview` (jsonb, chaves por tipo de organização), `analytics_daily` e
+`analytics_top_items`. `security definer`, só owner/admin (`org.forbidden` para os demais,
+`analytics.invalid_period` fora de 1–366 dias). Dias no fuso `America/Sao_Paulo`.
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router';
 import {
   Activity,
+  ChartColumn,
   Boxes,
   Building2,
   House,
@@ -49,6 +50,7 @@ const navItems: NavItem[] = [
     requiresAuth: true,
     orgKind: 'supplier',
   },
+  { to: '/analises', label: 'Análises', icon: ChartColumn, requiresAuth: true },
   { to: '/financeiro', label: 'Financeiro', icon: Wallet, requiresAuth: true },
   { to: '/organizacao', label: 'Organização', icon: Building2, requiresAuth: true },
   { to: '/conta', label: 'Minha conta', icon: UserRound, requiresAuth: true },

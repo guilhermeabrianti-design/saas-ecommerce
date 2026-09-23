@@ -13,6 +13,7 @@ import { RequireOrganization, RequireOrgKind } from '@/features/organizations/gu
 import { CreateOrganizationPage } from '@/features/organizations/pages/CreateOrganizationPage';
 import { OrganizationSettingsPage } from '@/features/organizations/pages/OrganizationSettingsPage';
 import { EditProductPage, NewProductPage } from '@/features/products/pages/ProductFormPage';
+import { AnalyticsPage } from '@/features/analytics/pages/AnalyticsPage';
 import { FinancePage } from '@/features/finance/pages/FinancePage';
 import { IntegrationPage } from '@/features/integrations/pages/IntegrationPage';
 import { IntegrationsPage } from '@/features/integrations/pages/IntegrationsPage';
@@ -67,6 +68,7 @@ export const router = createBrowserRouter([
               { path: 'produtos/:productId', element: <EditProductPage /> },
               { path: 'estoque', element: <InventoryPage /> },
               { path: 'estoque/:itemId', element: <InventoryItemPage /> },
+              { path: 'analises', element: <AnalyticsPage /> },
               { path: 'financeiro', element: <FinancePage /> },
               {
                 element: <RequireOrgKind kind="seller" />,

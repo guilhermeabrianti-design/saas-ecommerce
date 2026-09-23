@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.11.0] — Fase 11: Analytics
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20260923140000_analytics.sql`), só RPCs de leitura (sem tabelas):
+  `analytics_overview`, `analytics_daily` (todos os dias da janela, inclusive vazios) e
+  `analytics_top_items`. Vendedor: pedidos, receita, ticket médio, unidades, lucro bruto, pedidos
+  via marketplace e funil por situação. Fornecedor: fornecimentos, faturamento (atacado), aguardando
+  envio e a receber. Só owner/admin; janela de 1 a 366 dias no fuso de São Paulo; cancelados fora.
+- **Tela** **Análises**: cartões, alerta de estoque baixo, barras por dia (tooltip por barra,
+  `role="img"` com resumo) e mais vendidos.
+- **Testes**: 7 de banco e 4 de frontend.
+
+### Limitações conhecidas
+
+- Lucro bruto usa o **custo atual** do cadastro para estoque próprio (não há snapshot de custo no
+  pedido) e o atacado congelado para dropshipping; itens sem custo contam como zero e são avisados.
+- Receita é o total do pedido (inclui frete). Sem comparação entre períodos nem exportação.
+
 ## [0.10.0] — Fase 10: Integrações de marketplace (núcleo)
 
 ### Adicionado

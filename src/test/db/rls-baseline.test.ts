@@ -11,6 +11,9 @@ import { createTestDatabase } from './supabase-sim';
 const AUTHENTICATED_RPCS = [
   'accept_invitation',
   'adjust_stock',
+  'analytics_daily',
+  'analytics_overview',
+  'analytics_top_items',
   'cancel_order',
   'confirm_order',
   'create_connection',
