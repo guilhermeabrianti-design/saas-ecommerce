@@ -26,6 +26,8 @@ export const orgPermissions = {
   changeRoles: (role: OrgRole) => role === 'owner',
   /** Create/edit products and other catalog data. */
   editCatalog: (role: OrgRole) => role === 'owner' || role === 'admin',
+  /** Financeiro (recebimentos, estornos, livro-razão): só owner/admin. */
+  viewFinance: (role: OrgRole) => role === 'owner' || role === 'admin',
   /** Roles `role` may invite as. */
   invitableRoles: (role: OrgRole): OrgRole[] =>
     role === 'owner' ? ['member', 'admin'] : role === 'admin' ? ['member'] : [],

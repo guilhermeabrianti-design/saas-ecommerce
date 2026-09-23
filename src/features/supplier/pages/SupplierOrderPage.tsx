@@ -147,6 +147,13 @@ export function SupplierOrderPage() {
               <span className="font-mono">{o.tracking_code}</span>
             </Alert>
           )}
+          {o.status === 'shipped' && (
+            <Alert tone={o.paid_at ? 'success' : 'info'}>
+              {o.paid_at
+                ? `Pago pelo vendedor em ${new Date(o.paid_at).toLocaleString('pt-BR')}.`
+                : `Aguardando pagamento do vendedor (${formatBRL(o.total_wholesale_cents)}).`}
+            </Alert>
+          )}
           {o.status === 'cancelled' && (
             <Alert tone="info">O vendedor cancelou este pedido. A reserva foi liberada.</Alert>
           )}

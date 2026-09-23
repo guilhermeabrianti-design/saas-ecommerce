@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.9.0] — Fase 9: Financeiro
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20260923120000_finance.sql`):
+  - `ledger_entries`: livro-razão **imutável** por organização (nem owner, nem cascata, nem
+    truncate), valor com sinal validado por tipo (`sale_payment`, `refund`, `supplier_payment`,
+    `supplier_receipt`).
+  - `order_payments` + `orders.paid_cents`/`refunded_cents`: recebimentos e estornos manuais,
+    idempotentes por `request_id`, com constraint de que o líquido recebido nunca passa do total.
+  - RPCs `record_order_payment`, `refund_order_payment`, `pay_supplier_order` (débito no vendedor e
+    crédito no fornecedor atômicos; só após o envio; uma vez só) e `finance_summary`
+    (recebido, estornos, pago/recebido de fornecedores, saldo, a pagar/a receber).
+  - Dados financeiros visíveis apenas para owner/admin; escrita somente por RPC.
+- **Telas**: **Financeiro** (resumo por período + lançamentos paginados, visão de vendedor e de
+  fornecedor), seção **Pagamento** no pedido (situação, receber/estornar, histórico), botão de
+  pagar fornecimento no pedido e aviso de pagamento na tela do fornecedor.
+- **Testes**: 17 de banco (recebimento parcial/total, idempotência, excesso, estorno, acerto com
+  fornecedor, imutabilidade, escrita direta bloqueada, privacidade, resumo) e 7 de frontend.
+
+### Limitações conhecidas
+
+- Sem gateway/conciliação: o vendedor informa o que recebeu. Sem taxas de meio de pagamento nem
+  comissão da plataforma. Estorno não devolve estoque nem desfaz o acerto com fornecedor.
+- Lançamentos não têm edição: erro de digitação se corrige com estorno + novo lançamento.
+- O livro-razão referencia a organização sem cascata: uma organização com lançamentos não pode ser
+  excluída (o produto não expõe exclusão de organização).
+
 ## [0.8.0] — Fase 8: Pedidos e encaminhamento ao fornecedor
 
 ### Adicionado

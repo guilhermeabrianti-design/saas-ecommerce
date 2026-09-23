@@ -204,6 +204,20 @@ todas as RPCs.
 `next_order_number`, `lock_inventory_items`, `order_supplier_sources`) não checam papel e não são
 executáveis por `authenticated` — garantido por `rls-baseline.test.ts` (`POLICY_HELPERS`).
 
+### `public.ledger_entries` / `public.order_payments` (Fase 9)
+
+Financeiro manual (sem gateway). `ledger_entries` é o livro-razão **imutável** por organização
+(trigger bloqueia update/delete/truncate): valor com sinal (recebimento e crédito de fornecimento
+> 0; estorno e pagamento a fornecedor < 0, garantido por CHECK). Só owner/admin leem — membros e
+outras organizações não veem nada. `order_payments` registra cada recebimento/estorno do pedido;
+`orders.paid_cents`/`refunded_cents` são mantidos só pelas RPCs, com constraint
+`líquido (pago − estornado) ≤ total`. `supplier_orders.paid_at` marca o acerto.
+
+RPCs: `record_order_payment` e `refund_order_payment` (idempotentes por `p_request_id`),
+`pay_supplier_order` (débito no vendedor + crédito no fornecedor na mesma transação; só depois do
+envio; o estado `paid_at` impede repetir) e `finance_summary(org, de, até)`. Erros `finance.*`,
+traduzidos em `src/features/finance/api.ts`. Mesma ordem de travas (pedido → fornecimento).
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,

@@ -30,6 +30,7 @@ const detailSchema = listSchema.extend({
   tracking_code: z.string().nullable(),
   shipped_at: z.string().nullable(),
   cancelled_at: z.string().nullable(),
+  paid_at: z.string().nullable(),
   supplier_order_items: z.array(
     z.object({
       id: z.uuid(),
@@ -91,7 +92,7 @@ export function useSupplierOrder(orgId: string, id: string) {
         .select(
           `id, number, status, recipient_name, recipient_phone, recipient_document,
            ship_postal_code, ship_street, ship_number, ship_complement, ship_district, ship_city, ship_state,
-           total_wholesale_cents, carrier, tracking_code, created_at, shipped_at, cancelled_at,
+           total_wholesale_cents, carrier, tracking_code, created_at, shipped_at, cancelled_at, paid_at,
            supplier_order_items (id, sku, name, attributes, quantity, unit_wholesale_cents)`,
         )
         .eq('organization_id', orgId)

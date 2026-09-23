@@ -43,9 +43,12 @@ const supplierOrderSummarySchema = z.object({
   carrier: z.string().nullable(),
   tracking_code: z.string().nullable(),
   shipped_at: z.string().nullable(),
+  paid_at: z.string().nullable(),
 });
 
 const orderDetailSchema = orderListSchema.extend({
+  paid_cents: z.number().int(),
+  refunded_cents: z.number().int(),
   customer_email: z.string().nullable(),
   customer_phone: z.string().nullable(),
   customer_document: z.string().nullable(),
@@ -120,10 +123,10 @@ export function useOrder(orgId: string, id: string) {
         .select(
           `id, number, status, customer_name, customer_email, customer_phone, customer_document,
            ship_postal_code, ship_street, ship_number, ship_complement, ship_district, ship_city, ship_state,
-           subtotal_cents, shipping_cents, discount_cents, total_cents, notes, created_at,
-           confirmed_at, shipped_at, delivered_at, cancelled_at,
+           subtotal_cents, shipping_cents, discount_cents, total_cents, paid_cents, refunded_cents,
+           notes, created_at, confirmed_at, shipped_at, delivered_at, cancelled_at,
            order_items (id, sku, name, attributes, quantity, unit_price_cents, fulfillment),
-           supplier_orders (id, number, status, total_wholesale_cents, carrier, tracking_code, shipped_at)`,
+           supplier_orders (id, number, status, total_wholesale_cents, carrier, tracking_code, shipped_at, paid_at)`,
         )
         .eq('organization_id', orgId)
         .eq('id', id)

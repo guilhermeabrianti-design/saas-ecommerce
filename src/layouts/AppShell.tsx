@@ -11,6 +11,7 @@ import {
   ReceiptText,
   Store,
   UserRound,
+  Wallet,
   type LucideIcon,
 } from 'lucide-react';
 import { Logo } from '@/components/brand/Logo';
@@ -46,6 +47,7 @@ const navItems: NavItem[] = [
     requiresAuth: true,
     orgKind: 'supplier',
   },
+  { to: '/financeiro', label: 'Financeiro', icon: Wallet, requiresAuth: true },
   { to: '/organizacao', label: 'Organização', icon: Building2, requiresAuth: true },
   { to: '/conta', label: 'Minha conta', icon: UserRound, requiresAuth: true },
   { to: '/status', label: 'Status do sistema', icon: Activity, requiresAuth: false },

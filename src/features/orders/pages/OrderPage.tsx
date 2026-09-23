@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/Button';
 import { ConfirmButton } from '@/components/ui/ConfirmButton';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { Section } from '@/components/ui/Section';
+import { financeErrorMessage, usePaySupplierOrder } from '@/features/finance/api';
+import { PaymentSection } from '@/features/finance/components/PaymentSection';
 import { useOrganization } from '@/features/organizations/organization-context';
 import { orgPermissions } from '@/features/organizations/roles';
 import { describeAttributes } from '@/features/products/variants';
@@ -72,7 +74,10 @@ export function OrderPage() {
   const { active } = useOrganization();
   const orgId = active!.organization.id;
   const canEdit = orgPermissions.editCatalog(active!.role);
+  const canFinance = orgPermissions.viewFinance(active!.role);
   const order = useOrder(orgId, orderId);
+  const paySupplier = usePaySupplierOrder(orgId);
+  const payError = paySupplier.isError ? paySupplier.error : null;
   const o = order.data;
 
   return (
@@ -139,11 +144,14 @@ export function OrderPage() {
             </dl>
           </Section>
 
+          <PaymentSection order={o} orgId={orgId} canEdit={canFinance} />
+
           {o.supplier_orders.length > 0 && (
             <Section
               title="Fornecedores"
               description="Itens enviados diretamente pelos fornecedores ao cliente."
             >
+              {payError && <Alert tone="error">{financeErrorMessage(payError)}</Alert>}
               <ul className="divide-border -my-3 divide-y text-sm">
                 {o.supplier_orders.map((s) => (
                   <li key={s.id} className="flex flex-wrap items-center gap-3 py-3">
@@ -158,8 +166,18 @@ export function OrderPage() {
                           <span className="font-mono">{s.tracking_code}</span>
                         </p>
                       )}
+                      {s.paid_at && <p className="text-muted text-xs">Pago em {when(s.paid_at)}</p>}
                     </div>
                     <SupplierOrderStatusBadge status={s.status} />
+                    {canFinance && s.status === 'shipped' && !s.paid_at && (
+                      <ConfirmButton
+                        confirmLabel={`Pagar ${formatBRL(s.total_wholesale_cents)}`}
+                        loading={paySupplier.isPending && paySupplier.variables === s.id}
+                        onConfirm={() => paySupplier.mutate(s.id)}
+                      >
+                        Registrar pagamento
+                      </ConfirmButton>
+                    )}
                   </li>
                 ))}
               </ul>
