@@ -23,6 +23,7 @@ const AUTHENTICATED_RPCS = [
   'analytics_top_items',
   'cancel_order',
   'confirm_order',
+  'connection_credentials_status',
   'create_connection',
   'create_order',
   'create_organization',
@@ -49,6 +50,7 @@ const AUTHENTICATED_RPCS = [
   'set_stock',
   'ship_order',
   'ship_supplier_order',
+  'store_connection_credentials',
   'unlink_listing',
   'update_member_role',
 ];

@@ -31,6 +31,7 @@ import {
   type IntegrationEvent,
 } from '../api';
 import { ConnectionStatusBadge } from '../components/ConnectionStatusBadge';
+import { CredentialsSection } from '../components/CredentialsSection';
 import {
   connectableProviders,
   generateSecret,
@@ -391,6 +392,15 @@ export function IntegrationPage() {
                 <CopyField value={webhookUrl(env.supabase?.url, c.provider, c.id)} />
                 <RotateSecret connection={c} />
               </div>
+            </Section>
+          )}
+
+          {c.status !== 'disconnected' && isConnectable(c.provider) && (
+            <Section
+              title="Credenciais de API"
+              description="Necessárias para enviar o estoque ao marketplace. Ficam criptografadas e nunca são exibidas."
+            >
+              <CredentialsSection connection={c} />
             </Section>
           )}
 

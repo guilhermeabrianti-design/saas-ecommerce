@@ -260,6 +260,22 @@ RPCs; novas policies devem continuar usando `is_org_member`/`has_org_role` para 
 `ai_begin_description` / `ai_finish` / `ai_usage_today` rodam com o JWT do usuário. Cota diária em
 `private.ai_daily_limit()` (50), dia no fuso de São Paulo. O texto gerado nunca é gravado pelo banco.
 
+### Credenciais e envio de estoque (Fase 14)
+
+`integration_credentials` (texto cifrado + `config` não secreto; sem grants para a API; `select` só
+para service role). Nenhuma RPC devolve credencial. Agendar o worker (a cada minuto):
+
+```sql
+select cron.schedule('stock-sync', '* * * * *', $
+  select net.http_post(
+    url := 'https://<projeto>.supabase.co/functions/v1/stock-sync',
+    headers := jsonb_build_object('x-sync-secret', '<STOCK_SYNC_SECRET>')
+  )
+$);
+```
+
+Implantar `stock-sync` com `--no-verify-jwt` (a autenticação é o segredo do cabeçalho).
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,

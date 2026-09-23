@@ -137,6 +137,15 @@ Documento vivo — cada fase acrescenta os controles que implementa. Status atua
   vendedor são achatados e limitados; a saída é só texto mostrado a quem a pediu, para revisão.
 - Pendente: rate limit por usuário (hoje só a cota diária da organização); CAPTCHA/abuso por conta nova.
 
+## Implementado (Fase 14)
+
+- Credenciais de marketplace criptografadas (AES-256-GCM) com chave que o banco nunca vê; ligadas ao
+  id da conexão; nunca devolvidas, exibidas ou registradas em log; apagadas ao desconectar.
+- Worker autenticado por segredo compartilhado (comparação em tempo constante); credenciais só
+  decifradas em memória.
+- Anti-SSRF nas chamadas de saída (https público por nome, domínio Shopify fixo, sem redirecionamento).
+- Pendente: rotação de chave em lote; restrição de rede de saída; teste de conexão.
+
 ### Configuração obrigatória no projeto Supabase cloud
 
 `supabase/config.toml` vale só para o ambiente local. Em staging/produção, replique no painel

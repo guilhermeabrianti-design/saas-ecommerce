@@ -1,5 +1,39 @@
 # Changelog
 
+## [0.14.0] — Fase 14: Credenciais criptografadas e envio de estoque
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20260923170000_credentials.sql`): `integration_credentials` guarda
+  só o **texto cifrado** (sem nenhum privilégio para a API; só o service role lê) e `config` não
+  secreto (id do local de estoque). `store_connection_credentials` (owner/admin) e
+  `connection_credentials_status` (informa apenas se está configurado). Desconectar apaga tudo.
+- **Criptografia**: AES-256-GCM com `CREDENTIALS_ENCRYPTION_KEY` (segredo só das Edge Functions),
+  IV aleatório por gravação e o id da conexão como dado autenticado (texto cifrado copiado para
+  outra conexão não decifra). Formato versionado (`v1.iv.ct`).
+- **Edge Functions**: `credentials` (JWT do usuário: valida, criptografa e guarda; nada volta ao
+  navegador) e `stock-sync` (agendada; autenticada por `x-sync-secret`; reivindica lotes, decifra
+  em memória, envia e conclui com backoff do banco).
+- **Clientes de API** (`_shared/integrations/stock.ts`): Shopify (GraphQL `inventorySetQuantities`
+  no local configurado) e WooCommerce (produto simples por SKU, Basic auth). Timeout de 15 s, sem
+  seguir redirecionamentos, erros traduzidos sem vazar credenciais.
+- **Anti-SSRF**: só `https://` público por nome (sem IP, porta, credenciais na URL, `localhost`,
+  `.local`/`.internal`) e domínio Shopify obrigatoriamente `*.myshopify.com`.
+- **Tela**: seção **Credenciais de API** na conexão (status configurado/não, formulário por provedor,
+  valores nunca exibidos).
+- **Testes**: 7 de banco, 16 de criptografia/SSRF/clientes de API (com `fetch` simulado) e 3 de frontend.
+
+### Limitações conhecidas
+
+- **Nada disto foi executado contra lojas reais nem em Deno**: os formatos de requisição seguem a
+  documentação pública, mas só foram verificados com `fetch` simulado.
+- Não há botão "testar conexão" (seria a primeira chamada real à API).
+- WooCommerce: só produtos simples (variações não). Shopify: um local de estoque por conexão.
+- SSRF: sem resolução de DNS, um domínio público que aponte para IP privado não é barrado; recomenda-se
+  restringir a saída de rede da função onde a plataforma permitir.
+- Rotação de chave: o formato tem versão, mas a re-criptografia em lote ainda não existe (regravar
+  as credenciais pela tela usa a chave atual).
+
 ## [0.13.0] — Fase 13: IA — descrição de produto assistida
 
 ### Adicionado

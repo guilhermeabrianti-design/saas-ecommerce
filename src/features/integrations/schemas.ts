@@ -87,3 +87,27 @@ export function generateSecret(): string {
   const bytes = crypto.getRandomValues(new Uint8Array(24));
   return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
 }
+
+const credentialText = (label: string) =>
+  z
+    .string()
+    .trim()
+    .min(10, `${label}: ao menos 10 caracteres`)
+    .max(300, `${label}: máximo de 300 caracteres`);
+
+export const shopifyCredentialsSchema = z.object({
+  accessToken: credentialText('Token'),
+  locationId: z
+    .string()
+    .trim()
+    .refine((v) => /^(gid:\/\/shopify\/Location\/)?\d{1,20}$/.test(v), {
+      error: 'Informe o número do local de estoque',
+    }),
+});
+export type ShopifyCredentialsValues = z.infer<typeof shopifyCredentialsSchema>;
+
+export const wooCredentialsSchema = z.object({
+  consumerKey: credentialText('Consumer key'),
+  consumerSecret: credentialText('Consumer secret'),
+});
+export type WooCredentialsValues = z.infer<typeof wooCredentialsSchema>;
