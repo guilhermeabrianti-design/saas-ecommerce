@@ -1,1 +1,542 @@
-{"numTotalTestSuites":17,"numPassedTestSuites":17,"numFailedTestSuites":0,"numPendingTestSuites":0,"numTotalTests":44,"numPassedTests":44,"numFailedTests":0,"numPendingTests":0,"numTodoTests":0,"snapshot":{"added":0,"failure":false,"filesAdded":0,"filesRemoved":0,"filesRemovedList":[],"filesUnmatched":0,"filesUpdated":0,"matched":0,"total":0,"unchecked":0,"uncheckedKeysByFile":[],"unmatched":0,"updated":0,"didUpdate":false},"startTime":1790184337605,"success":true,"testResults":[{"assertionResults":[{"ancestorTitles":["valores monetários"],"fullName":"valores monetários converte texto decimal em centavos sem float","status":"passed","title":"converte texto decimal em centavos sem float","duration":4.326999999999998,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["valores monetários"],"fullName":"valores monetários recusa texto que não é valor","status":"passed","title":"recusa texto que não é valor","duration":1.1922000000001844,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["endereço"],"fullName":"endereço separa rua e número","status":"passed","title":"separa rua e número","duration":2.154800000000023,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["assinatura de webhook"],"fullName":"assinatura de webhook HMAC-SHA256 em base64 confere com o vetor de teste conhecido","status":"passed","title":"HMAC-SHA256 em base64 confere com o vetor de teste conhecido","duration":30.742500000000064,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["assinatura de webhook"],"fullName":"assinatura de webhook aceita a assinatura correta e rejeita corpo alterado, segredo errado e ausência","status":"passed","title":"aceita a assinatura correta e rejeita corpo alterado, segredo errado e ausência","duration":2.8804999999999836,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["assinatura de webhook"],"fullName":"assinatura de webhook comparação em tempo constante distingue tamanhos e conteúdos","status":"passed","title":"comparação em tempo constante distingue tamanhos e conteúdos","duration":0.4780000000000655,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["Shopify"],"fullName":"Shopify normaliza um pedido pago","status":"passed","title":"normaliza um pedido pago","duration":1.5517999999999574,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["Shopify"],"fullName":"Shopify ignora pedido cancelado, estornado e sem endereço de entrega","status":"passed","title":"ignora pedido cancelado, estornado e sem endereço de entrega","duration":0.43279999999981555,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["Shopify"],"fullName":"Shopify descarta telefone e e-mail inválidos em vez de derrubar o pedido","status":"passed","title":"descarta telefone e e-mail inválidos em vez de derrubar o pedido","duration":0.6100000000001273,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["Shopify"],"fullName":"Shopify erra para payload sem estrutura mínima","status":"passed","title":"erra para payload sem estrutura mínima","duration":1.877999999999929,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["WooCommerce"],"fullName":"WooCommerce normaliza usando os campos do Brazilian Market","status":"passed","title":"normaliza usando os campos do Brazilian Market","duration":1.1255000000001019,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["WooCommerce"],"fullName":"WooCommerce sem campos do plugin, extrai o número da rua e usa cobrança quando não há entrega","status":"passed","title":"sem campos do plugin, extrai o número da rua e usa cobrança quando não há entrega","duration":1.6847999999999956,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["WooCommerce"],"fullName":"WooCommerce só importa pedidos pagos/em andamento","status":"passed","title":"só importa pedidos pagos/em andamento","duration":1.5106999999998152,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["WooCommerce"],"fullName":"WooCommerce erra para payload sem estrutura mínima ou quantidade inválida","status":"passed","title":"erra para payload sem estrutura mínima ou quantidade inválida","duration":0.570699999999988,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]}],"startTime":1790184338705,"endTime":1790184338757.5708,"status":"passed","message":"","name":"C:/Users/Micro/OneDrive/Área de Trabalho/saas-ecommerce/src/integrations/integrations-logic.test.ts"},{"assertionResults":[{"ancestorTitles":["formulário de conexão"],"fullName":"formulário de conexão aceita dados válidos e exige segredo de 16+ caracteres","status":"passed","title":"aceita dados válidos e exige segredo de 16+ caracteres","duration":4.617500000000291,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["formulário de conexão"],"fullName":"formulário de conexão só permite provedores já conectáveis","status":"passed","title":"só permite provedores já conectáveis","duration":0.5510000000003856,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["formulário de vínculo"],"fullName":"formulário de vínculo exige item de estoque válido e SKU","status":"passed","title":"exige item de estoque válido e SKU","duration":1.524199999999837,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["URL do webhook"],"fullName":"URL do webhook monta a URL da Edge Function sem barras duplicadas","status":"passed","title":"monta a URL da Edge Function sem barras duplicadas","duration":0.4444999999996071,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["URL do webhook"],"fullName":"URL do webhook sem Supabase configurado, deixa um marcador explícito","status":"passed","title":"sem Supabase configurado, deixa um marcador explícito","duration":0.4311999999999898,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["segredo gerado"],"fullName":"segredo gerado tem 48 hex e não se repete","status":"passed","title":"tem 48 hex e não se repete","duration":2.8621000000002823,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["mensagens"],"fullName":"mensagens traduz erros de integração e cai nos erros de organização","status":"passed","title":"traduz erros de integração e cai nos erros de organização","duration":0.562699999999495,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["mensagens"],"fullName":"mensagens há mensagem para todo resultado de reprocessamento e nome para todo provedor","status":"passed","title":"há mensagem para todo resultado de reprocessamento e nome para todo provedor","duration":0.8815999999997075,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]}],"startTime":1790184342843,"endTime":1790184342855.8816,"status":"passed","message":"","name":"C:/Users/Micro/OneDrive/Área de Trabalho/saas-ecommerce/src/features/integrations/integrations-ui-logic.test.ts"},{"assertionResults":[{"ancestorTitles":["conexões e segredo"],"fullName":"conexões e segredo cria a conexão normalizada e nunca expõe o segredo","status":"passed","title":"cria a conexão normalizada e nunca expõe o segredo","duration":5568.5629,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["conexões e segredo"],"fullName":"conexões e segredo só owner/admin de organização vendedora criam; provedor ainda indisponível é recusado","status":"passed","title":"só owner/admin de organização vendedora criam; provedor ainda indisponível é recusado","duration":773.4852999999994,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["conexões e segredo"],"fullName":"conexões e segredo rejeita segredo curto e conexão duplicada","status":"passed","title":"rejeita segredo curto e conexão duplicada","duration":746.0642999999991,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["conexões e segredo"],"fullName":"conexões e segredo só owner/admin da organização leem conexões; outros tenants nada","status":"passed","title":"só owner/admin da organização leem conexões; outros tenants nada","duration":902.3794000000016,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["conexões e segredo"],"fullName":"conexões e segredo rotaciona o segredo; desconectar apaga o segredo e é definitivo","status":"passed","title":"rotaciona o segredo; desconectar apaga o segredo e é definitivo","duration":830.7633999999998,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["vínculos"],"fullName":"vínculos vincula e desvincula; SKU e item únicos por conexão","status":"passed","title":"vincula e desvincula; SKU e item únicos por conexão","duration":859.1995999999999,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["vínculos"],"fullName":"vínculos não vincula estoque de outra organização, dropshipping nem produto com variações sem variação","status":"passed","title":"não vincula estoque de outra organização, dropshipping nem produto com variações sem variação","duration":808.8186999999998,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["vínculos"],"fullName":"vínculos só owner/admin vinculam","status":"passed","title":"só owner/admin vinculam","duration":912.2594000000008,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["recebimento de pedidos"],"fullName":"recebimento de pedidos cria pedido pendente com itens vinculados, sem reservar estoque","status":"passed","title":"cria pedido pendente com itens vinculados, sem reservar estoque","duration":1023.4487000000008,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["recebimento de pedidos"],"fullName":"recebimento de pedidos é idempotente por pedido externo","status":"passed","title":"é idempotente por pedido externo","duration":821.2601000000013,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["recebimento de pedidos"],"fullName":"recebimento de pedidos soma linhas do mesmo SKU e recusa preços diferentes para o mesmo SKU","status":"passed","title":"soma linhas do mesmo SKU e recusa preços diferentes para o mesmo SKU","duration":918.9880000000012,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["recebimento de pedidos"],"fullName":"recebimento de pedidos SKU sem vínculo vira evento com payload e não cria pedido; reprocessa depois de vincular","status":"passed","title":"SKU sem vínculo vira evento com payload e não cria pedido; reprocessa depois de vincular","duration":894.1064000000006,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["recebimento de pedidos"],"fullName":"recebimento de pedidos dado inválido do cliente vira evento de erro, não exceção","status":"passed","title":"dado inválido do cliente vira evento de erro, não exceção","duration":828.7815999999984,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["recebimento de pedidos"],"fullName":"recebimento de pedidos conexão pausada ou desconectada não recebe pedidos","status":"passed","title":"conexão pausada ou desconectada não recebe pedidos","duration":857.1235000000015,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["recebimento de pedidos"],"fullName":"recebimento de pedidos a API autenticada não chama a ingestão nem o worker","status":"passed","title":"a API autenticada não chama a ingestão nem o worker","duration":713.3368999999984,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["recebimento de pedidos"],"fullName":"recebimento de pedidos eventos: só owner/admin leem e só da própria organização","status":"passed","title":"eventos: só owner/admin leem e só da própria organização","duration":776.3002000000015,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["recebimento de pedidos"],"fullName":"recebimento de pedidos pedido manual continua funcionando pelo mesmo núcleo","status":"passed","title":"pedido manual continua funcionando pelo mesmo núcleo","duration":795.6334999999999,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["estoque de saída"],"fullName":"estoque de saída vincular enfileira o saldo atual; mudanças coalescem numa linha pendente","status":"passed","title":"vincular enfileira o saldo atual; mudanças coalescem numa linha pendente","duration":720.890199999998,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["estoque de saída"],"fullName":"estoque de saída reserva de pedido também muda o disponível; vínculo sem sync ou conexão pausada não enfileiram","status":"passed","title":"reserva de pedido também muda o disponível; vínculo sem sync ou conexão pausada não enfileiram","duration":747.3001000000004,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["estoque de saída"],"fullName":"estoque de saída desconectar descarta pendências","status":"passed","title":"desconectar descarta pendências","duration":704.9471999999987,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["estoque de saída"],"fullName":"estoque de saída worker reivindica, conclui e registra o último valor enviado","status":"passed","title":"worker reivindica, conclui e registra o último valor enviado","duration":764.8240000000005,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]},{"ancestorTitles":["estoque de saída"],"fullName":"estoque de saída falha recoloca com espera; nova mudança durante o envio não colide; 5 falhas geram evento","status":"passed","title":"falha recoloca com espera; nova mudança durante o envio não colide; 5 falhas geram evento","duration":794.3125,"failureMessages":[],"meta":{},"tags":[],"benchmarks":[]}],"startTime":1790184338800,"endTime":1790184361565.3125,"status":"passed","message":"","name":"C:/Users/Micro/OneDrive/Área de Trabalho/saas-ecommerce/src/test/db/integrations.test.ts"}]}
+{
+  "numTotalTestSuites": 17,
+  "numPassedTestSuites": 17,
+  "numFailedTestSuites": 0,
+  "numPendingTestSuites": 0,
+  "numTotalTests": 44,
+  "numPassedTests": 44,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "snapshot": {
+    "added": 0,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0,
+    "didUpdate": false
+  },
+  "startTime": 1790184337605,
+  "success": true,
+  "testResults": [
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["valores monetários"],
+          "fullName": "valores monetários converte texto decimal em centavos sem float",
+          "status": "passed",
+          "title": "converte texto decimal em centavos sem float",
+          "duration": 4.326999999999998,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["valores monetários"],
+          "fullName": "valores monetários recusa texto que não é valor",
+          "status": "passed",
+          "title": "recusa texto que não é valor",
+          "duration": 1.1922000000001844,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["endereço"],
+          "fullName": "endereço separa rua e número",
+          "status": "passed",
+          "title": "separa rua e número",
+          "duration": 2.154800000000023,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["assinatura de webhook"],
+          "fullName": "assinatura de webhook HMAC-SHA256 em base64 confere com o vetor de teste conhecido",
+          "status": "passed",
+          "title": "HMAC-SHA256 em base64 confere com o vetor de teste conhecido",
+          "duration": 30.742500000000064,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["assinatura de webhook"],
+          "fullName": "assinatura de webhook aceita a assinatura correta e rejeita corpo alterado, segredo errado e ausência",
+          "status": "passed",
+          "title": "aceita a assinatura correta e rejeita corpo alterado, segredo errado e ausência",
+          "duration": 2.8804999999999836,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["assinatura de webhook"],
+          "fullName": "assinatura de webhook comparação em tempo constante distingue tamanhos e conteúdos",
+          "status": "passed",
+          "title": "comparação em tempo constante distingue tamanhos e conteúdos",
+          "duration": 0.4780000000000655,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Shopify"],
+          "fullName": "Shopify normaliza um pedido pago",
+          "status": "passed",
+          "title": "normaliza um pedido pago",
+          "duration": 1.5517999999999574,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Shopify"],
+          "fullName": "Shopify ignora pedido cancelado, estornado e sem endereço de entrega",
+          "status": "passed",
+          "title": "ignora pedido cancelado, estornado e sem endereço de entrega",
+          "duration": 0.43279999999981555,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Shopify"],
+          "fullName": "Shopify descarta telefone e e-mail inválidos em vez de derrubar o pedido",
+          "status": "passed",
+          "title": "descarta telefone e e-mail inválidos em vez de derrubar o pedido",
+          "duration": 0.6100000000001273,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["Shopify"],
+          "fullName": "Shopify erra para payload sem estrutura mínima",
+          "status": "passed",
+          "title": "erra para payload sem estrutura mínima",
+          "duration": 1.877999999999929,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["WooCommerce"],
+          "fullName": "WooCommerce normaliza usando os campos do Brazilian Market",
+          "status": "passed",
+          "title": "normaliza usando os campos do Brazilian Market",
+          "duration": 1.1255000000001019,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["WooCommerce"],
+          "fullName": "WooCommerce sem campos do plugin, extrai o número da rua e usa cobrança quando não há entrega",
+          "status": "passed",
+          "title": "sem campos do plugin, extrai o número da rua e usa cobrança quando não há entrega",
+          "duration": 1.6847999999999956,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["WooCommerce"],
+          "fullName": "WooCommerce só importa pedidos pagos/em andamento",
+          "status": "passed",
+          "title": "só importa pedidos pagos/em andamento",
+          "duration": 1.5106999999998152,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["WooCommerce"],
+          "fullName": "WooCommerce erra para payload sem estrutura mínima ou quantidade inválida",
+          "status": "passed",
+          "title": "erra para payload sem estrutura mínima ou quantidade inválida",
+          "duration": 0.570699999999988,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1790184338705,
+      "endTime": 1790184338757.5708,
+      "status": "passed",
+      "message": "",
+      "name": "C:/Users/Micro/OneDrive/Área de Trabalho/saas-ecommerce/src/integrations/integrations-logic.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["formulário de conexão"],
+          "fullName": "formulário de conexão aceita dados válidos e exige segredo de 16+ caracteres",
+          "status": "passed",
+          "title": "aceita dados válidos e exige segredo de 16+ caracteres",
+          "duration": 4.617500000000291,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["formulário de conexão"],
+          "fullName": "formulário de conexão só permite provedores já conectáveis",
+          "status": "passed",
+          "title": "só permite provedores já conectáveis",
+          "duration": 0.5510000000003856,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["formulário de vínculo"],
+          "fullName": "formulário de vínculo exige item de estoque válido e SKU",
+          "status": "passed",
+          "title": "exige item de estoque válido e SKU",
+          "duration": 1.524199999999837,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["URL do webhook"],
+          "fullName": "URL do webhook monta a URL da Edge Function sem barras duplicadas",
+          "status": "passed",
+          "title": "monta a URL da Edge Function sem barras duplicadas",
+          "duration": 0.4444999999996071,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["URL do webhook"],
+          "fullName": "URL do webhook sem Supabase configurado, deixa um marcador explícito",
+          "status": "passed",
+          "title": "sem Supabase configurado, deixa um marcador explícito",
+          "duration": 0.4311999999999898,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["segredo gerado"],
+          "fullName": "segredo gerado tem 48 hex e não se repete",
+          "status": "passed",
+          "title": "tem 48 hex e não se repete",
+          "duration": 2.8621000000002823,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["mensagens"],
+          "fullName": "mensagens traduz erros de integração e cai nos erros de organização",
+          "status": "passed",
+          "title": "traduz erros de integração e cai nos erros de organização",
+          "duration": 0.562699999999495,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["mensagens"],
+          "fullName": "mensagens há mensagem para todo resultado de reprocessamento e nome para todo provedor",
+          "status": "passed",
+          "title": "há mensagem para todo resultado de reprocessamento e nome para todo provedor",
+          "duration": 0.8815999999997075,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1790184342843,
+      "endTime": 1790184342855.8816,
+      "status": "passed",
+      "message": "",
+      "name": "C:/Users/Micro/OneDrive/Área de Trabalho/saas-ecommerce/src/features/integrations/integrations-ui-logic.test.ts"
+    },
+    {
+      "assertionResults": [
+        {
+          "ancestorTitles": ["conexões e segredo"],
+          "fullName": "conexões e segredo cria a conexão normalizada e nunca expõe o segredo",
+          "status": "passed",
+          "title": "cria a conexão normalizada e nunca expõe o segredo",
+          "duration": 5568.5629,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["conexões e segredo"],
+          "fullName": "conexões e segredo só owner/admin de organização vendedora criam; provedor ainda indisponível é recusado",
+          "status": "passed",
+          "title": "só owner/admin de organização vendedora criam; provedor ainda indisponível é recusado",
+          "duration": 773.4852999999994,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["conexões e segredo"],
+          "fullName": "conexões e segredo rejeita segredo curto e conexão duplicada",
+          "status": "passed",
+          "title": "rejeita segredo curto e conexão duplicada",
+          "duration": 746.0642999999991,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["conexões e segredo"],
+          "fullName": "conexões e segredo só owner/admin da organização leem conexões; outros tenants nada",
+          "status": "passed",
+          "title": "só owner/admin da organização leem conexões; outros tenants nada",
+          "duration": 902.3794000000016,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["conexões e segredo"],
+          "fullName": "conexões e segredo rotaciona o segredo; desconectar apaga o segredo e é definitivo",
+          "status": "passed",
+          "title": "rotaciona o segredo; desconectar apaga o segredo e é definitivo",
+          "duration": 830.7633999999998,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["vínculos"],
+          "fullName": "vínculos vincula e desvincula; SKU e item únicos por conexão",
+          "status": "passed",
+          "title": "vincula e desvincula; SKU e item únicos por conexão",
+          "duration": 859.1995999999999,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["vínculos"],
+          "fullName": "vínculos não vincula estoque de outra organização, dropshipping nem produto com variações sem variação",
+          "status": "passed",
+          "title": "não vincula estoque de outra organização, dropshipping nem produto com variações sem variação",
+          "duration": 808.8186999999998,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["vínculos"],
+          "fullName": "vínculos só owner/admin vinculam",
+          "status": "passed",
+          "title": "só owner/admin vinculam",
+          "duration": 912.2594000000008,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["recebimento de pedidos"],
+          "fullName": "recebimento de pedidos cria pedido pendente com itens vinculados, sem reservar estoque",
+          "status": "passed",
+          "title": "cria pedido pendente com itens vinculados, sem reservar estoque",
+          "duration": 1023.4487000000008,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["recebimento de pedidos"],
+          "fullName": "recebimento de pedidos é idempotente por pedido externo",
+          "status": "passed",
+          "title": "é idempotente por pedido externo",
+          "duration": 821.2601000000013,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["recebimento de pedidos"],
+          "fullName": "recebimento de pedidos soma linhas do mesmo SKU e recusa preços diferentes para o mesmo SKU",
+          "status": "passed",
+          "title": "soma linhas do mesmo SKU e recusa preços diferentes para o mesmo SKU",
+          "duration": 918.9880000000012,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["recebimento de pedidos"],
+          "fullName": "recebimento de pedidos SKU sem vínculo vira evento com payload e não cria pedido; reprocessa depois de vincular",
+          "status": "passed",
+          "title": "SKU sem vínculo vira evento com payload e não cria pedido; reprocessa depois de vincular",
+          "duration": 894.1064000000006,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["recebimento de pedidos"],
+          "fullName": "recebimento de pedidos dado inválido do cliente vira evento de erro, não exceção",
+          "status": "passed",
+          "title": "dado inválido do cliente vira evento de erro, não exceção",
+          "duration": 828.7815999999984,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["recebimento de pedidos"],
+          "fullName": "recebimento de pedidos conexão pausada ou desconectada não recebe pedidos",
+          "status": "passed",
+          "title": "conexão pausada ou desconectada não recebe pedidos",
+          "duration": 857.1235000000015,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["recebimento de pedidos"],
+          "fullName": "recebimento de pedidos a API autenticada não chama a ingestão nem o worker",
+          "status": "passed",
+          "title": "a API autenticada não chama a ingestão nem o worker",
+          "duration": 713.3368999999984,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["recebimento de pedidos"],
+          "fullName": "recebimento de pedidos eventos: só owner/admin leem e só da própria organização",
+          "status": "passed",
+          "title": "eventos: só owner/admin leem e só da própria organização",
+          "duration": 776.3002000000015,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["recebimento de pedidos"],
+          "fullName": "recebimento de pedidos pedido manual continua funcionando pelo mesmo núcleo",
+          "status": "passed",
+          "title": "pedido manual continua funcionando pelo mesmo núcleo",
+          "duration": 795.6334999999999,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["estoque de saída"],
+          "fullName": "estoque de saída vincular enfileira o saldo atual; mudanças coalescem numa linha pendente",
+          "status": "passed",
+          "title": "vincular enfileira o saldo atual; mudanças coalescem numa linha pendente",
+          "duration": 720.890199999998,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["estoque de saída"],
+          "fullName": "estoque de saída reserva de pedido também muda o disponível; vínculo sem sync ou conexão pausada não enfileiram",
+          "status": "passed",
+          "title": "reserva de pedido também muda o disponível; vínculo sem sync ou conexão pausada não enfileiram",
+          "duration": 747.3001000000004,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["estoque de saída"],
+          "fullName": "estoque de saída desconectar descarta pendências",
+          "status": "passed",
+          "title": "desconectar descarta pendências",
+          "duration": 704.9471999999987,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["estoque de saída"],
+          "fullName": "estoque de saída worker reivindica, conclui e registra o último valor enviado",
+          "status": "passed",
+          "title": "worker reivindica, conclui e registra o último valor enviado",
+          "duration": 764.8240000000005,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        },
+        {
+          "ancestorTitles": ["estoque de saída"],
+          "fullName": "estoque de saída falha recoloca com espera; nova mudança durante o envio não colide; 5 falhas geram evento",
+          "status": "passed",
+          "title": "falha recoloca com espera; nova mudança durante o envio não colide; 5 falhas geram evento",
+          "duration": 794.3125,
+          "failureMessages": [],
+          "meta": {},
+          "tags": [],
+          "benchmarks": []
+        }
+      ],
+      "startTime": 1790184338800,
+      "endTime": 1790184361565.3125,
+      "status": "passed",
+      "message": "",
+      "name": "C:/Users/Micro/OneDrive/Área de Trabalho/saas-ecommerce/src/test/db/integrations.test.ts"
+    }
+  ]
+}
