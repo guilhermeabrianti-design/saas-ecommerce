@@ -10,6 +10,7 @@ import { Section } from '@/components/ui/Section';
 import { Select } from '@/components/ui/Select';
 import { TextField } from '@/components/ui/TextField';
 import { useOrganization } from '@/features/organizations/organization-context';
+import { GenerateDescriptionButton } from '@/features/ai/components/GenerateDescriptionButton';
 import { orgPermissions } from '@/features/organizations/roles';
 import { CatalogListingSection } from '@/features/supplier/components/CatalogListingSection';
 import { formatBRL, parseBRL } from '@/utils/money';
@@ -64,6 +65,7 @@ function ProductForm({ product }: { product: Product | null }) {
     handleSubmit,
     control,
     reset,
+    setValue,
     formState: { errors, isDirty },
   } = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
@@ -129,6 +131,17 @@ function ProductForm({ product }: { product: Product | null }) {
             />
             {errors.description && (
               <p className="text-danger text-xs">{errors.description.message}</p>
+            )}
+            {product && canEdit && (
+              <GenerateDescriptionButton
+                orgId={orgId}
+                productId={product.id}
+                disabled={isDirty}
+                disabledReason="Salve as alterações antes: a IA usa os dados salvos do produto."
+                onGenerated={(text) =>
+                  setValue('description', text, { shouldDirty: true, shouldValidate: true })
+                }
+              />
             )}
           </div>
         </div>

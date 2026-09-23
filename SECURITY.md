@@ -128,6 +128,15 @@ Documento vivo — cada fase acrescenta os controles que implementa. Status atua
   nada (nem via RPC de outro tenant que dependa dela: catálogo, roteirização, webhooks).
 - Pendente: MFA obrigatório para contas da equipe; alerta por e-mail em ações administrativas.
 
+## Implementado (Fase 13)
+
+- Chave da Anthropic só como segredo da Edge Function (`ANTHROPIC_API_KEY`); nunca no navegador.
+- A função usa o JWT do usuário: mesma autorização das RPCs (owner/admin, produto da organização),
+  cota por organização com lock e devolução em caso de falha; log de uso sem acesso pela API.
+- O servidor relê o produto do banco (o cliente não envia o conteúdo do prompt). Campos do
+  vendedor são achatados e limitados; a saída é só texto mostrado a quem a pediu, para revisão.
+- Pendente: rate limit por usuário (hoje só a cota diária da organização); CAPTCHA/abuso por conta nova.
+
 ### Configuração obrigatória no projeto Supabase cloud
 
 `supabase/config.toml` vale só para o ambiente local. Em staging/produção, replique no painel

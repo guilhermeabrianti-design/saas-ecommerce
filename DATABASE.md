@@ -254,6 +254,12 @@ RPCs; novas policies devem continuar usando `is_org_member`/`has_org_role` para 
 (erro `admin.forbidden`). Toda função que decide visibilidade de fornecedor deve considerar
 `suspended_at` (`visible_listing`, `search_catalog`, `is_catalog_image`).
 
+### IA (Fase 13)
+
+`ai_usage` (sem grants; RLS ligada): uma linha por geração (`started` → `done`/`failed`) com tokens.
+`ai_begin_description` / `ai_finish` / `ai_usage_today` rodam com o JWT do usuário. Cota diária em
+`private.ai_daily_limit()` (50), dia no fuso de São Paulo. O texto gerado nunca é gravado pelo banco.
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,

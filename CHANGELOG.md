@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.13.0] — Fase 13: IA — descrição de produto assistida
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20260923160000_ai.sql`): `ai_begin_description` (autoriza owner/admin,
+  confere que o produto é da organização, aplica a **cota diária de 50 por organização** com lock
+  para chamadas paralelas e entrega só os dados do produto para o prompt), `ai_finish` (fecha a
+  reserva; falha **devolve a cota**; reserva presa expira em 5 min) e `ai_usage_today`. `ai_usage`
+  registra tokens e não tem nenhum acesso pela API.
+- **Edge Function** `ai` (`POST /functions/v1/ai`): roda com o **JWT do usuário** (sem service role),
+  chama a API da Anthropic (SDK oficial; modelo por `AI_MODEL`, padrão `claude-opus-5`, esforço
+  `low`), trata `refusal`, limita a resposta a 1024 tokens e devolve códigos de erro estáveis.
+- **Prompt e limpeza** em `supabase/functions/_shared/ai/description.ts`: campos do vendedor viram
+  texto de uma linha (sem injeção por quebra de linha), instrução de tratar o cadastro como dado e
+  não inventar fatos; resposta sem markdown/rótulos e dentro do limite de 5000 caracteres.
+- **Tela**: botão **Sugerir com IA** no produto (a partir dos dados salvos). O texto só preenche o
+  campo; **nada é salvo** até a pessoa revisar e salvar. Mostra a cota restante.
+- **Testes**: 7 de banco (autorização, isolamento entre organizações, dados mínimos, cota,
+  expiração, fechamento único) e 9 de lógica (prompt, injeção, limpeza, modelos, mensagens).
+
+### Limitações conhecidas
+
+- **A Edge Function não foi executada** (sem Deno, Supabase CLI nem chave da API aqui): o banco, o
+  prompt e a limpeza são testados; a chamada ao modelo e o CORS devem ser exercitados com
+  `supabase functions serve ai` + `ANTHROPIC_API_KEY` antes de produção.
+- Um só recurso de IA (descrição de produto). Sem fila, cache de resultados ou sugestão em lote.
+- `fallbacks` de recusa do Opus 5 não foi habilitado (fluxo curto e revisável): uma recusa devolve
+  "escreva manualmente". Custo: cota por organização, sem faturamento por uso.
+- LGPD: o cadastro do produto (sem dados de clientes) é enviado à Anthropic para gerar o texto.
+
 ## [0.12.0] — Fase 12: Administração da plataforma
 
 ### Adicionado

@@ -20,6 +20,7 @@
 | `SUPABASE_SERVICE_ROLE_KEY`                                            | Supabase Secrets         | **não**                 |
 | `CREDENTIALS_ENCRYPTION_KEY`                                           | Supabase Secrets         | **não**                 |
 | `OPENAI_API_KEY`                                                       | Supabase Secrets         | **não**                 |
+| `ANTHROPIC_API_KEY` (Fase 13), `AI_MODEL` (opcional)                   | Supabase Secrets         | **não**                 |
 | `MERCADOLIVRE_*`, `SHOPEE_*`, `TIKTOK_*`, `SHOPIFY_*`, `WOOCOMMERCE_*` | Supabase Secrets         | **não**                 |
 | `PAYMENT_PROVIDER_KEY`                                                 | Supabase Secrets         | **não**                 |
 
