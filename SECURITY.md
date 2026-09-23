@@ -119,6 +119,15 @@ Documento vivo — cada fase acrescenta os controles que implementa. Status atua
   normalização e a assinatura são testadas; o roteamento deve ser exercitado com
   `supabase functions serve` antes de produção.
 
+## Implementado (Fase 12)
+
+- Papel `admin` da equipe só via SQL; RPCs administrativas checam o papel no servidor. A equipe
+  enxerga **agregados**, nunca dados de negócio (teste de isolamento).
+- Suspensão com motivo obrigatório e trilha de auditoria imutável (sem grants, sem UPDATE/DELETE).
+- Suspensão aplicada no helper central de autorização: uma organização suspensa não lê nem escreve
+  nada (nem via RPC de outro tenant que dependa dela: catálogo, roteirização, webhooks).
+- Pendente: MFA obrigatório para contas da equipe; alerta por e-mail em ações administrativas.
+
 ### Configuração obrigatória no projeto Supabase cloud
 
 `supabase/config.toml` vale só para o ambiente local. Em staging/produção, replique no painel

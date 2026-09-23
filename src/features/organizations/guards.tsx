@@ -1,4 +1,5 @@
 import { Navigate, Outlet } from 'react-router';
+import { useMySuspendedOrganizations } from '@/features/admin/api';
 import { Alert } from '@/components/ui/Alert';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { useOrganization } from './organization-context';
@@ -7,6 +8,7 @@ import { orgKindLabels, type OrgKind } from './roles';
 /** Tenant-scoped area: users without an organization are sent to create or join one. */
 export function RequireOrganization() {
   const { isPending, isError, active } = useOrganization();
+  const suspended = useMySuspendedOrganizations();
 
   if (isPending) return <PageLoader />;
   if (isError) {
@@ -14,7 +16,12 @@ export function RequireOrganization() {
       <Alert tone="error">Não foi possível carregar suas organizações. Recarregue a página.</Alert>
     );
   }
-  if (!active) return <Navigate to="/organizacao/nova" replace />;
+  if (!active) {
+    if (suspended.isPending) return <PageLoader />;
+    // Sem organização ativa por causa de suspensão: o aviso (no layout) explica; não mande criar outra.
+    if ((suspended.data?.length ?? 0) > 0) return null;
+    return <Navigate to="/organizacao/nova" replace />;
+  }
   return <Outlet />;
 }
 

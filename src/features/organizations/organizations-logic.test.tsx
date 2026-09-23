@@ -1,6 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import type { Membership } from './api';
+
+// O guard consulta as suspensões via React Query; aqui basta controlar o resultado.
+const suspendedState = vi.hoisted(() => ({
+  value: { isPending: false, data: [] as { id: string; name: string }[] },
+}));
+vi.mock('@/features/admin/api', () => ({
+  useMySuspendedOrganizations: () => suspendedState.value,
+}));
 import { orgErrorMessage } from './errors';
 import { RequireOrganization } from './guards';
 import {
@@ -86,6 +94,18 @@ describe('RequireOrganization', () => {
       </OrganizationContext.Provider>,
     );
   }
+
+  beforeEach(() => {
+    suspendedState.value = { isPending: false, data: [] };
+  });
+
+  it('não manda para o onboarding quem perdeu a organização por suspensão', async () => {
+    suspendedState.value = { isPending: false, data: [{ id: 'x', name: 'Loja X' }] };
+    renderWith({});
+    await Promise.resolve();
+    expect(screen.queryByText('criar organização')).not.toBeInTheDocument();
+    expect(screen.queryByText('configurações')).not.toBeInTheDocument();
+  });
 
   it('manda quem não tem organização para o onboarding', async () => {
     renderWith({});

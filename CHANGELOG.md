@@ -1,5 +1,35 @@
 # Changelog
 
+## [0.12.0] — Fase 12: Administração da plataforma
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20260923150000_admin.sql`):
+  - **Suspensão de organização** (`organizations.suspended_at` + motivo obrigatório). Aplicada no
+    ponto único `private.org_role_of`: toda policy e RPC passa a negar a organização suspensa de uma
+    vez. Também: anúncios de fornecedor suspenso saem de `search_catalog`, `visible_listing` (não
+    roteia pedido) e das imagens do catálogo; vendedor suspenso não recebe pedidos de marketplace.
+  - `admin_audit_log`: auditoria **imutável**, sem acesso direto pela API.
+  - RPCs da equipe (`profiles.role = 'admin'`): `admin_stats`, `admin_list_organizations` (busca
+    sem coringas, paginada), `admin_set_suspension` (motivo obrigatório; recusa repetir estado) e
+    `admin_audit_entries`. `my_suspended_organizations` explica o bloqueio aos membros.
+  - A equipe vê **só agregados**: nenhuma policy dá acesso a pedidos, clientes ou financeiro.
+- **Telas**: **Administração** (indicadores, organizações com suspender/reativar e motivo,
+  auditoria), aviso de suspensão para os membros e menu específico para contas da equipe.
+- **Testes**: 8 de banco (acesso, isolamento da equipe, agregados, busca, auditoria imutável,
+  bloqueio total da suspensa, fornecedor suspenso, webhook) e 3 de frontend.
+
+### Revisão
+
+- O teste de suspensão de fornecedor revelou que `search_catalog` e a policy de imagens não usavam
+  `visible_listing`: ambos foram redefinidos com o filtro de suspensão.
+
+### Limitações conhecidas
+
+- Não há criação de contas de equipe pela interface (continua via SQL, como documentado). Sem MFA
+  obrigatório para a equipe ainda. Suspensão não notifica por e-mail. Pedidos já roteados a um
+  fornecedor que é suspenso depois ficam parados até a reativação.
+
 ## [0.11.0] — Fase 11: Analytics
 
 ### Adicionado

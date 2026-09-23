@@ -11,6 +11,10 @@ import { createTestDatabase } from './supabase-sim';
 const AUTHENTICATED_RPCS = [
   'accept_invitation',
   'adjust_stock',
+  'admin_audit_entries',
+  'admin_list_organizations',
+  'admin_set_suspension',
+  'admin_stats',
   'analytics_daily',
   'analytics_overview',
   'analytics_top_items',
@@ -28,6 +32,7 @@ const AUTHENTICATED_RPCS = [
   'link_listing',
   'list_organization_members',
   'my_pending_invitations',
+  'my_suspended_organizations',
   'pay_supplier_order',
   'record_order_payment',
   'refund_order_payment',

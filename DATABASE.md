@@ -245,6 +245,15 @@ Sem tabelas: `analytics_overview` (jsonb, chaves por tipo de organização), `an
 `analytics_top_items`. `security definer`, só owner/admin (`org.forbidden` para os demais,
 `analytics.invalid_period` fora de 1–366 dias). Dias no fuso `America/Sao_Paulo`.
 
+### Administração (Fase 12)
+
+`organizations.suspended_at`/`suspension_reason` (ambos nulos ou ambos preenchidos).
+`private.org_role_of` devolve nulo para organização suspensa — é o gancho de **toda** a RLS e das
+RPCs; novas policies devem continuar usando `is_org_member`/`has_org_role` para herdar a suspensão.
+`admin_audit_log` é imutável e sem grants. RPCs `admin_*` exigem `profiles.role = 'admin'`
+(erro `admin.forbidden`). Toda função que decide visibilidade de fornecedor deve considerar
+`suspended_at` (`visible_listing`, `search_catalog`, `is_catalog_image`).
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,

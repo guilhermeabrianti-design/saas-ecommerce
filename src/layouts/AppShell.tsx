@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet } from 'react-router';
 import {
   Activity,
   ChartColumn,
+  ShieldCheck,
   Boxes,
   Building2,
   House,
@@ -19,6 +20,8 @@ import {
 import { Logo } from '@/components/brand/Logo';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { EnvBadge } from '@/components/ui/EnvBadge';
+import { useMySuspendedOrganizations } from '@/features/admin/api';
+import { SuspensionNotice } from '@/features/admin/components/SuspensionNotice';
 import { useAuth } from '@/features/auth/auth-context';
 import { useProfile } from '@/features/auth/profile';
 import { roleLabels } from '@/features/auth/roles';
@@ -34,25 +37,58 @@ interface NavItem {
   requiresAuth: boolean;
   /** Only shown when the active organization is of this kind. */
   orgKind?: OrgKind;
+  /** Platform staff (`admin` accounts): only they see it, and they see no tenant screens. */
+  staffOnly?: boolean;
+  /** Hidden for staff, who have no organization. */
+  tenantOnly?: boolean;
 }
 
 const navItems: NavItem[] = [
   { to: '/', label: 'Início', icon: House, requiresAuth: true },
-  { to: '/produtos', label: 'Produtos', icon: Package, requiresAuth: true },
-  { to: '/estoque', label: 'Estoque', icon: Boxes, requiresAuth: true },
-  { to: '/pedidos', label: 'Pedidos', icon: ReceiptText, requiresAuth: true, orgKind: 'seller' },
-  { to: '/catalogo', label: 'Catálogo', icon: Store, requiresAuth: true, orgKind: 'seller' },
-  { to: '/integracoes', label: 'Integrações', icon: Plug, requiresAuth: true, orgKind: 'seller' },
+  { to: '/admin', label: 'Administração', icon: ShieldCheck, requiresAuth: true, staffOnly: true },
+  { to: '/produtos', label: 'Produtos', icon: Package, requiresAuth: true, tenantOnly: true },
+  { to: '/estoque', label: 'Estoque', icon: Boxes, requiresAuth: true, tenantOnly: true },
+  {
+    to: '/pedidos',
+    label: 'Pedidos',
+    icon: ReceiptText,
+    requiresAuth: true,
+    tenantOnly: true,
+    orgKind: 'seller',
+  },
+  {
+    to: '/catalogo',
+    label: 'Catálogo',
+    icon: Store,
+    requiresAuth: true,
+    tenantOnly: true,
+    orgKind: 'seller',
+  },
+  {
+    to: '/integracoes',
+    label: 'Integrações',
+    icon: Plug,
+    requiresAuth: true,
+    tenantOnly: true,
+    orgKind: 'seller',
+  },
   {
     to: '/fornecimentos',
     label: 'Fornecimentos',
     icon: PackageCheck,
     requiresAuth: true,
+    tenantOnly: true,
     orgKind: 'supplier',
   },
-  { to: '/analises', label: 'Análises', icon: ChartColumn, requiresAuth: true },
-  { to: '/financeiro', label: 'Financeiro', icon: Wallet, requiresAuth: true },
-  { to: '/organizacao', label: 'Organização', icon: Building2, requiresAuth: true },
+  { to: '/analises', label: 'Análises', icon: ChartColumn, requiresAuth: true, tenantOnly: true },
+  { to: '/financeiro', label: 'Financeiro', icon: Wallet, requiresAuth: true, tenantOnly: true },
+  {
+    to: '/organizacao',
+    label: 'Organização',
+    icon: Building2,
+    requiresAuth: true,
+    tenantOnly: true,
+  },
   { to: '/conta', label: 'Minha conta', icon: UserRound, requiresAuth: true },
   { to: '/status', label: 'Status do sistema', icon: Activity, requiresAuth: false },
 ];
@@ -97,9 +133,14 @@ export function AppShell() {
   const { status } = useAuth();
   const authenticated = status === 'authenticated';
   const { active } = useOrganization();
+  const profile = useProfile();
+  const isStaff = profile.data?.role === 'admin';
+  const suspended = useMySuspendedOrganizations();
   const items = navItems.filter(
     (item) =>
       (authenticated || !item.requiresAuth) &&
+      (!item.staffOnly || isStaff) &&
+      (!item.tenantOnly || !isStaff) &&
       (!item.orgKind || item.orgKind === active?.organization.kind),
   );
 
@@ -153,6 +194,7 @@ export function AppShell() {
           </nav>
         </header>
         <main className="flex-1 overflow-y-auto p-4 md:p-8">
+          {authenticated && <SuspensionNotice organizations={suspended.data ?? []} />}
           <Outlet />
         </main>
       </div>

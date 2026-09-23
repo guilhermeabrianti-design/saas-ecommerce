@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router';
 import { AppShell } from '@/layouts/AppShell';
 import { AuthLayout } from '@/layouts/AuthLayout';
-import { RedirectIfAuthenticated, RequireAuth } from '@/features/auth/guards';
+import { RedirectIfAuthenticated, RequireAuth, RequireRole } from '@/features/auth/guards';
 import { AccountPage } from '@/features/auth/pages/AccountPage';
 import { ForgotPasswordPage } from '@/features/auth/pages/ForgotPasswordPage';
 import { ResetPasswordPage } from '@/features/auth/pages/ResetPasswordPage';
@@ -13,6 +13,7 @@ import { RequireOrganization, RequireOrgKind } from '@/features/organizations/gu
 import { CreateOrganizationPage } from '@/features/organizations/pages/CreateOrganizationPage';
 import { OrganizationSettingsPage } from '@/features/organizations/pages/OrganizationSettingsPage';
 import { EditProductPage, NewProductPage } from '@/features/products/pages/ProductFormPage';
+import { AdminPage } from '@/features/admin/pages/AdminPage';
 import { AnalyticsPage } from '@/features/analytics/pages/AnalyticsPage';
 import { FinancePage } from '@/features/finance/pages/FinancePage';
 import { IntegrationPage } from '@/features/integrations/pages/IntegrationPage';
@@ -59,6 +60,10 @@ export const router = createBrowserRouter([
           { index: true, element: <HomePage /> },
           { path: 'conta', element: <AccountPage /> },
           { path: 'organizacao/nova', element: <CreateOrganizationPage /> },
+          {
+            element: <RequireRole allowed={['admin']} />,
+            children: [{ path: 'admin', element: <AdminPage /> }],
+          },
           {
             element: <RequireOrganization />,
             children: [
