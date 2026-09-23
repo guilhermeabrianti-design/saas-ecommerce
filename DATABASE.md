@@ -155,6 +155,27 @@ garante idempotência). Consequência: produto/variação com movimentações n�
 
 Ambas: owner/admin, linha travada, sem saldo negativo, idempotentes. Erros `inventory.*`.
 
+### `public.catalog_listings` (Fase 7)
+
+Anúncio do fornecedor no catálogo: `wholesale_price_cents`, `suggested_price_cents`,
+`is_published`. FK composta para `products`; único por `(organization_id, product_id)`. Só
+owner/admin de organização `supplier` escrevem; só membros do próprio fornecedor leem a tabela.
+
+**Acesso cruzado** (vendedores) exclusivamente por RPCs `security definer` com colunas escolhidas:
+
+- `search_catalog(p_query, p_limit, p_offset)` — anúncios publicados de produtos ativos.
+- `get_catalog_listing(p_listing)` — detalhe (JSON) com variações ativas e caminhos de imagem.
+- `import_catalog_listing(p_org, p_listing, p_sku_prefix)` — cria produto rascunho + variações no
+  vendedor, preenchendo `products.source_listing_id` e `product_variants.source_variant_id`
+  (colunas sem grant de escrita para o cliente).
+
+Policy extra em `storage.objects`: membros de organizações vendedoras leem imagens de anúncios
+visíveis (`private.is_catalog_image`).
+
+> Ordem de verificação importa em dados multi-tenant: índices únicos são checados antes das FKs.
+> Prefira unicidade com `organization_id` para que a FK composta recuse dados de outro tenant antes
+> que um "duplicate key" revele existência (ver CHANGELOG 0.7.0).
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,

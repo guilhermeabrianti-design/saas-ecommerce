@@ -2,7 +2,7 @@
 
 SaaS multi-tenant para vendedores de e-commerce/dropshipping, fornecedores e equipe TheSigns.
 
-> **Status:** Fase 6 (Estoque) concluída. Veja [CHANGELOG.md](CHANGELOG.md) para o progresso por fase.
+> **Status:** Fase 7 (Catálogo de fornecedores) concluída. Veja [CHANGELOG.md](CHANGELOG.md) para o progresso por fase.
 
 ## Stack
 

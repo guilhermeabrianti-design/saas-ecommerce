@@ -1,5 +1,5 @@
 import { Link, Navigate } from 'react-router';
-import { Activity, Boxes, Building2, ChevronRight, Package, UserRound } from 'lucide-react';
+import { Activity, Boxes, Building2, ChevronRight, Package, Store, UserRound } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { useProfile } from '@/features/auth/profile';
@@ -38,6 +38,16 @@ export function HomePage() {
             detail: 'Saldos e movimentações',
             icon: Boxes,
           },
+          ...(active.organization.kind === 'seller'
+            ? [
+                {
+                  to: '/catalogo',
+                  label: 'Catálogo de fornecedores',
+                  detail: 'Importe produtos para vender',
+                  icon: Store,
+                },
+              ]
+            : []),
           {
             to: '/organizacao',
             label: active.organization.name,

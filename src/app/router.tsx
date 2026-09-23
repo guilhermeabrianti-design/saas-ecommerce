@@ -9,10 +9,12 @@ import { SignInPage } from '@/features/auth/pages/SignInPage';
 import { SignUpPage } from '@/features/auth/pages/SignUpPage';
 import { InventoryItemPage } from '@/features/inventory/pages/InventoryItemPage';
 import { InventoryPage } from '@/features/inventory/pages/InventoryPage';
-import { RequireOrganization } from '@/features/organizations/guards';
+import { RequireOrganization, RequireOrgKind } from '@/features/organizations/guards';
 import { CreateOrganizationPage } from '@/features/organizations/pages/CreateOrganizationPage';
 import { OrganizationSettingsPage } from '@/features/organizations/pages/OrganizationSettingsPage';
 import { EditProductPage, NewProductPage } from '@/features/products/pages/ProductFormPage';
+import { CatalogListingPage } from '@/features/seller/pages/CatalogListingPage';
+import { CatalogPage } from '@/features/seller/pages/CatalogPage';
 import { ProductsPage } from '@/features/products/pages/ProductsPage';
 import { HomePage } from '@/pages/HomePage';
 import { NotFoundPage } from '@/pages/NotFoundPage';
@@ -57,6 +59,13 @@ export const router = createBrowserRouter([
               { path: 'produtos/:productId', element: <EditProductPage /> },
               { path: 'estoque', element: <InventoryPage /> },
               { path: 'estoque/:itemId', element: <InventoryItemPage /> },
+              {
+                element: <RequireOrgKind kind="seller" />,
+                children: [
+                  { path: 'catalogo', element: <CatalogPage /> },
+                  { path: 'catalogo/:listingId', element: <CatalogListingPage /> },
+                ],
+              },
             ],
           },
         ],

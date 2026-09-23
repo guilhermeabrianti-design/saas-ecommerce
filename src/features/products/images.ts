@@ -64,15 +64,8 @@ export function useProductImages(orgId: string, productId: string) {
       const rows = z.array(imageRowSchema).parse(data);
       if (rows.length === 0) return [];
 
-      const { data: signed, error: signError } = await supabase.storage
-        .from(PRODUCT_IMAGES_BUCKET)
-        .createSignedUrls(
-          rows.map((r) => r.storage_path),
-          3600,
-        );
-      if (signError) throw signError;
-      const urlByPath = new Map(signed.map((s) => [s.path, s.signedUrl]));
-      return rows.map((r) => ({ ...r, url: urlByPath.get(r.storage_path) ?? null }));
+      const urls = await signImagePaths(rows.map((r) => r.storage_path));
+      return rows.map((r, i) => ({ ...r, url: urls[i] ?? null }));
     },
   });
 }
@@ -82,28 +75,42 @@ function useInvalidateImages(orgId: string, productId: string) {
   return () => queryClient.invalidateQueries({ queryKey: imageKeys.list(orgId, productId) });
 }
 
+/** Uploads a file into the product's folder and registers it (appended last). */
+export async function uploadProductImageFile(orgId: string, productId: string, file: File) {
+  const supabase = getSupabase();
+  const path = imageStoragePath(orgId, productId, file);
+  const { error: uploadError } = await supabase.storage
+    .from(PRODUCT_IMAGES_BUCKET)
+    .upload(path, file, { contentType: file.type, upsert: false, cacheControl: '3600' });
+  if (uploadError) throw uploadError;
+
+  const { error } = await supabase
+    .from('product_images')
+    .insert({ organization_id: orgId, product_id: productId, storage_path: path });
+  if (error) {
+    // Don't leave an orphan file behind when the row is refused (limit, permission…).
+    await supabase.storage.from(PRODUCT_IMAGES_BUCKET).remove([path]);
+    throw error;
+  }
+}
+
 export function useUploadProductImage(orgId: string, productId: string) {
   const invalidate = useInvalidateImages(orgId, productId);
   return useMutation({
-    mutationFn: async (file: File) => {
-      const supabase = getSupabase();
-      const path = imageStoragePath(orgId, productId, file);
-      const { error: uploadError } = await supabase.storage
-        .from(PRODUCT_IMAGES_BUCKET)
-        .upload(path, file, { contentType: file.type, upsert: false, cacheControl: '3600' });
-      if (uploadError) throw uploadError;
-
-      const { error } = await supabase
-        .from('product_images')
-        .insert({ organization_id: orgId, product_id: productId, storage_path: path });
-      if (error) {
-        // Don't leave an orphan file behind when the row is refused (limit, permission…).
-        await supabase.storage.from(PRODUCT_IMAGES_BUCKET).remove([path]);
-        throw error;
-      }
-    },
+    mutationFn: (file: File) => uploadProductImageFile(orgId, productId, file),
     onSettled: invalidate,
   });
+}
+
+/** Signed URLs (1h) for storage paths the caller may read, in the same order. */
+export async function signImagePaths(paths: string[]): Promise<(string | null)[]> {
+  if (paths.length === 0) return [];
+  const { data, error } = await getSupabase()
+    .storage.from(PRODUCT_IMAGES_BUCKET)
+    .createSignedUrls(paths, 3600);
+  if (error) throw error;
+  const byPath = new Map(data.map((s) => [s.path, s.signedUrl]));
+  return paths.map((p) => byPath.get(p) ?? null);
 }
 
 export function useDeleteProductImage(orgId: string, productId: string) {

@@ -1,4 +1,4 @@
-import { Link, useNavigate, useParams } from 'react-router';
+import { Link, useLocation, useNavigate, useParams } from 'react-router';
 import { useForm, useWatch, type Control } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft } from 'lucide-react';
@@ -11,6 +11,7 @@ import { Select } from '@/components/ui/Select';
 import { TextField } from '@/components/ui/TextField';
 import { useOrganization } from '@/features/organizations/organization-context';
 import { orgPermissions } from '@/features/organizations/roles';
+import { CatalogListingSection } from '@/features/supplier/components/CatalogListingSection';
 import { formatBRL, parseBRL } from '@/utils/money';
 import {
   useCreateProduct,
@@ -238,15 +239,42 @@ export function NewProductPage() {
   );
 }
 
+/** Set by the catalog import (router state) to confirm what happened. */
+interface ImportedState {
+  imported?: boolean;
+  imagesFailed?: number;
+}
+
 export function EditProductPage() {
   const { productId = '' } = useParams();
   const { active } = useOrganization();
   const orgId = active!.organization.id;
   const product = useProduct(orgId, productId);
+  const imported = (useLocation().state ?? {}) as ImportedState;
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <PageHeader title={product.data?.name ?? 'Produto'} />
+      {imported.imported && (
+        <Alert tone={imported.imagesFailed ? 'error' : 'success'}>
+          Produto importado como rascunho. Revise preço e dados e ative quando estiver pronto.
+          {imported.imagesFailed
+            ? ` ${imported.imagesFailed} imagem(ns) não puderam ser copiadas; envie-as manualmente.`
+            : ''}
+        </Alert>
+      )}
+      {product.data?.source_listing_id && (
+        <p className="text-muted text-sm">
+          Importado do{' '}
+          <Link
+            to={`/catalogo/${product.data.source_listing_id}`}
+            className="text-brand hover:underline"
+          >
+            catálogo de fornecedores
+          </Link>
+          .
+        </p>
+      )}
       {product.isPending ? (
         <PageLoader />
       ) : product.isError ? (
@@ -265,6 +293,12 @@ export function EditProductPage() {
             product={product.data}
             canEdit={orgPermissions.editCatalog(active!.role)}
           />
+          {active!.organization.kind === 'supplier' && (
+            <CatalogListingSection
+              product={product.data}
+              canEdit={orgPermissions.editCatalog(active!.role)}
+            />
+          )}
         </div>
       )}
     </div>

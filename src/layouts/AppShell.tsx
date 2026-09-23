@@ -7,6 +7,7 @@ import {
   House,
   LogOut,
   Package,
+  Store,
   UserRound,
   type LucideIcon,
 } from 'lucide-react';
@@ -17,6 +18,8 @@ import { useAuth } from '@/features/auth/auth-context';
 import { useProfile } from '@/features/auth/profile';
 import { roleLabels } from '@/features/auth/roles';
 import { OrganizationSwitcher } from '@/features/organizations/components/OrganizationSwitcher';
+import { useOrganization } from '@/features/organizations/organization-context';
+import type { OrgKind } from '@/features/organizations/roles';
 import { cn } from '@/utils/cn';
 
 interface NavItem {
@@ -24,12 +27,15 @@ interface NavItem {
   label: string;
   icon: LucideIcon;
   requiresAuth: boolean;
+  /** Only shown when the active organization is of this kind. */
+  orgKind?: OrgKind;
 }
 
 const navItems: NavItem[] = [
   { to: '/', label: 'Início', icon: House, requiresAuth: true },
   { to: '/produtos', label: 'Produtos', icon: Package, requiresAuth: true },
   { to: '/estoque', label: 'Estoque', icon: Boxes, requiresAuth: true },
+  { to: '/catalogo', label: 'Catálogo', icon: Store, requiresAuth: true, orgKind: 'seller' },
   { to: '/organizacao', label: 'Organização', icon: Building2, requiresAuth: true },
   { to: '/conta', label: 'Minha conta', icon: UserRound, requiresAuth: true },
   { to: '/status', label: 'Status do sistema', icon: Activity, requiresAuth: false },
@@ -74,7 +80,12 @@ function UserMenu() {
 export function AppShell() {
   const { status } = useAuth();
   const authenticated = status === 'authenticated';
-  const items = navItems.filter((item) => authenticated || !item.requiresAuth);
+  const { active } = useOrganization();
+  const items = navItems.filter(
+    (item) =>
+      (authenticated || !item.requiresAuth) &&
+      (!item.orgKind || item.orgKind === active?.organization.kind),
+  );
 
   const nav = items.map(({ to, label, icon: Icon }) => (
     <NavLink key={to} to={to} end={to === '/'} className={linkClass}>

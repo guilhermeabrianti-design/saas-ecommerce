@@ -78,6 +78,14 @@ Documento vivo — cada fase acrescenta os controles que implementa. Status atua
   por `request_id` (proteção contra clique duplo e retry de rede).
 - View de saldos com `security_invoker` (sem bypass de RLS).
 
+## Implementado (Fase 7)
+
+- Primeiro compartilhamento entre tenants (catálogo de fornecedores) feito **somente por RPCs** com
+  lista explícita de colunas; vendedores nunca leem linhas de `products` do fornecedor.
+- Catálogo visível apenas para membros de organizações vendedoras; fornecedores não veem
+  concorrentes.
+- Vínculo de origem de produtos importados não é gravável pelo cliente.
+
 ### Configuração obrigatória no projeto Supabase cloud
 
 `supabase/config.toml` vale só para o ambiente local. Em staging/produção, replique no painel

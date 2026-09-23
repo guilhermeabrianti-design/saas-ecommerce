@@ -1,5 +1,52 @@
 # Changelog
 
+## [0.7.0] — Fase 7: Catálogo de fornecedores
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20260922170000_supplier_catalog.sql`) — primeiro dado que cruza
+  tenants:
+  - `catalog_listings`: fornecedor publica produto com preço de atacado e preço sugerido. Só
+    organizações `supplier` publicam; só produtos **ativos** e **publicados** ficam visíveis.
+  - RPCs `search_catalog` e `get_catalog_listing`: vendedores consultam apenas **colunas seguras**
+    (nome, descrição, marca, GTIN, medidas, preços de catálogo, disponibilidade agregada, variações
+    ativas e imagens). Nunca custo, criador, ids internos do fornecedor ou linhas de `products`.
+  - Só membros de organizações `seller` consultam: fornecedores não veem o catálogo uns dos outros
+    (conta de fornecedor não entra em organização vendedora — regra da Fase 3).
+  - RPC `import_catalog_listing`: cria produto **rascunho** no vendedor (preço = sugerido ou
+    atacado; custo = atacado) com variações ativas, SKU com prefixo opcional e vínculo à origem
+    (`products.source_listing_id`, `product_variants.source_variant_id`) — base para rotear pedidos.
+    Uma importação por anúncio por organização.
+  - Storage: vendedores leem imagens de anúncios visíveis (para exibir e copiar ao importar).
+- **Telas**:
+  - Fornecedor: seção **Catálogo para vendedores** na página do produto (preços, publicar).
+  - Vendedor: **Catálogo** (busca por produto/marca/fornecedor, grade com capa, atacado e
+    disponibilidade) e página do anúncio com importação; imagens copiadas para a pasta do vendedor.
+  - Guarda `RequireOrgKind` e item de menu exclusivo para organizações vendedoras.
+- Código organizado em `src/features/supplier` e `src/features/seller` (seção 4 da especificação).
+- **Testes**: 17 de banco (visibilidade, vazamento de dados, importação, storage) e 7 de frontend.
+
+### Revisão de segurança (fechamento da fase)
+
+- **Corrigido — existência de anúncio vazava entre fornecedores**: com `unique (product_id)`, o
+  índice único era verificado antes da FK composta, revelando a outro fornecedor se um produto já
+  tinha anúncio. Agora `unique (organization_id, product_id)`: a FK recusa primeiro.
+- Teste garante que o JSON do detalhe não contém custo, criador, id do produto/organização do
+  fornecedor.
+- Colunas de origem (`source_*`) não têm grant de escrita: vendedor não forja vínculo com anúncio.
+- Importação checa papel e tipo da organização, visibilidade do anúncio e tamanho final do SKU
+  antes de escrever; colisão de SKU vira erro claro sugerindo prefixo.
+- `npm run check` verde: typecheck, lint, format, 238 testes, build.
+
+### Limitações conhecidas
+
+- A disponibilidade do fornecedor é exibida no momento da consulta; não há reserva de estoque do
+  fornecedor na importação (virá com pedidos).
+- Alterações posteriores do fornecedor (preço, descrição) não são sincronizadas com produtos já
+  importados.
+- A cópia de imagens roda no navegador do vendedor; falhas são informadas e podem ser refeitas
+  manualmente.
+
 ## [0.6.0] — Fase 6: Estoque
 
 ### Adicionado

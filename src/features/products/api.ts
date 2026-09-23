@@ -20,6 +20,7 @@ const productSchema = z.object({
   width_mm: z.number().int().nullable(),
   height_mm: z.number().int().nullable(),
   status: z.enum(productStatuses),
+  source_listing_id: z.uuid().nullable(),
   updated_at: z.string(),
 });
 
@@ -93,7 +94,7 @@ export function useProduct(orgId: string, id: string) {
       const { data, error } = await getSupabase()
         .from('products')
         .select(
-          'id, organization_id, sku, name, description, brand, gtin, price_cents, cost_cents, weight_grams, length_mm, width_mm, height_mm, status, updated_at',
+          'id, organization_id, sku, name, description, brand, gtin, price_cents, cost_cents, weight_grams, length_mm, width_mm, height_mm, status, source_listing_id, updated_at',
         )
         .eq('organization_id', orgId)
         .eq('id', id)
