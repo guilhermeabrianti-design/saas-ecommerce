@@ -13,7 +13,7 @@ import {
   type OutlineLesson,
 } from '../academy';
 import { useClaimCertificate, useCourseOutline, useRequestUnlock } from '../api';
-import { ProgressBar } from '../components/ProgressBar';
+import { ProgressBar } from '@/components/ui/ProgressBar';
 
 function LessonRow({ courseId, lesson }: { courseId: string; lesson: OutlineLesson }) {
   const request = useRequestUnlock(courseId);

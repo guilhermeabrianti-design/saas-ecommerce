@@ -30,17 +30,19 @@ Perfil 1:1 com `auth.users`, criado pelo trigger `on_auth_user_created`.
 | Coluna       | Tipo              | Observação                                            |
 | ------------ | ----------------- | ----------------------------------------------------- |
 | `id`         | `uuid` PK/FK      | `auth.users.id`, `on delete cascade`                  |
-| `full_name`  | `text`            | 2–120 caracteres; único campo editável pelo usuário   |
+| `full_name`  | `text`            | 2–120 caracteres; editável pelo usuário               |
 | `role`       | `public.app_role` | `seller` \| `supplier` \| `admin`; `admin` só via SQL |
+| `phone`      | `text`            | Fase 18: só dígitos, DDD + fixo/celular; editável     |
+| `document`   | `text`            | Fase 18: CPF/CNPJ com dígitos verificadores; editável |
 | `created_at` | `timestamptz`     |                                                       |
 | `updated_at` | `timestamptz`     | atualizado por trigger                                |
 
-| Operação | `anon` | `authenticated`                     |
-| -------- | ------ | ----------------------------------- |
-| SELECT   | —      | só o próprio perfil                 |
-| UPDATE   | —      | só o próprio perfil, só `full_name` |
-| INSERT   | —      | — (apenas o trigger)                |
-| DELETE   | —      | — (cascata ao excluir o usuário)    |
+| Operação | `anon` | `authenticated`                                        |
+| -------- | ------ | ------------------------------------------------------ |
+| SELECT   | —      | só o próprio perfil                                    |
+| UPDATE   | —      | só o próprio perfil, só `full_name`/`phone`/`document` |
+| INSERT   | —      | — (apenas o trigger)                                   |
+| DELETE   | —      | — (cascata ao excluir o usuário)                       |
 
 Promover alguém a admin (SQL editor, com service role):
 
@@ -324,6 +326,21 @@ receita da TheSigns**. Nenhuma taxa fica no código; o cálculo é feito só no 
   `admin_issue_certificate`, `admin_answer_question`, `admin_move_academy_item`.
 - Regras em `private.academy_unlocked` e `private.academy_summary` (curso concluído = todas as
   obrigatórias). Bucket privado `academy`: leitura via `private.academy_file_readable`.
+
+### Painel do vendedor (Fase 18)
+
+- `profiles.phone`/`document` validados por `private.is_valid_phone` e `private.is_valid_document`
+  (check constraints; `authenticated` executa os dois). O trigger de cadastro lê `phone`/`document`
+  dos metadados e descarta valor inválido sem impedir a conta.
+- `seller_onboarding(org)`: passos calculados (perfil de quem chama completo, produto cadastrado,
+  produto ativo, conexão ativa, pedido não cancelado e, se houver curso liberado, uma aula
+  concluída). Qualquer membro de vendedor.
+- `seller_dashboard(org, dias)`: vendido, lucro bruto, recebido no período e, sem período, a receber
+  dos clientes e a pagar aos fornecedores. Owner/admin.
+- `analytics_series(org, dias, 'day'|'week'|'month')` (vendedor e fornecedor) e
+  `analytics_channels(org, dias)` (vendedor: `manual` ou provedor da conexão). Owner/admin.
+- `seller_suggestions(org, limite)`: anúncios visíveis, com estoque e preço sugerido acima do
+  atacado, ainda não importados, pela margem sugerida. Qualquer membro de vendedor.
 
 ### RPCs (Fase 3)
 

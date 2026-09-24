@@ -61,7 +61,7 @@ import {
   type AdminMaterial,
   type AdminModule,
 } from '../api';
-import { ProgressBar } from '../components/ProgressBar';
+import { ProgressBar } from '@/components/ui/ProgressBar';
 
 const textareaClass =
   'border-border bg-surface focus:border-brand focus:ring-brand/30 w-full rounded-lg border px-3 py-2 text-sm outline-none focus:ring-2';

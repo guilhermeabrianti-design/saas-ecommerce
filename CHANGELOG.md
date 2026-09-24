@@ -1,5 +1,41 @@
 # Changelog
 
+## [0.18.0] — Fase 18: Onboarding e painel do vendedor
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20260925120000_seller_dashboard.sql`):
+  - Perfil com **telefone** e **CPF/CNPJ** (só dígitos, com dígitos verificadores checados no
+    banco). O cadastro envia os dois; valor inválido é descartado sem impedir a criação da conta.
+  - `seller_onboarding`: checklist **calculado de dados reais** — cadastro completo, produto
+    cadastrado, produto ativo, canal conectado, primeira venda e (quando há curso liberado) uma aula
+    da Academia concluída.
+  - `seller_dashboard`: quanto vendi, lucro bruto e recebido no período; a receber dos clientes e a
+    pagar aos fornecedores (situação atual). Só owner/admin.
+  - `analytics_series` (dia, semana ou mês; vendedor e fornecedor) e `analytics_channels` (pedido
+    manual ou canal conectado).
+  - `seller_suggestions` ("o que vender"): anúncios aprovados, com estoque e preço sugerido acima
+    do atacado, ainda não importados, pela margem sugerida pelo fornecedor.
+- **Telas**:
+  - Cadastro pede telefone e CPF/CNPJ; **Minha conta** permite completar/editar.
+  - **Início do vendedor** vira painel: primeiros passos com o próximo passo em destaque (some
+    quando tudo está feito), cartões de valores com período, gráfico por dia/semana/mês, vendas por
+    canal e "o que vender". Membros veem os passos e as sugestões, sem valores.
+  - `ProgressBar` passou para `components/ui` (compartilhado com a Academia).
+- **Testes**: 16 de banco e 11 de frontend.
+
+### Limitações conhecidas
+
+- "Quanto ganhei" é o **lucro bruto** (produtos − custo): taxas de marketplace não são descontadas,
+  porque o pedido ainda não guarda tipo de anúncio nem divisão congelada (chega com o checkout, Fase
+  21).
+- "O que vender" usa a margem sugerida pelo fornecedor; "em alta" (vendas na plataforma) fica para a
+  Central de Vendas (Fase 19).
+- CPF/CNPJ não é único entre contas e pode ser trocado pelo usuário; travar/verificar o documento
+  fica para os saques (Fase 22).
+- Contas antigas não têm telefone/documento até completarem em Minha conta (o checklist avisa).
+- O fornecedor ainda não tem checklist próprio; a série por semana/mês já funciona para ele no banco.
+
 ## [0.17.0] — Fase 17: Academia
 
 ### Adicionado

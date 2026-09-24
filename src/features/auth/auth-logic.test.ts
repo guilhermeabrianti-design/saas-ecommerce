@@ -9,6 +9,8 @@ describe('signUpSchema', () => {
   const valid = {
     fullName: 'Ana Souza',
     email: 'ana@example.com',
+    phone: '(11) 91234-5678',
+    document: '529.982.247-25',
     password: 'Senha12345',
     confirmPassword: 'Senha12345',
     accountType: 'seller',

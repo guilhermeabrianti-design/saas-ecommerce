@@ -28,7 +28,7 @@ import {
   useSaveProgress,
   useSetCompleted,
 } from '../api';
-import { ProgressBar } from '../components/ProgressBar';
+import { ProgressBar } from '@/components/ui/ProgressBar';
 import { YouTubePlayer } from '../components/YouTubePlayer';
 
 function Questions({ lessonId }: { lessonId: string }) {

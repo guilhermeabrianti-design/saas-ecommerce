@@ -10,7 +10,7 @@ import {
   parseYouTubeId,
 } from './academy';
 import { storageFileName, validateAcademyFile } from './api';
-import { ProgressBar } from './components/ProgressBar';
+import { ProgressBar } from '@/components/ui/ProgressBar';
 
 describe('vídeo do YouTube', () => {
   it('extrai o id dos formatos de link comuns', () => {

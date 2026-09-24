@@ -9,12 +9,15 @@ import { Section } from '@/components/ui/Section';
 import { TextField } from '@/components/ui/TextField';
 import { useAuth } from '../auth-context';
 import { ChangePasswordForm } from '../components/ChangePasswordForm';
-import { useProfile, useUpdateFullName, type Profile } from '../profile';
+import { formatDocument, formatPhone, onlyDigits } from '@/utils/br';
+import { useProfile, useUpdateProfile, type Profile } from '../profile';
 import { roleLabels } from '../roles';
 import { profileFormSchema, type ProfileFormValues } from '../schemas';
 
+const blankIfNull = (v: string | null, format: (s: string) => string) => (v ? format(v) : '');
+
 function ProfileForm({ profile, email }: { profile: Profile; email: string }) {
-  const update = useUpdateFullName();
+  const update = useUpdateProfile();
   const {
     register,
     handleSubmit,
@@ -22,17 +25,36 @@ function ProfileForm({ profile, email }: { profile: Profile; email: string }) {
     reset,
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
-    defaultValues: { fullName: profile.full_name },
+    defaultValues: {
+      fullName: profile.full_name,
+      phone: blankIfNull(profile.phone, formatPhone),
+      document: blankIfNull(profile.document, formatDocument),
+    },
   });
 
-  const onSubmit = handleSubmit(({ fullName }) => {
-    update.mutate(fullName, { onSuccess: () => reset({ fullName }) });
+  const onSubmit = handleSubmit((values) => {
+    const phone = onlyDigits(values.phone) || null;
+    const document = onlyDigits(values.document) || null;
+    update.mutate(
+      { full_name: values.fullName, phone, document },
+      {
+        onSuccess: () =>
+          reset({
+            fullName: values.fullName,
+            phone: blankIfNull(phone, formatPhone),
+            document: blankIfNull(document, formatDocument),
+          }),
+      },
+    );
   });
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4">
       {update.isError && <Alert tone="error">Não foi possível salvar. Tente novamente.</Alert>}
       {update.isSuccess && !isDirty && <Alert tone="success">Perfil atualizado.</Alert>}
+      {(!profile.phone || !profile.document) && !isDirty && (
+        <Alert tone="info">Complete seu cadastro com telefone e CPF ou CNPJ.</Alert>
+      )}
       <TextField
         label="Nome completo"
         autoComplete="name"
@@ -40,6 +62,23 @@ function ProfileForm({ profile, email }: { profile: Profile; email: string }) {
         {...register('fullName')}
       />
       <TextField label="E-mail" value={email} disabled readOnly />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <TextField
+          label="Telefone"
+          type="tel"
+          autoComplete="tel-national"
+          inputMode="tel"
+          placeholder="(11) 91234-5678"
+          error={errors.phone?.message}
+          {...register('phone')}
+        />
+        <TextField
+          label="CPF ou CNPJ"
+          inputMode="numeric"
+          error={errors.document?.message}
+          {...register('document')}
+        />
+      </div>
       <dl className="grid gap-4 text-sm sm:grid-cols-2">
         <div>
           <dt className="text-muted">Tipo de conta</dt>

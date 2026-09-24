@@ -67,3 +67,24 @@ export function formatCep(value: string) {
   const d = onlyDigits(value);
   return d.length === 8 ? `${d.slice(0, 5)}-${d.slice(5)}` : value;
 }
+
+/** DDD sem zero + fixo (8 dígitos, 2–8) ou celular (9 + 8 dígitos). Espelha `private.is_valid_phone`. */
+export function isValidPhone(value: string): boolean {
+  return /^[1-9]{2}(9\d{8}|[2-8]\d{7})$/.test(onlyDigits(value));
+}
+
+export function formatPhone(value: string) {
+  const d = onlyDigits(value);
+  if (d.length === 11) return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+  if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return value;
+}
+
+export function formatDocument(value: string) {
+  const d = onlyDigits(value);
+  if (d.length === 11) return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}`;
+  if (d.length === 14) {
+    return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8, 12)}-${d.slice(12)}`;
+  }
+  return value;
+}

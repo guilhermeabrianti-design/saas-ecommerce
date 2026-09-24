@@ -4,7 +4,7 @@ import { Alert } from '@/components/ui/Alert';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { academyErrorMessage, formatDuration, levelLabels } from '../academy';
 import { useAcademyCatalog } from '../api';
-import { ProgressBar } from '../components/ProgressBar';
+import { ProgressBar } from '@/components/ui/ProgressBar';
 
 export function AcademyPage() {
   const catalog = useAcademyCatalog();

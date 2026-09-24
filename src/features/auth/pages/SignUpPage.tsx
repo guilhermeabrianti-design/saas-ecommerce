@@ -7,6 +7,7 @@ import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
 import { getSupabase } from '@/lib/supabase';
+import { onlyDigits } from '@/utils/br';
 import { cn } from '@/utils/cn';
 import { AuthHeading } from '../components/AuthHeading';
 import { PasswordRules } from '../components/PasswordRules';
@@ -34,6 +35,8 @@ export function SignUpPage() {
     defaultValues: {
       fullName: '',
       email: '',
+      phone: '',
+      document: '',
       password: '',
       confirmPassword: '',
       accountType: 'seller',
@@ -49,7 +52,13 @@ export function SignUpPage() {
       password: values.password,
       options: {
         // Read by the `handle_new_user` trigger, which only accepts seller|supplier.
-        data: { full_name: values.fullName, account_type: values.accountType },
+        // phone/document are re-validated there; an invalid value is dropped, never trusted.
+        data: {
+          full_name: values.fullName,
+          account_type: values.accountType,
+          phone: onlyDigits(values.phone),
+          document: onlyDigits(values.document),
+        },
         emailRedirectTo: authRedirectUrl('/entrar'),
       },
     });
@@ -124,6 +133,23 @@ export function SignUpPage() {
           error={errors.email?.message}
           {...register('email')}
         />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <TextField
+            label="Telefone"
+            type="tel"
+            autoComplete="tel-national"
+            inputMode="tel"
+            placeholder="(11) 91234-5678"
+            error={errors.phone?.message}
+            {...register('phone')}
+          />
+          <TextField
+            label="CPF ou CNPJ"
+            inputMode="numeric"
+            error={errors.document?.message}
+            {...register('document')}
+          />
+        </div>
         <TextField
           label="Senha"
           type="password"

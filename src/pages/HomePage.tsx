@@ -12,11 +12,14 @@ import {
 } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
 import { PageLoader } from '@/components/ui/PageLoader';
+import { OnboardingChecklist } from '@/features/dashboard/components/OnboardingChecklist';
+import { SellerDashboard } from '@/features/dashboard/components/SellerDashboard';
 import { useProfile } from '@/features/auth/profile';
 import { roleLabels } from '@/features/auth/roles';
 import { PendingInvitations } from '@/features/organizations/components/PendingInvitations';
 import { useOrganization } from '@/features/organizations/organization-context';
 import { orgRoleLabels } from '@/features/organizations/roles';
+import { cn } from '@/utils/cn';
 
 export function HomePage() {
   const profile = useProfile();
@@ -32,6 +35,7 @@ export function HomePage() {
   // Customers always work inside an organization; send them to create or join one.
   if (!active && !isStaff) return <Navigate to="/organizacao/nova" replace />;
 
+  const isSeller = active?.organization.kind === 'seller';
   const firstName = profile.data.full_name.split(' ')[0];
   const shortcuts = [
     ...(active
@@ -89,18 +93,27 @@ export function HomePage() {
   ];
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
+    <div className={cn('mx-auto space-y-8', isSeller ? 'max-w-4xl' : 'max-w-3xl')}>
       <div>
         <p className="text-brand font-mono text-xs font-medium tracking-widest uppercase">
           {roleLabels[profile.data.role]}
         </p>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight">Olá, {firstName}</h1>
         <p className="text-muted mt-1 text-sm">
-          Integrações com marketplaces serão habilitadas aqui conforme cada módulo for liberado.
+          {isSeller
+            ? 'Acompanhe suas vendas e o que falta para começar a vender.'
+            : 'Atalhos para o dia a dia.'}
         </p>
       </div>
 
       {!isStaff && <PendingInvitations />}
+
+      {isSeller && (
+        <>
+          <OnboardingChecklist orgId={active.organization.id} />
+          <SellerDashboard orgId={active.organization.id} role={active.role} />
+        </>
+      )}
 
       <ul className="grid gap-3 sm:grid-cols-2">
         {shortcuts.map(({ to, label, detail, icon: Icon }) => (
