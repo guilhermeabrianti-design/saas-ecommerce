@@ -1,6 +1,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { useAuth } from '@/features/auth/auth-context';
+import { feesAuditLabels } from '@/features/fees/fees';
 import { orgErrorMessage } from '@/features/organizations/errors';
 import { orgKinds } from '@/features/organizations/roles';
 import { getSupabase } from '@/lib/supabase';
@@ -147,6 +148,7 @@ export function useMySuspendedOrganizations() {
 export const auditActionLabels: Record<string, string> = {
   'organization.suspended': 'Organização suspensa',
   'organization.reactivated': 'Organização reativada',
+  ...feesAuditLabels,
 };
 
 const messages: Partial<Record<string, string>> = {

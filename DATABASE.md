@@ -276,6 +276,29 @@ $);
 
 Implantar `stock-sync` com `--no-verify-jwt` (a autenticação é o segredo do cabeçalho).
 
+### Taxas, comissões e categorias (Fase 15)
+
+Divisão da venda: **venda − taxa do marketplace − valor do fornecedor − comissão do vendedor =
+receita da TheSigns**. Nenhuma taxa fica no código; o cálculo é feito só no banco
+(`private.compute_split`), e o frontend apenas exibe.
+
+- `categories`: dois níveis (categoria/subcategoria), mantidas pela equipe; todo usuário autenticado
+  lê. `catalog_listings.category_id` (fornecedor escolhe; categoria desativada não é atribuída).
+- `marketplace_fee_rules`: por marketplace, tipo de anúncio (`classico`, `premium`, `padrao`,
+  `live`...), categoria (ou categoria-mãe), faixa de preço unitário `[mín, máx)` e campanha.
+  Taxa = `percentual × venda + fixo × quantidade`. Regra com `campaign` **soma** à regra base.
+  Mais específica vence: subcategoria > categoria-mãe > geral. Faixas ativas sobrepostas são
+  recusadas. Legível por todos; escrita só por RPC da equipe.
+- `commission_rules`: comissão do vendedor em pontos-base sobre o preço de venda. Precedência:
+  produto (anúncio) > vendedor > subcategoria > categoria-mãe > padrão (15% inicial, não removível).
+  **Sem acesso direto** (acordos por vendedor são privados).
+- RPCs: `estimate_sale_split` (membros da organização vendedora, anúncio visível; custo = atacado do
+  anúncio) e, para a equipe, `admin_simulate_split`, `admin_save_fee_rule`,
+  `admin_set_fee_rule_active`, `admin_list_commission_rules`, `admin_save_commission_rule`,
+  `admin_delete_commission_rule`, `admin_save_category`, `admin_set_category_active`,
+  `admin_search_listings`. Toda alteração grava `admin_audit_log` com resumo legível.
+- Erros estáveis `fees.*`, traduzidos em `src/features/fees/fees.ts`.
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,

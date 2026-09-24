@@ -39,6 +39,7 @@ const detailSchema = z.object({
   height_mm: z.number().int().nullable(),
   wholesale_price_cents: z.number().int(),
   suggested_price_cents: z.number().int().nullable(),
+  category_name: z.string().nullable().optional(),
   available: z.number().int(),
   variants: z.array(
     z.object({

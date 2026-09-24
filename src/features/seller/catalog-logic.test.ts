@@ -31,11 +31,17 @@ describe('formulário de anúncio (fornecedor)', () => {
     expect(
       listingFormSchema.safeParse({ wholesale: '', suggested: '', isPublished: true }).success,
     ).toBe(false);
-    const parsed = listingFormSchema.parse({ wholesale: '30', suggested: '', isPublished: true });
+    const parsed = listingFormSchema.parse({
+      wholesale: '30',
+      suggested: '',
+      isPublished: true,
+      categoryId: '',
+    });
     expect(toListingPayload(parsed)).toEqual({
       wholesale_price_cents: 3000,
       suggested_price_cents: null,
       is_published: true,
+      category_id: null,
     });
   });
 
@@ -45,12 +51,24 @@ describe('formulário de anúncio (fornecedor)', () => {
       wholesale_price_cents: 3000,
       suggested_price_cents: 7990,
       is_published: false,
+      category_id: '99999999-2222-4333-8444-555555555555',
     });
-    expect(values).toEqual({ wholesale: '30,00', suggested: '79,90', isPublished: false });
+    expect(values).toEqual({
+      wholesale: '30,00',
+      suggested: '79,90',
+      isPublished: false,
+      categoryId: '99999999-2222-4333-8444-555555555555',
+    });
     expect(toListingPayload(listingFormSchema.parse(values))).toMatchObject({
       wholesale_price_cents: 3000,
       suggested_price_cents: 7990,
+      category_id: '99999999-2222-4333-8444-555555555555',
     });
-    expect(toListingFormValues(null)).toEqual({ wholesale: '', suggested: '', isPublished: false });
+    expect(toListingFormValues(null)).toEqual({
+      wholesale: '',
+      suggested: '',
+      isPublished: false,
+      categoryId: '',
+    });
   });
 });

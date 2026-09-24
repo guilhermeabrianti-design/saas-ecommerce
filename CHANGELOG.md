@@ -1,5 +1,42 @@
 # Changelog
 
+## [0.15.0] — Fase 15: Taxas de marketplace, comissão do vendedor e divisão da venda
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20260923180000_fees_commissions.sql`):
+  - `marketplace_fee_rules`: taxa por marketplace, tipo de anúncio, categoria (ou categoria-mãe),
+    faixa de preço unitário e campanha (campanha soma à base); percentual + custo fixo por item.
+    Nenhuma taxa no código. Faixas ativas sobrepostas são recusadas.
+  - `commission_rules`: comissão do vendedor (padrão **15%**) com exceções por produto, vendedor,
+    subcategoria e categoria-mãe, nessa ordem de precedência. Sem acesso direto pela API.
+  - `categories` (dois níveis) e categoria no anúncio do fornecedor.
+  - `private.compute_split`: venda − taxa do marketplace − fornecedor − comissão do vendedor =
+    receita da TheSigns (+ margem). Usado por `estimate_sale_split` (vendedor, anúncio visível) e
+    `admin_simulate_split` (equipe).
+  - RPCs da equipe para taxas, comissões e categorias; **toda alteração vai para a auditoria** com
+    resumo legível ("Comissão padrão: 15.00% → 20.00%").
+  - Taxas iniciais informadas pelo dono do produto: TikTok Shop (abaixo de R$ 50: 10% + R$ 4/item;
+    a partir de R$ 50: 6% + R$ 6/item), Shopee Live 3%, Mercado Livre Clássico 14% e Premium 19%.
+- **Telas**:
+  - Equipe: **Taxas e comissões** (simulador, comissão padrão com atalhos 10/15/20/25% ou valor livre,
+    exceções, regras de taxa por marketplace com faixas e campanhas, categorias).
+  - Vendedor: **Calculadora de venda** no produto do catálogo (preço de venda, taxas, fornecedor,
+    comissão, receita da TheSigns, lucro do vendedor, margem; aviso de prejuízo).
+  - Fornecedor: escolha de categoria no anúncio do catálogo.
+- **Testes**: 19 de banco (exemplo R$ 100 → R$ 29, faixas do TikTok, campanha da Shopee,
+  precedência de comissões, sobreposição, auditoria, acesso) e 10 de frontend.
+
+### Limitações conhecidas
+
+- **Mercado Livre**: sem taxa por categoria e sem custos fixos por faixa de preço cadastrados. Os
+  valores iniciais são o teto das faixas informadas (14%/19%), para não superestimar a receita.
+- **Shopee fora de live** não tem taxa cadastrada: a calculadora mostra "Taxa não configurada".
+- A divisão é **estimativa**: ainda não é congelada no pedido nem lançada no ledger (vem com o
+  checkout Mercado Pago). Frete, impostos e taxa do meio de pagamento não entram no cálculo.
+- Comissão por campanha espera a tabela de campanhas (Central de Vendas).
+- O vendedor vê a receita estimada da TheSigns na calculadora, como foi pedido.
+
 ## [0.14.0] — Fase 14: Credenciais criptografadas e envio de estoque
 
 ### Adicionado

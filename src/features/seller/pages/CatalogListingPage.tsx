@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { Section } from '@/components/ui/Section';
 import { TextField } from '@/components/ui/TextField';
+import { SellerSplitSection } from '@/features/fees/components/SellerSplitSection';
 import { useOrganization } from '@/features/organizations/organization-context';
 import { orgPermissions } from '@/features/organizations/roles';
 import { describeAttributes } from '@/features/products/variants';
@@ -150,6 +151,12 @@ export function CatalogListingPage() {
                   <dt className="text-muted">SKU do fornecedor</dt>
                   <dd className="font-mono text-xs">{d.sku}</dd>
                 </div>
+                {d.category_name && (
+                  <div>
+                    <dt className="text-muted">Categoria</dt>
+                    <dd>{d.category_name}</dd>
+                  </div>
+                )}
                 {d.gtin && (
                   <div>
                     <dt className="text-muted">GTIN</dt>
@@ -168,6 +175,11 @@ export function CatalogListingPage() {
               </Section>
             </div>
           </div>
+
+          <SellerSplitSection
+            listingId={d.listing_id}
+            suggestedPriceCents={d.suggested_price_cents}
+          />
 
           {d.description && (
             <Section title="Descrição" description="Texto do fornecedor.">

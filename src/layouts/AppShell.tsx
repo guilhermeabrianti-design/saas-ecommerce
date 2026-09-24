@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet } from 'react-router';
 import {
   Activity,
   ChartColumn,
+  Percent,
   ShieldCheck,
   Boxes,
   Building2,
@@ -46,6 +47,13 @@ interface NavItem {
 const navItems: NavItem[] = [
   { to: '/', label: 'Início', icon: House, requiresAuth: true },
   { to: '/admin', label: 'Administração', icon: ShieldCheck, requiresAuth: true, staffOnly: true },
+  {
+    to: '/admin/taxas',
+    label: 'Taxas e comissões',
+    icon: Percent,
+    requiresAuth: true,
+    staffOnly: true,
+  },
   { to: '/produtos', label: 'Produtos', icon: Package, requiresAuth: true, tenantOnly: true },
   { to: '/estoque', label: 'Estoque', icon: Boxes, requiresAuth: true, tenantOnly: true },
   {
@@ -145,7 +153,7 @@ export function AppShell() {
   );
 
   const nav = items.map(({ to, label, icon: Icon }) => (
-    <NavLink key={to} to={to} end={to === '/'} className={linkClass}>
+    <NavLink key={to} to={to} end={to === '/' || to === '/admin'} className={linkClass}>
       <Icon className="size-4" aria-hidden />
       {label}
     </NavLink>

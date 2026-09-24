@@ -8,6 +8,7 @@ const listingSchema = z.object({
   wholesale_price_cents: z.number().int(),
   suggested_price_cents: z.number().int().nullable(),
   is_published: z.boolean(),
+  category_id: z.uuid().nullable(),
 });
 
 export type CatalogListing = z.infer<typeof listingSchema>;
@@ -22,7 +23,7 @@ export function useOwnCatalogListing(orgId: string, productId: string) {
     queryFn: async () => {
       const { data, error } = await getSupabase()
         .from('catalog_listings')
-        .select('id, wholesale_price_cents, suggested_price_cents, is_published')
+        .select('id, wholesale_price_cents, suggested_price_cents, is_published, category_id')
         .eq('organization_id', orgId)
         .eq('product_id', productId)
         .maybeSingle();
@@ -42,6 +43,7 @@ export const listingFormSchema = z.object({
     .trim()
     .refine((v) => v === '' || parseBRL(v) !== null, { error: 'Valor inválido, ex.: 79,90' }),
   isPublished: z.boolean(),
+  categoryId: z.string(),
 });
 
 export type ListingFormValues = z.infer<typeof listingFormSchema>;
@@ -51,6 +53,7 @@ export function toListingFormValues(l: CatalogListing | null): ListingFormValues
     wholesale: centsToInput(l?.wholesale_price_cents),
     suggested: centsToInput(l?.suggested_price_cents),
     isPublished: l?.is_published ?? false,
+    categoryId: l?.category_id ?? '',
   };
 }
 
@@ -59,6 +62,7 @@ export function toListingPayload(v: ListingFormValues) {
     wholesale_price_cents: parseBRL(v.wholesale)!,
     suggested_price_cents: v.suggested === '' ? null : parseBRL(v.suggested),
     is_published: v.isPublished,
+    category_id: v.categoryId || null,
   };
 }
 

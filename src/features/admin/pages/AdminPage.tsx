@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router';
+import { ChevronLeft, ChevronRight, Percent } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { PageLoader } from '@/components/ui/PageLoader';
@@ -268,6 +269,18 @@ export function AdminPage() {
         </p>
       </div>
       <Stats />
+      <Link
+        to="/admin/taxas"
+        className="border-border bg-surface hover:bg-surface-2 flex items-center gap-3 rounded-xl border px-4 py-3 text-sm"
+      >
+        <Percent className="text-brand size-5" aria-hidden />
+        <span>
+          <span className="block font-medium">Taxas e comissões</span>
+          <span className="text-muted">
+            Taxas dos marketplaces, comissão do vendedor, categorias e simulador da divisão.
+          </span>
+        </span>
+      </Link>
       <Section
         title="Organizações"
         description="Suspender bloqueia todo o acesso da organização até a reativação. O motivo aparece para os membros."

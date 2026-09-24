@@ -2,7 +2,7 @@
 
 SaaS multi-tenant para vendedores de e-commerce/dropshipping, fornecedores e equipe TheSigns.
 
-> **Status:** Fase 14 (credenciais e envio de estoque) concluída. Veja [CHANGELOG.md](CHANGELOG.md) para o progresso por fase.
+> **Status:** Fase 15 (taxas de marketplace e comissões) concluída. Veja [CHANGELOG.md](CHANGELOG.md) para o progresso por fase.
 
 ## Stack
 
@@ -57,5 +57,6 @@ Copie a `API URL` e a `anon key` exibidas para `VITE_SUPABASE_URL` / `VITE_SUPAB
 - [SECURITY.md](SECURITY.md) — modelo de segurança
 - [DATABASE.md](DATABASE.md) — schema, RLS e testes de banco
 - [CHANGELOG.md](CHANGELOG.md) — progresso por fase
+- [ROADMAP.md](ROADMAP.md) — próximas fases (spec ampliada)
 
 Os demais documentos (INTEGRATIONS, API, DEPLOYMENT, TESTING, TROUBLESHOOTING) são criados nas fases em que seu conteúdo passa a existir.

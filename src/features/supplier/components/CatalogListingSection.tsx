@@ -4,7 +4,10 @@ import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { Section } from '@/components/ui/Section';
+import { Select } from '@/components/ui/Select';
 import { TextField } from '@/components/ui/TextField';
+import { useCategories } from '@/features/fees/api';
+import { categoryPath, feesErrorMessage, sortCategories } from '@/features/fees/fees';
 import type { Product } from '@/features/products/api';
 import { productErrorMessage } from '@/features/products/errors';
 import { formatBRL } from '@/utils/money';
@@ -27,6 +30,11 @@ function ListingForm({
   canEdit: boolean;
 }) {
   const save = useSaveCatalogListing(product.organization_id, product.id);
+  const categories = useCategories();
+  const allCategories = categories.data ?? [];
+  const categoryOptions = sortCategories(allCategories).filter(
+    (c) => c.is_active || c.id === listing?.category_id,
+  );
   const {
     register,
     handleSubmit,
@@ -45,7 +53,13 @@ function ListingForm({
 
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-4">
-      {save.isError && <Alert tone="error">{productErrorMessage(save.error)}</Alert>}
+      {save.isError && (
+        <Alert tone="error">
+          {(save.error as { message?: string }).message?.startsWith('fees.')
+            ? feesErrorMessage(save.error)
+            : productErrorMessage(save.error)}
+        </Alert>
+      )}
       {save.isSuccess && !isDirty && <Alert tone="success">Catálogo atualizado.</Alert>}
       {listing?.is_published && product.status !== 'active' && (
         <Alert tone="info">
@@ -70,6 +84,15 @@ function ListingForm({
           {...register('suggested')}
         />
       </div>
+      <Select label="Categoria" disabled={!canEdit} {...register('categoryId')}>
+        <option value="">Sem categoria</option>
+        {categoryOptions.map((c) => (
+          <option key={c.id} value={c.id}>
+            {categoryPath(c, allCategories)}
+            {c.is_active ? '' : ' (desativada)'}
+          </option>
+        ))}
+      </Select>
       <label className="flex items-center gap-2 text-sm">
         <input
           type="checkbox"
@@ -102,16 +125,20 @@ export function CatalogListingSection({
   canEdit: boolean;
 }) {
   const listing = useOwnCatalogListing(product.organization_id, product.id);
+  // O select de categoria precisa das opções antes de o formulário registrar o valor.
+  const categories = useCategories();
 
   return (
     <Section
       title="Catálogo para vendedores"
       description="Publique este produto para que lojas vendedoras possam importá-lo."
     >
-      {listing.isPending ? (
+      {listing.isPending || categories.isPending ? (
         <PageLoader />
       ) : listing.isError ? (
         <Alert tone="error">{productErrorMessage(listing.error)}</Alert>
+      ) : categories.isError ? (
+        <Alert tone="error">{feesErrorMessage(categories.error)}</Alert>
       ) : (
         <ListingForm product={product} listing={listing.data} canEdit={canEdit} />
       )}
