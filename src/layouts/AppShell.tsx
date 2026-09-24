@@ -7,6 +7,7 @@ import {
   ShieldCheck,
   Boxes,
   Building2,
+  GraduationCap,
   House,
   ListChecks,
   LogOut,
@@ -48,11 +49,19 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { to: '/', label: 'Início', icon: House, requiresAuth: true },
+  { to: '/academia', label: 'Academia', icon: GraduationCap, requiresAuth: true, tenantOnly: true },
   { to: '/admin', label: 'Administração', icon: ShieldCheck, requiresAuth: true, staffOnly: true },
   {
     to: '/admin/moderacao',
     label: 'Moderação',
     icon: ListChecks,
+    requiresAuth: true,
+    staffOnly: true,
+  },
+  {
+    to: '/admin/academia',
+    label: 'Academia',
+    icon: GraduationCap,
     requiresAuth: true,
     staffOnly: true,
   },
@@ -162,7 +171,12 @@ export function AppShell() {
   );
 
   const nav = items.map(({ to, label, icon: Icon }) => (
-    <NavLink key={to} to={to} end={to === '/' || to === '/admin'} className={linkClass}>
+    <NavLink
+      key={to}
+      to={to}
+      end={to === '/' || to === '/admin' || to === '/academia'}
+      className={linkClass}
+    >
       <Icon className="size-4" aria-hidden />
       {label}
     </NavLink>

@@ -31,13 +31,13 @@ integração fictícia** ("Não configurado" / "Não suportado pela API atual").
 | Ferramentas com IA                                      | Reaproveita a Edge Function `ai` (cota por organização, saída revisável, nada salvo sem revisão).                                                                                                                                                                        |
 | Dados de exemplo                                        | Seed só em desenvolvimento, marcado como tal. Depoimentos/produtos da landing não podem ser inventados.                                                                                                                                                                  |
 
-## Entregue (v0.1 – v0.16)
+## Entregue (v0.1 – v0.17)
 
 1 Setup · 2 Auth/sessão/RBAC · 3 Organizações + RLS · 4 Produtos · 5 Variações/imagens · 6 Estoque
 (ledger) · 7 Catálogo de fornecedores · 8 Pedidos + roteamento ao fornecedor · 9 Financeiro (ledger)
 · 10 Integrações (núcleo, webhooks Shopify/Woo) · 11 Analytics · 12 Admin da plataforma · 13 IA
 (descrição) · 14 Credenciais criptografadas + envio de estoque · **15 Taxas de marketplace, comissão
-do vendedor, categorias e calculadora da divisão** · **16 Moderação de fornecedores e anúncios**.
+do vendedor, categorias e calculadora da divisão** · **16 Moderação de fornecedores e anúncios** · **17 Academia (YouTube)**.
 
 ## Próximas fases
 
@@ -45,7 +45,6 @@ Ordem pensada para fechar primeiro o **MVP da seção 26** e depois o ecossistem
 
 | Fase  | Entrega                                                                                                                                                                                                                                   | Seções         |
 | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
-| 17    | **Academia**: cursos, módulos, aulas com **vídeo do YouTube** (retomar de onde parou, concluir, anterior/próxima), materiais/PDF, progresso, regras de liberação, botões de ação que levam à ferramenta, admin da Academia, certificados. | 8, 29–33       |
 | 18    | **Onboarding e dashboard do vendedor**: checklist calculado de dados reais, dashboard "quanto vendi / ganhei / tenho a receber / o que vender", gráficos por dia/semana/mês/canal; cadastro com telefone e CPF/CNPJ.                      | 2, 3, 43       |
 | 19    | **Central de Vendas**: biblioteca de materiais por produto (vídeos, imagens, roteiros, títulos, hashtags, argumentos), download, favoritos, "em alta"/"maior margem" com dados reais, **campanhas para lives** (e comissão por campanha). | 7, 4, 9        |
 | 20    | **Ferramentas**: calculadora de preço-alvo (a partir da margem desejada, usando as taxas da Fase 15 + impostos, frete e antecipação), simulador de lucro, geradores com IA (título, descrição, copy, roteiro TikTok/live).                | 34, 36         |

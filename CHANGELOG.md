@@ -1,5 +1,43 @@
 # Changelog
 
+## [0.17.0] — Fase 17: Academia
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20260924130000_academy.sql`):
+  - Cursos (nível, público: todos/vendedores/fornecedores, rascunho/liberado/bloqueado, capa,
+    certificado), módulos e aulas com **vídeo do YouTube** (só o id de 11 caracteres), duração,
+    aula obrigatória/opcional e **botão de ação** que leva a uma tela do app. Materiais: arquivo
+    (PDF/imagem, bucket privado `academy`) ou link https.
+  - Regras de liberação checadas no banco: livre, após a aula anterior, após o módulo anterior ou
+    por aprovação da equipe (com pedido do aluno).
+  - Alunos **não leem as tabelas**: RPCs `academy_catalog`, `academy_course` (esboço sem ids de
+    vídeo), `academy_lesson` (só aula liberada), progresso (`academy_save_progress` guarda posição e
+    maior %, conclui aos 90%; `academy_set_completed`), certificado (`academy_claim_certificate`,
+    `academy_certificate`) e perguntas (`academy_ask`, `academy_lesson_questions` mostra só o
+    primeiro nome de outros alunos; 20 por dia).
+  - Equipe: conteúdo direto nas tabelas (policy só para ela), ordenação, alunos com progresso,
+    pedidos de liberação, emissão manual de certificado (auditada) e respostas às perguntas.
+  - Arquivos: aluno lê a capa de curso visível e o material de aula liberada.
+- **Telas**:
+  - Aluno: **Academia** (cursos com progresso), página do curso (% concluído, módulos x/y, aulas x/y,
+    "Continuar de onde parou", pedido de liberação, certificado), **aula** com player oficial do
+    YouTube (velocidade, recomeçar, retoma a posição, salva a cada 15 s e ao pausar/sair), concluir,
+    anterior/próxima, lista de aulas, descrição, materiais, perguntas e o botão de ação.
+    **Certificado** para imprimir ou salvar em PDF.
+  - Equipe: **Academia** (cursos, liberações, perguntas) e editor do curso (dados, capa, módulos,
+    aulas com link do YouTube, materiais, ordenação, alunos, certificado).
+- **Testes**: 11 de banco e 10 de frontend.
+
+### Limitações conhecidas
+
+- A duração da aula é informada pela equipe (ler do YouTube exigiria chave da API de dados).
+- O player do YouTube não foi exercitado num navegador real aqui; se o script não carregar, a aula
+  mostra o link para assistir no YouTube e o botão de concluir.
+- "Assistiu 90%" usa a posição do player: pular para o fim conta como assistido.
+- Liberação por plano chega com os planos. Sem verificação pública do código do certificado.
+- Tarefas/exercícios, comunidade e aulas ao vivo ficam para fases próprias.
+
 ## [0.16.0] — Fase 16: Moderação de fornecedores e anúncios
 
 ### Adicionado

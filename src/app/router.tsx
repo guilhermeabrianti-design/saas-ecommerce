@@ -13,6 +13,12 @@ import { RequireOrganization, RequireOrgKind } from '@/features/organizations/gu
 import { CreateOrganizationPage } from '@/features/organizations/pages/CreateOrganizationPage';
 import { OrganizationSettingsPage } from '@/features/organizations/pages/OrganizationSettingsPage';
 import { EditProductPage, NewProductPage } from '@/features/products/pages/ProductFormPage';
+import { AcademyAdminPage } from '@/features/academy/pages/AcademyAdminPage';
+import { AcademyPage } from '@/features/academy/pages/AcademyPage';
+import { CertificatePage } from '@/features/academy/pages/CertificatePage';
+import { CourseEditorPage } from '@/features/academy/pages/CourseEditorPage';
+import { CoursePage } from '@/features/academy/pages/CoursePage';
+import { LessonPage } from '@/features/academy/pages/LessonPage';
 import { AdminPage } from '@/features/admin/pages/AdminPage';
 import { FeesAdminPage } from '@/features/fees/pages/FeesAdminPage';
 import { ModerationPage } from '@/features/moderation/pages/ModerationPage';
@@ -62,12 +68,19 @@ export const router = createBrowserRouter([
           { index: true, element: <HomePage /> },
           { path: 'conta', element: <AccountPage /> },
           { path: 'organizacao/nova', element: <CreateOrganizationPage /> },
+          // Academia: qualquer conta (não depende de organização).
+          { path: 'academia', element: <AcademyPage /> },
+          { path: 'academia/:courseId', element: <CoursePage /> },
+          { path: 'academia/aula/:lessonId', element: <LessonPage /> },
+          { path: 'academia/certificado/:certificateId', element: <CertificatePage /> },
           {
             element: <RequireRole allowed={['admin']} />,
             children: [
               { path: 'admin', element: <AdminPage /> },
               { path: 'admin/taxas', element: <FeesAdminPage /> },
               { path: 'admin/moderacao', element: <ModerationPage /> },
+              { path: 'admin/academia', element: <AcademyAdminPage /> },
+              { path: 'admin/academia/:courseId', element: <CourseEditorPage /> },
             ],
           },
           {

@@ -313,6 +313,18 @@ receita da TheSigns**. Nenhuma taxa fica no código; o cálculo é feito só no 
   `admin_review_supplier`, `admin_moderation_listings`, `admin_moderate_listing`,
   `admin_update_listing_content`. Erros `moderation.*`.
 
+### Academia (Fase 17)
+
+- Conteúdo: `academy_courses`, `academy_modules`, `academy_lessons` (FK composta com o módulo,
+  `youtube_id`, `unlock_rule`, `action_label`/`action_path`), `academy_materials` (arquivo em
+  `materials/<aula>/...` ou link https). Policy única: só a equipe (`private.is_platform_admin()`).
+- Alunos: `academy_progress` (posição, maior %, conclusão), `academy_unlocks` (pedido/aprovação),
+  `academy_certificates` (código, nome e curso congelados) e `academy_questions`. Sem acesso direto;
+  tudo por RPCs `academy_*`. Equipe: `admin_academy_*`, `admin_approve_unlock`,
+  `admin_issue_certificate`, `admin_answer_question`, `admin_move_academy_item`.
+- Regras em `private.academy_unlocked` e `private.academy_summary` (curso concluído = todas as
+  obrigatórias). Bucket privado `academy`: leitura via `private.academy_file_readable`.
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,
