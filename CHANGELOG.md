@@ -1,5 +1,39 @@
 # Changelog
 
+## [0.16.0] — Fase 16: Moderação de fornecedores e anúncios
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20260924120000_moderation.sql`):
+  - Fornecedor novo nasce **em análise** (`organizations.approval_status`); a equipe aprova ou
+    reprova com motivo. O proprietário de um fornecedor reprovado pede nova análise.
+  - Anúncio novo nasce **em análise** (`catalog_listings.moderation_status`). A equipe aprova,
+    reprova (o fornecedor corrige e reenvia) ou bloqueia (só a equipe desfaz). Motivo obrigatório
+    para reprovar/bloquear; o fornecedor vê o motivo.
+  - Vendedores só veem anúncio **publicado + produto ativo + anúncio aprovado + fornecedor aprovado
+    e não suspenso**: vale para busca, detalhe, importação, imagens, calculadora e roteamento de
+    pedidos. Colunas de moderação não têm grant de escrita para o cliente.
+  - Equipe: filas `admin_supplier_reviews` (com contato do responsável) e `admin_moderation_listings`
+    (com imagens), `admin_review_supplier`, `admin_moderate_listing` e
+    `admin_update_listing_content` (corrige nome, descrição e categoria). Tudo auditado.
+  - A equipe lê as imagens de produtos com anúncio no catálogo (para moderar).
+  - `admin_stats` informa fornecedores e anúncios aguardando análise.
+- **Telas**:
+  - Equipe: **Moderação** (anúncios com fotos, dados e ações; fornecedores), atalho com as filas
+    pendentes na Administração.
+  - Fornecedor: aviso de cadastro em análise/reprovado (com pedido de nova análise) e situação da
+    análise de cada anúncio, com reenvio.
+- **Testes**: 10 de banco e 6 de frontend. Os testes de fases anteriores aprovam o catálogo com
+  `approveCatalog` (helper de teste).
+
+### Limitações conhecidas
+
+- Fornecedores e anúncios que já existiam antes desta fase ficaram **aprovados** automaticamente.
+- Alterar o produto depois da aprovação (nome, fotos, descrição) **não** reenvia para análise.
+- Produtos já importados por vendedores continuam no catálogo deles quando o anúncio é bloqueado;
+  o bloqueio impede novas importações e o encaminhamento de novos pedidos ao fornecedor.
+- Decisões não são avisadas por e-mail ou notificação (fase de notificações).
+
 ## [0.15.0] — Fase 15: Taxas de marketplace, comissão do vendedor e divisão da venda
 
 ### Adicionado

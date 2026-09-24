@@ -1,6 +1,6 @@
 // @vitest-environment node
 import type { PGlite } from '@electric-sql/pglite';
-import { asUser, createTestDatabase, signUpUser } from './supabase-sim';
+import { approveCatalog, asUser, createTestDatabase, signUpUser } from './supabase-sim';
 
 let db: PGlite;
 let seller: string;
@@ -138,6 +138,7 @@ beforeEach(async () => {
      values ($1, $2, 2000, 5990, true) returning id`,
     [supplierOrg, sp],
   );
+  await approveCatalog(db);
 
   const imported = await scalar<string>(
     seller,

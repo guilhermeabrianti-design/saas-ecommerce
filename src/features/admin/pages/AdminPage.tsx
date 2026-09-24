@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
-import { ChevronLeft, ChevronRight, Percent } from 'lucide-react';
+import { Percent, ShieldCheck } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { Section } from '@/components/ui/Section';
+import { Pager as BasePager } from '../components/Pager';
 import { TextField } from '@/components/ui/TextField';
 import { orgKindLabels } from '@/features/organizations/roles';
 import { formatBRL } from '@/utils/money';
@@ -22,45 +23,9 @@ import {
 const int = (v: number) => v.toLocaleString('pt-BR');
 const when = (iso: string) => new Date(iso).toLocaleString('pt-BR');
 
-function Pager({
-  page,
-  total,
-  onPage,
-  noun,
-}: {
-  page: number;
-  total: number;
-  onPage: (p: number) => void;
-  noun: string;
-}) {
-  const pages = Math.max(1, Math.ceil(total / ADMIN_PAGE_SIZE));
-  if (total <= ADMIN_PAGE_SIZE) return null;
-  return (
-    <nav className="flex items-center justify-between gap-3 text-sm" aria-label="Paginação">
-      <span className="text-muted">
-        Página {page} de {pages} · {total} {noun}
-      </span>
-      <span className="flex gap-2">
-        <Button
-          variant="secondary"
-          disabled={page <= 1}
-          onClick={() => onPage(page - 1)}
-          aria-label="Página anterior"
-        >
-          <ChevronLeft className="size-4" aria-hidden />
-        </Button>
-        <Button
-          variant="secondary"
-          disabled={page >= pages}
-          onClick={() => onPage(page + 1)}
-          aria-label="Próxima página"
-        >
-          <ChevronRight className="size-4" aria-hidden />
-        </Button>
-      </span>
-    </nav>
-  );
-}
+const Pager = (props: Omit<Parameters<typeof BasePager>[0], 'pageSize'>) => (
+  <BasePager {...props} pageSize={ADMIN_PAGE_SIZE} />
+);
 
 function Stats() {
   const stats = useAdminStats();
@@ -76,15 +41,37 @@ function Stats() {
     { label: 'Volume (30 dias)', value: formatBRL(s.gmv_30d_cents) },
     { label: 'Integrações ativas', value: int(s.active_connections) },
   ];
+  const pending = s.pending_suppliers + s.pending_listings;
   return (
-    <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      {cards.map((c) => (
-        <div key={c.label} className="border-border bg-surface rounded-xl border px-4 py-3">
-          <dt className="text-muted text-xs">{c.label}</dt>
-          <dd className="text-2xl font-semibold tabular-nums">{c.value}</dd>
-        </div>
-      ))}
-    </dl>
+    <div className="space-y-3">
+      <Link
+        to="/admin/moderacao"
+        className={
+          'flex items-center gap-3 rounded-xl border px-4 py-3 text-sm ' +
+          (pending > 0
+            ? 'border-brand/40 bg-brand/5 hover:bg-brand/10'
+            : 'border-border bg-surface hover:bg-surface-2')
+        }
+      >
+        <ShieldCheck className="text-brand size-5" aria-hidden />
+        <span>
+          <span className="block font-medium">Moderação</span>
+          <span className="text-muted">
+            {pending === 0
+              ? 'Nada aguardando análise.'
+              : `${int(s.pending_suppliers)} fornecedor(es) e ${int(s.pending_listings)} anúncio(s) aguardando análise.`}
+          </span>
+        </span>
+      </Link>
+      <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {cards.map((c) => (
+          <div key={c.label} className="border-border bg-surface rounded-xl border px-4 py-3">
+            <dt className="text-muted text-xs">{c.label}</dt>
+            <dd className="text-2xl font-semibold tabular-nums">{c.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
   );
 }
 

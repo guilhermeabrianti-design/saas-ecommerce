@@ -52,6 +52,8 @@ describe('formulário de anúncio (fornecedor)', () => {
       suggested_price_cents: 7990,
       is_published: false,
       category_id: '99999999-2222-4333-8444-555555555555',
+      moderation_status: 'approved',
+      moderation_reason: null,
     });
     expect(values).toEqual({
       wholesale: '30,00',

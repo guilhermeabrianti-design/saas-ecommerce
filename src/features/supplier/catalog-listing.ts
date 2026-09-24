@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
+import { listingModerations } from '@/features/moderation/moderation';
 import { getSupabase } from '@/lib/supabase';
 import { centsToInput, parseBRL } from '@/utils/money';
 
@@ -9,11 +10,13 @@ const listingSchema = z.object({
   suggested_price_cents: z.number().int().nullable(),
   is_published: z.boolean(),
   category_id: z.uuid().nullable(),
+  moderation_status: z.enum(listingModerations),
+  moderation_reason: z.string().nullable(),
 });
 
 export type CatalogListing = z.infer<typeof listingSchema>;
 
-const listingKey = (orgId: string, productId: string) =>
+export const listingKey = (orgId: string, productId: string) =>
   ['products', orgId, 'catalog-listing', productId] as const;
 
 /** The supplier's own listing for a product (RLS: supplier members only). */
@@ -23,7 +26,9 @@ export function useOwnCatalogListing(orgId: string, productId: string) {
     queryFn: async () => {
       const { data, error } = await getSupabase()
         .from('catalog_listings')
-        .select('id, wholesale_price_cents, suggested_price_cents, is_published, category_id')
+        .select(
+          'id, wholesale_price_cents, suggested_price_cents, is_published, category_id, moderation_status, moderation_reason',
+        )
         .eq('organization_id', orgId)
         .eq('product_id', productId)
         .maybeSingle();

@@ -15,6 +15,7 @@ import { OrganizationSettingsPage } from '@/features/organizations/pages/Organiz
 import { EditProductPage, NewProductPage } from '@/features/products/pages/ProductFormPage';
 import { AdminPage } from '@/features/admin/pages/AdminPage';
 import { FeesAdminPage } from '@/features/fees/pages/FeesAdminPage';
+import { ModerationPage } from '@/features/moderation/pages/ModerationPage';
 import { AnalyticsPage } from '@/features/analytics/pages/AnalyticsPage';
 import { FinancePage } from '@/features/finance/pages/FinancePage';
 import { IntegrationPage } from '@/features/integrations/pages/IntegrationPage';
@@ -66,6 +67,7 @@ export const router = createBrowserRouter([
             children: [
               { path: 'admin', element: <AdminPage /> },
               { path: 'admin/taxas', element: <FeesAdminPage /> },
+              { path: 'admin/moderacao', element: <ModerationPage /> },
             ],
           },
           {

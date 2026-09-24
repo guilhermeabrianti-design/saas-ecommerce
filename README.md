@@ -2,7 +2,7 @@
 
 SaaS multi-tenant para vendedores de e-commerce/dropshipping, fornecedores e equipe TheSigns.
 
-> **Status:** Fase 15 (taxas de marketplace e comissões) concluída. Veja [CHANGELOG.md](CHANGELOG.md) para o progresso por fase.
+> **Status:** Fase 16 (moderação de fornecedores e anúncios) concluída. Veja [CHANGELOG.md](CHANGELOG.md) para o progresso por fase.
 
 ## Stack
 

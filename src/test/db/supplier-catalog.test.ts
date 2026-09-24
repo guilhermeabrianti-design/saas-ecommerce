@@ -1,6 +1,6 @@
 // @vitest-environment node
 import type { PGlite } from '@electric-sql/pglite';
-import { asUser, createTestDatabase, signUpUser } from './supabase-sim';
+import { approveCatalog, asUser, createTestDatabase, signUpUser } from './supabase-sim';
 
 let db: PGlite;
 let supplier: string; // owner of supplier org
@@ -32,13 +32,17 @@ const newProduct = (userId: string, orgId: string, sku: string, status = 'active
     [orgId, sku, status],
   );
 
-const publish = (userId: string, orgId: string, productId: string, published = true) =>
-  scalar<string>(
+/** Publica e aprova (a moderação da Fase 16 tem testes próprios). */
+async function publish(userId: string, orgId: string, productId: string, published = true) {
+  const id = await scalar<string>(
     userId,
     `insert into public.catalog_listings (organization_id, product_id, wholesale_price_cents, suggested_price_cents, is_published)
      values ($1, $2, 3000, 7990, $3) returning id`,
     [orgId, productId, published],
   );
+  await approveCatalog(db);
+  return id;
+}
 
 const search = (userId: string, q = '') =>
   rows<{ listing_id: string; name: string; supplier_name: string; available: number }>(

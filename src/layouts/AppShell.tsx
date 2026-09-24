@@ -8,6 +8,7 @@ import {
   Boxes,
   Building2,
   House,
+  ListChecks,
   LogOut,
   Package,
   PackageCheck,
@@ -24,6 +25,7 @@ import { EnvBadge } from '@/components/ui/EnvBadge';
 import { useMySuspendedOrganizations } from '@/features/admin/api';
 import { SuspensionNotice } from '@/features/admin/components/SuspensionNotice';
 import { useAuth } from '@/features/auth/auth-context';
+import { SupplierApprovalNotice } from '@/features/moderation/components/SupplierApprovalNotice';
 import { useProfile } from '@/features/auth/profile';
 import { roleLabels } from '@/features/auth/roles';
 import { OrganizationSwitcher } from '@/features/organizations/components/OrganizationSwitcher';
@@ -47,6 +49,13 @@ interface NavItem {
 const navItems: NavItem[] = [
   { to: '/', label: 'Início', icon: House, requiresAuth: true },
   { to: '/admin', label: 'Administração', icon: ShieldCheck, requiresAuth: true, staffOnly: true },
+  {
+    to: '/admin/moderacao',
+    label: 'Moderação',
+    icon: ListChecks,
+    requiresAuth: true,
+    staffOnly: true,
+  },
   {
     to: '/admin/taxas',
     label: 'Taxas e comissões',
@@ -203,6 +212,7 @@ export function AppShell() {
         </header>
         <main className="flex-1 overflow-y-auto p-4 md:p-8">
           {authenticated && <SuspensionNotice organizations={suspended.data ?? []} />}
+          {authenticated && <SupplierApprovalNotice />}
           <Outlet />
         </main>
       </div>

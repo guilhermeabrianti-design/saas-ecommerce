@@ -106,3 +106,14 @@ export function asUser<T>(
     return fn(tx);
   });
 }
+
+/**
+ * Moderação (Fase 16): fornecedores e anúncios novos nascem "em análise".
+ * Testes que não tratam de moderação aprovam tudo o que existe até aqui.
+ */
+export async function approveCatalog(db: PGlite): Promise<void> {
+  await db.exec(`
+    update public.organizations set approval_status = 'approved' where approval_status <> 'approved';
+    update public.catalog_listings set moderation_status = 'approved' where moderation_status <> 'approved';
+  `);
+}

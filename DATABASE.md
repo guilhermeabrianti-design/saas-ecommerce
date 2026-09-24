@@ -299,6 +299,20 @@ receita da TheSigns**. Nenhuma taxa fica no código; o cálculo é feito só no 
   `admin_search_listings`. Toda alteração grava `admin_audit_log` com resumo legível.
 - Erros estáveis `fees.*`, traduzidos em `src/features/fees/fees.ts`.
 
+### Moderação (Fase 16)
+
+- `organizations.approval_status` (`pending`/`approved`/`rejected`) + `approval_reason` e
+  `approval_reviewed_at`. Trigger define `pending` para fornecedor novo e `approved` para vendedor.
+- `catalog_listings.moderation_status` (`pending`/`approved`/`rejected`/`blocked`) +
+  `moderation_reason` e `moderated_at`; anúncio novo nasce `pending`. Sem grant de escrita.
+- `private.visible_listing`, `search_catalog` e `private.is_catalog_image` exigem anúncio e
+  fornecedor aprovados. `private.is_moderation_image` libera à equipe as imagens de produtos com
+  anúncio.
+- RPCs: `resubmit_catalog_listing` (owner/admin do fornecedor; só reprovado),
+  `request_supplier_review` (proprietário; só reprovado) e, para a equipe, `admin_supplier_reviews`,
+  `admin_review_supplier`, `admin_moderation_listings`, `admin_moderate_listing`,
+  `admin_update_listing_content`. Erros `moderation.*`.
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,

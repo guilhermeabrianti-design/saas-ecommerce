@@ -2,6 +2,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { z } from 'zod';
 import { useAuth } from '@/features/auth/auth-context';
 import { feesAuditLabels } from '@/features/fees/fees';
+import { moderationAuditLabels } from '@/features/moderation/moderation';
 import { orgErrorMessage } from '@/features/organizations/errors';
 import { orgKinds } from '@/features/organizations/roles';
 import { getSupabase } from '@/lib/supabase';
@@ -18,6 +19,8 @@ const statsSchema = z.object({
   orders_30d: n,
   gmv_30d_cents: n,
   active_connections: n,
+  pending_suppliers: n,
+  pending_listings: n,
 });
 
 const orgRowSchema = z.object({
@@ -149,6 +152,7 @@ export const auditActionLabels: Record<string, string> = {
   'organization.suspended': 'Organização suspensa',
   'organization.reactivated': 'Organização reativada',
   ...feesAuditLabels,
+  ...moderationAuditLabels,
 };
 
 const messages: Partial<Record<string, string>> = {
