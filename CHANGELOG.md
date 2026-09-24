@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.20.0] — Fase 20: Ferramentas
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20260927120000_tools.sql`):
+  - `pricing_simulate`: lucro e margem de uma venda unitária a um preço, com a taxa do marketplace
+    da Fase 15 (mesma regra, categoria e faixa de preço), impostos, antecipação, custo e frete pago
+    pelo vendedor. Impostos e antecipação são informados por quem usa (nada fixo no código).
+  - `pricing_target`: **menor preço** que atinge a margem desejada. Testa cada regra/faixa e só
+    aceita o preço se a regra que vale nele for a usada na conta (ex.: TikTok abaixo e acima de
+    R$ 50). Margem impossível → `pricing.unreachable`.
+  - `ai_begin_generation` (owner/admin, produto da própria organização): reserva para os geradores
+    de **títulos**, **copy para redes sociais**, **roteiro de vídeo** e **roteiro de live**, com
+    orientação opcional de até 300 caracteres. **Mesma cota diária** das descrições; a reserva foi
+    extraída para `private.ai_reserve` e `ai_begin_description` passou a usá-la.
+- **Edge Function `ai`**: aceita `kind` e `brief`. Os geradores pedem a resposta em **JSON**
+  (`output_config.format`, lista de opções), validam e limpam cada opção (tamanho, duplicadas,
+  markdown) e usam o **fallback do servidor** da API do Claude quando o modelo principal recusa por
+  política. A descrição de produto continua igual.
+- **Tela Ferramentas** (vendedor): **Preço ideal**, **Simulador de lucro** (marketplace, tipo de
+  anúncio e categoria só com taxa ativa; custo preenchido a partir de um produto; detalhamento do
+  preço ao lucro; impostos e antecipação lembrados no navegador) e **Textos com IA** (tipo,
+  produto, orientação, cota restante, opções com copiar; nada é salvo).
+- **Testes**: 12 de banco e 13 de frontend.
+
+### Limitações conhecidas
+
+- A Edge Function não foi executada aqui (sem Deno, Supabase CLI nem chave de API): prompts,
+  esquema e limpeza estão testados; rode `supabase functions serve ai` antes de produção.
+- As contas usam o modelo atual (o vendedor recebe a venda e paga o custo). A divisão com a
+  TheSigns entra quando o checkout próprio existir (Fase 21).
+- Uma unidade por cálculo; taxas de campanha do marketplace não entram (use o simulador da
+  Fase 15 no anúncio do catálogo para isso).
+- Os geradores trabalham com produtos da própria organização (importe do catálogo antes).
+
 ## [0.19.0] — Fase 19: Central de Vendas e campanhas para lives
 
 ### Adicionado

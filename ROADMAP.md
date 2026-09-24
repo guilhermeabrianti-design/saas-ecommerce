@@ -31,35 +31,34 @@ integração fictícia** ("Não configurado" / "Não suportado pela API atual").
 | Ferramentas com IA                                      | Reaproveita a Edge Function `ai` (cota por organização, saída revisável, nada salvo sem revisão).                                                                                                                                                                        |
 | Dados de exemplo                                        | Seed só em desenvolvimento, marcado como tal. Depoimentos/produtos da landing não podem ser inventados.                                                                                                                                                                  |
 
-## Entregue (v0.1 – v0.19)
+## Entregue (v0.1 – v0.20)
 
 1 Setup · 2 Auth/sessão/RBAC · 3 Organizações + RLS · 4 Produtos · 5 Variações/imagens · 6 Estoque
 (ledger) · 7 Catálogo de fornecedores · 8 Pedidos + roteamento ao fornecedor · 9 Financeiro (ledger)
 · 10 Integrações (núcleo, webhooks Shopify/Woo) · 11 Analytics · 12 Admin da plataforma · 13 IA
 (descrição) · 14 Credenciais criptografadas + envio de estoque · **15 Taxas de marketplace, comissão
-do vendedor, categorias e calculadora da divisão** · **16 Moderação de fornecedores e anúncios** · **17 Academia (YouTube)** · **18 Onboarding e painel do vendedor** · **19 Central de Vendas e campanhas para lives**.
+do vendedor, categorias e calculadora da divisão** · **16 Moderação de fornecedores e anúncios** · **17 Academia (YouTube)** · **18 Onboarding e painel do vendedor** · **19 Central de Vendas e campanhas para lives** · **20 Ferramentas (preço-alvo, simulador de lucro, textos com IA)**.
 
 ## Próximas fases
 
 Ordem pensada para fechar primeiro o **MVP da seção 26** e depois o ecossistema.
 
-| Fase  | Entrega                                                                                                                                                                                                                    | Seções         |
-| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
-| 20    | **Ferramentas**: calculadora de preço-alvo (a partir da margem desejada, usando as taxas da Fase 15 + impostos, frete e antecipação), simulador de lucro, geradores com IA (título, descrição, copy, roteiro TikTok/live). | 34, 36         |
-| 21    | **Checkout próprio + Mercado Pago**: PIX/cartão/boleto, webhooks de pagamento, divisão congelada no pedido, lançamentos por parte no ledger.                                                                               | 16, 9, 10      |
-| 22    | **Carteira e saques**: disponível/pendente/bloqueado, solicitação de saque, aprovação da equipe, pagamento via Mercado Pago.                                                                                               | 16             |
-| 23    | **Afiliados e indicação**: link/código/QR, página pública do vendedor, cliques, visitas e vendas atribuídas pelo checkout, recompensa de indicação configurável.                                                           | 14, 15         |
-| 24    | **Notificações em tempo real** (Supabase Realtime) e alertas de estoque baixo/esgotado/alteração de preço ou fornecedor.                                                                                                   | 21, 13         |
-| 25    | **Landing page** pública (headline, como funciona, vendedores, fornecedores, Academia, planos, FAQ, CTA) — sem depoimentos inventados.                                                                                     | 24             |
-| 26    | **Rate limiting e endurecimento**, MFA para equipe.                                                                                                                                                                        | 27             |
-| 27    | **Suporte e denúncias**: tickets por categoria com conversa usuário ↔ suporte.                                                                                                                                             | 20             |
-| 28    | **Avaliações e reputação**: estrelas/comentários + métricas objetivas (vendas, taxa de entrega, taxa de cancelamento).                                                                                                     | 19             |
-| 29    | **Gerenciador de anúncios e publicação** (Shopify/Woo primeiro): criar, editar, duplicar, pausar, preço/estoque, fluxo de publicação por etapas reais, logs de sincronização.                                              | 12, 35, 37, 42 |
-| 30    | **Etiquetas**: upload/vínculo manual e geração via API oficial quando houver; status `in_transit`.                                                                                                                         | 41, 10         |
-| 31–34 | **Mercado Livre, Shopee, TikTok Shop, Amazon (SP-API)** — uma fase por marketplace, cada uma dependente de app de desenvolvedor aprovado.                                                                                  | 11, 38         |
-| 35    | **Mentoria e Comunidade** (fora do MVP): mentores, comissão de mentor, aulas ao vivo, grupos, desafios.                                                                                                                    | 8, 44          |
-| 36    | **Gamificação**: pontos por eventos reais, níveis, conquistas, ranking — configurável.                                                                                                                                     | 45             |
-| 37    | **Planos e monetização**: assinaturas de fornecedor/vendedor, destaque de produto, campanhas patrocinadas.                                                                                                                 | 25             |
+| Fase  | Entrega                                                                                                                                                                       | Seções         |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| 21    | **Checkout próprio + Mercado Pago**: PIX/cartão/boleto, webhooks de pagamento, divisão congelada no pedido, lançamentos por parte no ledger.                                  | 16, 9, 10      |
+| 22    | **Carteira e saques**: disponível/pendente/bloqueado, solicitação de saque, aprovação da equipe, pagamento via Mercado Pago.                                                  | 16             |
+| 23    | **Afiliados e indicação**: link/código/QR, página pública do vendedor, cliques, visitas e vendas atribuídas pelo checkout, recompensa de indicação configurável.              | 14, 15         |
+| 24    | **Notificações em tempo real** (Supabase Realtime) e alertas de estoque baixo/esgotado/alteração de preço ou fornecedor.                                                      | 21, 13         |
+| 25    | **Landing page** pública (headline, como funciona, vendedores, fornecedores, Academia, planos, FAQ, CTA) — sem depoimentos inventados.                                        | 24             |
+| 26    | **Rate limiting e endurecimento**, MFA para equipe.                                                                                                                           | 27             |
+| 27    | **Suporte e denúncias**: tickets por categoria com conversa usuário ↔ suporte.                                                                                                | 20             |
+| 28    | **Avaliações e reputação**: estrelas/comentários + métricas objetivas (vendas, taxa de entrega, taxa de cancelamento).                                                        | 19             |
+| 29    | **Gerenciador de anúncios e publicação** (Shopify/Woo primeiro): criar, editar, duplicar, pausar, preço/estoque, fluxo de publicação por etapas reais, logs de sincronização. | 12, 35, 37, 42 |
+| 30    | **Etiquetas**: upload/vínculo manual e geração via API oficial quando houver; status `in_transit`.                                                                            | 41, 10         |
+| 31–34 | **Mercado Livre, Shopee, TikTok Shop, Amazon (SP-API)** — uma fase por marketplace, cada uma dependente de app de desenvolvedor aprovado.                                     | 11, 38         |
+| 35    | **Mentoria e Comunidade** (fora do MVP): mentores, comissão de mentor, aulas ao vivo, grupos, desafios.                                                                       | 8, 44          |
+| 36    | **Gamificação**: pontos por eventos reais, níveis, conquistas, ranking — configurável.                                                                                        | 45             |
+| 37    | **Planos e monetização**: assinaturas de fornecedor/vendedor, destaque de produto, campanhas patrocinadas.                                                                    | 25             |
 
 Cada fase segue o mesmo fechamento: migração com RLS, testes de banco e frontend, `npm run check`
 verde, revisão de segurança e entrada no [CHANGELOG.md](CHANGELOG.md).

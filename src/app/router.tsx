@@ -28,6 +28,7 @@ import { LiveCampaignsAdminPage } from '@/features/sales/pages/LiveCampaignsAdmi
 import { LiveCampaignsPage } from '@/features/sales/pages/LiveCampaignsPage';
 import { SalesCenterPage } from '@/features/sales/pages/SalesCenterPage';
 import { SalesListingPage } from '@/features/sales/pages/SalesListingPage';
+import { ToolsPage } from '@/features/tools/pages/ToolsPage';
 import { AnalyticsPage } from '@/features/analytics/pages/AnalyticsPage';
 import { FinancePage } from '@/features/finance/pages/FinancePage';
 import { IntegrationPage } from '@/features/integrations/pages/IntegrationPage';
@@ -111,6 +112,7 @@ export const router = createBrowserRouter([
                   { path: 'central/lives', element: <LiveCampaignsPage /> },
                   { path: 'central/lives/:campaignId', element: <LiveCampaignPage /> },
                   { path: 'central/:listingId', element: <SalesListingPage /> },
+                  { path: 'ferramentas', element: <ToolsPage /> },
                   { path: 'integracoes', element: <IntegrationsPage /> },
                   { path: 'integracoes/:connectionId', element: <IntegrationPage /> },
                   { path: 'pedidos', element: <OrdersPage /> },

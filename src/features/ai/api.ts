@@ -16,19 +16,20 @@ const messages: Record<string, string> = {
   quota_exceeded: 'O limite diário de gerações da organização foi atingido. Tente amanhã.',
   not_configured: 'A IA não está configurada neste ambiente. Contate o suporte.',
   ai_busy: 'A IA está ocupada no momento. Tente novamente em instantes.',
-  refused: 'A IA não pôde gerar uma descrição para este produto. Escreva manualmente.',
+  refused: 'A IA não pôde gerar este texto para o produto. Escreva manualmente.',
+  invalid_body: 'Pedido inválido. Recarregue a página.',
   empty_response: 'A IA não devolveu texto. Tente novamente.',
   unauthorized: 'Sua sessão expirou. Entre novamente.',
 };
 
-const FALLBACK = 'Não foi possível gerar a descrição. Tente novamente.';
+const FALLBACK = 'Não foi possível gerar o texto. Tente novamente.';
 
 export function aiErrorMessage(code: string | undefined | null): string {
   return (code && messages[code]) || FALLBACK;
 }
 
 /** O código estável vem no corpo JSON de respostas não-2xx da função. */
-async function errorCodeOf(error: unknown): Promise<string | undefined> {
+export async function aiErrorCodeOf(error: unknown): Promise<string | undefined> {
   if (error instanceof FunctionsHttpError) {
     try {
       const body: unknown = await error.context.json();
@@ -67,7 +68,7 @@ export function useGenerateDescription(orgId: string, productId: string) {
       const { data, error } = await getSupabase().functions.invoke('ai', {
         body: { organization_id: orgId, product_id: productId },
       });
-      if (error) throw new AiError(await errorCodeOf(error));
+      if (error) throw new AiError(await aiErrorCodeOf(error));
       const parsed = resultSchema.safeParse(data);
       if (!parsed.success) throw new AiError(undefined);
       return parsed.data;

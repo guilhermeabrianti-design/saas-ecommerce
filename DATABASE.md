@@ -262,6 +262,15 @@ RPCs; novas policies devem continuar usando `is_org_member`/`has_org_role` para 
 `ai_begin_description` / `ai_finish` / `ai_usage_today` rodam com o JWT do usuário. Cota diária em
 `private.ai_daily_limit()` (50), dia no fuso de São Paulo. O texto gerado nunca é gravado pelo banco.
 
+### Ferramentas (Fase 20)
+
+- `pricing_simulate(provedor, tipo, categoria, preço, custo, frete, imposto_bps, antecipação_bps)`
+  e `pricing_target(..., margem_bps)`: qualquer usuário autenticado; usam `private.match_fee_rule`
+  (Fase 15). Erros `pricing.invalid`, `pricing.unreachable`, `fees.not_configured`.
+- `ai_begin_generation(org, produto, tipo, orientação)`: tipos `title`, `ad_copy`, `video_script`,
+  `live_script`; owner/admin; mesma cota de `ai_begin_description` via `private.ai_reserve`
+  (`ai_usage.feature` = tipo). Erro `ai.invalid`.
+
 ### Credenciais e envio de estoque (Fase 14)
 
 `integration_credentials` (texto cifrado + `config` não secreto; sem grants para a API; `select` só

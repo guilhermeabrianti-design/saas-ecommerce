@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router';
 import {
   Activity,
+  Calculator,
   ChartColumn,
   Percent,
   ShieldCheck,
@@ -103,6 +104,14 @@ const navItems: NavItem[] = [
     to: '/catalogo',
     label: 'Catálogo',
     icon: Store,
+    requiresAuth: true,
+    tenantOnly: true,
+    orgKind: 'seller',
+  },
+  {
+    to: '/ferramentas',
+    label: 'Ferramentas',
+    icon: Calculator,
     requiresAuth: true,
     tenantOnly: true,
     orgKind: 'seller',
