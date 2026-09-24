@@ -1,5 +1,49 @@
 # Changelog
 
+## [0.19.0] — Fase 19: Central de Vendas e campanhas para lives
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20260926120000_sales_center.sql`):
+  - `sales_materials`: materiais de divulgação por anúncio do catálogo — **vídeo** e **imagem**
+    (bucket privado `sales-materials`, até 100 MB, pasta do anúncio) e textos prontos (**roteiro,
+    título, hashtags, argumento**). Só owner/admin do fornecedor dono do anúncio escreve (FK
+    composta com a organização); a equipe pode excluir. Até 50 por anúncio.
+  - Vendedores leem materiais e arquivos **só de anúncio visível** (publicado, aprovado, fornecedor
+    aprovado e ativo).
+  - `listing_favorites`: favoritos por usuário, só de conta vendedora e anúncio visível.
+  - `sales_center`: vitrine com abas **em alta** (unidades em pedidos de fornecimento não
+    cancelados dos últimos 30 dias), **maior margem** (atacado × preço sugerido), **novidades** e
+    **favoritos**, com busca. `sales_center_listing`: materiais e campanhas abertas do produto.
+  - **Campanhas para lives** (`live_campaigns`, produtos e participantes; sem acesso direto): a
+    equipe cria/edita por `admin_save_live_campaign` (auditado), com período (até 90 dias),
+    marketplace opcional, comissão própria e situação (rascunho/publicada/cancelada). O vendedor
+    (owner/admin) entra ou sai por `set_live_campaign_participation` até o fim da campanha.
+  - **Comissão por campanha**: enquanto a campanha publicada está no ar, a loja participante recebe
+    a comissão dela nos produtos incluídos (e no marketplace da campanha, se houver). Precedência
+    sobre produto/vendedor/categoria/padrão; se houver mais de uma, a maior. A divisão da venda
+    (`estimate_sale_split`) já mostra a origem "campanha de live".
+- **Telas**:
+  - Vendedor: **Central de Vendas** (abas, busca, favoritar, selo "em campanha", vendidos em 30
+    dias, margem, estoque e nº de materiais), página do produto com materiais agrupados por tipo
+    (**copiar** textos, **baixar** vídeos e imagens, prévia), campanhas do produto e atalho para
+    importar e calcular. **Campanhas para lives** (lista e detalhe com participar/sair).
+  - Fornecedor: seção **Materiais de divulgação** no produto com anúncio (enviar, ver, excluir).
+  - Equipe: **Campanhas de live** (lista, criação/edição com busca de produtos, participantes).
+  - Atalho da Central no Início do vendedor.
+- **Testes**: 10 de banco e 9 de frontend.
+
+### Limitações conhecidas
+
+- "Em alta" mostra unidades somadas de todos os lojistas (sem identificar quem vendeu). Pedidos de
+  marketplace que não passam por fornecedor da plataforma não entram na conta.
+- Materiais não passam por moderação prévia: a equipe remove depois, se preciso. Não há contagem
+  de downloads.
+- A comissão da campanha vale para qualquer venda da loja participante no período e canal da
+  campanha — não só para vendas feitas durante a transmissão. Ela só vira dinheiro quando a divisão
+  for congelada no pedido (checkout, Fase 21).
+- Participação em campanha e novidades não geram notificação (Fase 24).
+
 ## [0.18.0] — Fase 18: Onboarding e painel do vendedor
 
 ### Adicionado

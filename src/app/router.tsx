@@ -22,6 +22,12 @@ import { LessonPage } from '@/features/academy/pages/LessonPage';
 import { AdminPage } from '@/features/admin/pages/AdminPage';
 import { FeesAdminPage } from '@/features/fees/pages/FeesAdminPage';
 import { ModerationPage } from '@/features/moderation/pages/ModerationPage';
+import { LiveCampaignEditorPage } from '@/features/sales/pages/LiveCampaignEditorPage';
+import { LiveCampaignPage } from '@/features/sales/pages/LiveCampaignPage';
+import { LiveCampaignsAdminPage } from '@/features/sales/pages/LiveCampaignsAdminPage';
+import { LiveCampaignsPage } from '@/features/sales/pages/LiveCampaignsPage';
+import { SalesCenterPage } from '@/features/sales/pages/SalesCenterPage';
+import { SalesListingPage } from '@/features/sales/pages/SalesListingPage';
 import { AnalyticsPage } from '@/features/analytics/pages/AnalyticsPage';
 import { FinancePage } from '@/features/finance/pages/FinancePage';
 import { IntegrationPage } from '@/features/integrations/pages/IntegrationPage';
@@ -81,6 +87,8 @@ export const router = createBrowserRouter([
               { path: 'admin/moderacao', element: <ModerationPage /> },
               { path: 'admin/academia', element: <AcademyAdminPage /> },
               { path: 'admin/academia/:courseId', element: <CourseEditorPage /> },
+              { path: 'admin/lives', element: <LiveCampaignsAdminPage /> },
+              { path: 'admin/lives/:campaignId', element: <LiveCampaignEditorPage /> },
             ],
           },
           {
@@ -99,6 +107,10 @@ export const router = createBrowserRouter([
                 children: [
                   { path: 'catalogo', element: <CatalogPage /> },
                   { path: 'catalogo/:listingId', element: <CatalogListingPage /> },
+                  { path: 'central', element: <SalesCenterPage /> },
+                  { path: 'central/lives', element: <LiveCampaignsPage /> },
+                  { path: 'central/lives/:campaignId', element: <LiveCampaignPage /> },
+                  { path: 'central/:listingId', element: <SalesListingPage /> },
                   { path: 'integracoes', element: <IntegrationsPage /> },
                   { path: 'integracoes/:connectionId', element: <IntegrationPage /> },
                   { path: 'pedidos', element: <OrdersPage /> },

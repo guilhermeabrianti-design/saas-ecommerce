@@ -342,6 +342,26 @@ receita da TheSigns**. Nenhuma taxa fica no código; o cálculo é feito só no 
 - `seller_suggestions(org, limite)`: anúncios visíveis, com estoque e preço sugerido acima do
   atacado, ainda não importados, pela margem sugerida. Qualquer membro de vendedor.
 
+### Central de Vendas e campanhas para lives (Fase 19)
+
+- `sales_materials` (FK composta `(organization_id, listing_id)` → `catalog_listings`): vídeo/imagem
+  com `storage_path` em `<anúncio>/<uuid>/<arquivo>` no bucket privado `sales-materials`, ou texto
+  (`body`) para roteiro, título, hashtags e argumento. Escrita: `private.can_manage_listing`
+  (owner/admin do fornecedor dono, ou equipe); leitura direta: membros do fornecedor e equipe;
+  vendedores por `sales_center_listing`. Storage: `private.sales_file_readable`. Máximo 50 por
+  anúncio (`sales.too_many_materials`).
+- `listing_favorites (user_id, listing_id)`: só os próprios; inserir exige conta vendedora e
+  `private.visible_listing` (executável por `authenticated`).
+- RPCs do vendedor: `sales_center(sort, busca, limite, offset)` (`trending`/`margin`/`new`/
+  `favorites`), `sales_center_listing`, `live_campaigns_for_seller`, `live_campaign_for_seller`,
+  `set_live_campaign_participation` (owner/admin).
+- `live_campaigns`, `live_campaign_listings`, `live_campaign_participants`: sem grants; equipe usa
+  `admin_live_campaigns`, `admin_live_campaign` e `admin_save_live_campaign` (auditoria
+  `live_campaign.created`/`updated`). Erros `campaign.*`.
+- `private.seller_commission(listing, categoria, vendedor, provedor)`: campanha publicada, no ar,
+  com a loja participando e o produto incluído vence as demais regras (fonte `live_campaign`).
+  `private.compute_split` passou a usar esta versão.
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,

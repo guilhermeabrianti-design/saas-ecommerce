@@ -13,6 +13,7 @@ import { useOrganization } from '@/features/organizations/organization-context';
 import { GenerateDescriptionButton } from '@/features/ai/components/GenerateDescriptionButton';
 import { orgPermissions } from '@/features/organizations/roles';
 import { CatalogListingSection } from '@/features/supplier/components/CatalogListingSection';
+import { SupplierMaterialsSection } from '@/features/sales/components/SupplierMaterialsSection';
 import { formatBRL, parseBRL } from '@/utils/money';
 import {
   useCreateProduct,
@@ -307,10 +308,16 @@ export function EditProductPage() {
             canEdit={orgPermissions.editCatalog(active!.role)}
           />
           {active!.organization.kind === 'supplier' && (
-            <CatalogListingSection
-              product={product.data}
-              canEdit={orgPermissions.editCatalog(active!.role)}
-            />
+            <>
+              <CatalogListingSection
+                product={product.data}
+                canEdit={orgPermissions.editCatalog(active!.role)}
+              />
+              <SupplierMaterialsSection
+                product={product.data}
+                canEdit={orgPermissions.editCatalog(active!.role)}
+              />
+            </>
           )}
         </div>
       )}

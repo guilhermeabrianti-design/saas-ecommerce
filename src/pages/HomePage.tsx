@@ -4,6 +4,7 @@ import {
   Boxes,
   Building2,
   ChevronRight,
+  Megaphone,
   Package,
   PackageCheck,
   ReceiptText,
@@ -59,6 +60,12 @@ export function HomePage() {
                   label: 'Pedidos',
                   detail: 'Registre e acompanhe vendas',
                   icon: ReceiptText,
+                },
+                {
+                  to: '/central',
+                  label: 'Central de Vendas',
+                  detail: 'Em alta, materiais de divulgação e lives',
+                  icon: Megaphone,
                 },
                 {
                   to: '/catalogo',

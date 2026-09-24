@@ -96,7 +96,7 @@ export const splitSchema = z.object({
   campaign_rule: ruleRef.extend({ campaign: z.string() }).nullable(),
   supplier_cents: int,
   seller_commission_bps: int,
-  seller_commission_source: z.enum([...commissionScopes, 'parent_category']),
+  seller_commission_source: z.enum([...commissionScopes, 'parent_category', 'live_campaign']),
   seller_commission_cents: int,
   platform_cents: int,
   platform_margin_bps: int,
@@ -109,6 +109,7 @@ export const commissionSourceLabels: Record<Split['seller_commission_source'], s
   parent_category: 'regra da categoria-mãe',
   product: 'regra do produto',
   seller: 'acordo com o vendedor',
+  live_campaign: 'campanha de live',
 };
 
 // ---------------------------------------------------------------------

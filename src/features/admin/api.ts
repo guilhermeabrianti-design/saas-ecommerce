@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { useAuth } from '@/features/auth/auth-context';
 import { feesAuditLabels } from '@/features/fees/fees';
 import { moderationAuditLabels } from '@/features/moderation/moderation';
+import { salesAuditLabels } from '@/features/sales/sales';
 import { orgErrorMessage } from '@/features/organizations/errors';
 import { orgKinds } from '@/features/organizations/roles';
 import { getSupabase } from '@/lib/supabase';
@@ -153,6 +154,7 @@ export const auditActionLabels: Record<string, string> = {
   'organization.reactivated': 'Organização reativada',
   ...feesAuditLabels,
   ...moderationAuditLabels,
+  ...salesAuditLabels,
 };
 
 const messages: Partial<Record<string, string>> = {
