@@ -460,6 +460,15 @@ receita da TheSigns**. Nenhuma taxa fica no código; o cálculo é feito só no 
   `organization_referrals`.
 - RPCs: `mark_notifications_read(p_ids)`, `mark_all_notifications_read(p_org)` (só as próprias).
 
+### Rate limiting e MFA (Fase 26)
+
+- `private.rate_limits` (bucket, assunto, início da janela, contagem) — fora da API, sem RLS
+  necessária. `private.rate_limit` conta e responde; `private.enforce_rate_limit` levanta
+  `rate_limited`; `private.limit_inserts(bucket, coluna, limite, janela)` é o gatilho genérico
+  (`organization_invitations`, `withdrawal_requests`, `affiliate_links`, `academy_questions`,
+  `products`). `public.rate_limit_hit` só para o service role (Edge Function, por hash do IP).
+- `private.current_aal()` lê `auth.jwt() ->> 'aal'`; `private.is_platform_admin()` exige `aal2`.
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,

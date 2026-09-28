@@ -1,5 +1,43 @@
 # Changelog
 
+## [0.26.0] — Fase 26: Rate limiting, endurecimento e MFA da equipe
+
+### Adicionado
+
+- **Rate limiting** (`supabase/migrations/20261002120000_hardening.sql`): contador em janela fixa no
+  schema `private` (fora da API).
+  - Por gatilho nas escritas que dá para repetir em massa: convites (50/h por organização), saques
+    (10/dia por organização), links de divulgação (50/h por loja), perguntas na Academia (20/h por
+    pessoa), produtos (1000/h por organização). Estourou → erro `rate_limited` com mensagem na tela.
+  - **Por IP** nas rotas públicas do checkout (Edge Function): pagamento 10 a cada 10 min, visitas
+    120/h, leituras (oferta, vitrine, link) 300 a cada 10 min. Só o hash do IP é guardado. Se o
+    contador falhar, a venda segue (o limite não derruba o checkout).
+- **MFA obrigatório para a equipe**: toda RPC e policy da administração
+  (`private.is_platform_admin()`) passa a exigir sessão **aal2** (senha + código TOTP do Supabase
+  Auth).
+  - **Minha conta → Verificação em duas etapas**: ativar com QR Code/chave e código, ver e remover
+    aplicativos (qualquer conta pode ativar; a equipe não pode remover o último).
+  - **Login em dois passos** (`/verificacao`): quem tem o segundo fator ativo e entrou só com a
+    senha precisa do código antes de usar o app.
+  - Equipe sem segundo fator: a área de administração mostra o cadastro no lugar do painel, e o
+    Início avisa.
+- `supabase/config.toml`: TOTP habilitado no ambiente local.
+- **Testes**: 5 de banco, 3 do módulo de limite por IP e 6 de frontend. Simulador de banco agora
+  tem `auth.jwt()` e sessões aal1/aal2.
+
+### Atenção ao atualizar
+
+- **Contas da equipe perdem acesso à administração até ativarem a verificação em duas etapas** em
+  Minha conta (leva um minuto: QR Code no aplicativo autenticador + código).
+- TOTP vem ativado nos projetos hospedados do Supabase; se o cadastro disser que está desativado,
+  ative em Authentication → Multi-Factor no painel.
+
+### Limitações conhecidas
+
+- Sem CSP/cabeçalhos de segurança: dependem de onde o frontend for hospedado (fica para o deploy).
+- CORS das Edge Functions segue aberto (`*`): não usam cookies, a autorização é por token.
+- Sem CAPTCHA no cadastro.
+
 ## [0.25.0] — Fase 25: Landing page
 
 ### Adicionado

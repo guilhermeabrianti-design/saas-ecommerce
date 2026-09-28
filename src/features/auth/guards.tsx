@@ -1,8 +1,10 @@
 import { Link, Navigate, Outlet, useLocation, useSearchParams } from 'react-router';
-import { ShieldX } from 'lucide-react';
+import { ShieldCheck, ShieldX } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { useAuth } from './auth-context';
+import { MfaSection } from './components/MfaSection';
+import { mfaRequirement } from './mfa';
 import { useProfile } from './profile';
 import { safeNextPath } from './redirect';
 import { hasRole, type AppRole } from './roles';
@@ -25,13 +27,17 @@ export function AuthUnavailable() {
 
 /** Protected area: redirects anonymous visitors to sign-in, preserving where they were going. */
 export function RequireAuth() {
-  const { status } = useAuth();
+  const { status, session, user } = useAuth();
   const location = useLocation();
 
   if (status === 'loading') return <PageLoader />;
+  const next = encodeURIComponent(location.pathname + location.search);
   if (status !== 'authenticated') {
-    const next = encodeURIComponent(location.pathname + location.search);
     return <Navigate to={`/entrar?next=${next}`} replace />;
+  }
+  // Tem segundo fator e entrou só com a senha: pede o código (Fase 26).
+  if (mfaRequirement({ session, user, isStaff: false }) === 'verify') {
+    return <Navigate to={`/verificacao?next=${next}`} replace />;
   }
   return <Outlet />;
 }
@@ -50,6 +56,7 @@ export function RedirectIfAuthenticated() {
 /** UX gate by role. The database (RLS) enforces the same rule independently. */
 export function RequireRole({ allowed }: { allowed: readonly AppRole[] }) {
   const profile = useProfile();
+  const { session, user } = useAuth();
 
   if (profile.isPending) return <PageLoader />;
   if (profile.isError) {
@@ -64,6 +71,27 @@ export function RequireRole({ allowed }: { allowed: readonly AppRole[] }) {
         <Link to="/" className="text-brand mt-6 inline-block text-sm font-medium hover:underline">
           Voltar ao início
         </Link>
+      </div>
+    );
+  }
+  // Equipe só entra na administração com verificação em duas etapas (o banco exige aal2).
+  if (
+    profile.data.role === 'admin' &&
+    mfaRequirement({ session, user, isStaff: true }) === 'enroll'
+  ) {
+    return (
+      <div className="mx-auto max-w-xl space-y-4 py-10">
+        <div className="text-center">
+          <ShieldCheck className="text-brand mx-auto size-8" aria-hidden />
+          <h1 className="mt-3 text-xl font-semibold tracking-tight">
+            Ative a verificação em duas etapas
+          </h1>
+          <p className="text-muted mt-1 text-sm">
+            A administração mexe com dinheiro e dados de todos os clientes: a equipe precisa de um
+            código do celular além da senha.
+          </p>
+        </div>
+        <MfaSection required />
       </div>
     );
   }

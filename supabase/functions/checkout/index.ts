@@ -35,6 +35,7 @@ import {
   type NormalizedPayment,
 } from '../_shared/payments/mercadopago.ts';
 import { parsePublicCode, parseVisit } from '../_shared/affiliates.ts';
+import { CHECKOUT_LIMITS, clientIp, ipSubject, type RouteLimit } from '../_shared/ratelimit.ts';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const MAX_BODY_BYTES = 20_000;
@@ -420,9 +421,40 @@ async function visit(req: Request) {
   return json(200, { ok: true });
 }
 
+/**
+ * Limite por IP (Fase 26). Sem IP identificável ou com falha no contador,
+ * segue: o limite protege, mas não pode derrubar a venda.
+ */
+async function overLimit(req: Request, route: RouteLimit): Promise<boolean> {
+  const ip = clientIp(req.headers);
+  if (!ip) return false;
+  const { data, error } = await service().rpc('rate_limit_hit', {
+    p_bucket: route.bucket,
+    p_subject: await ipSubject(ip),
+    p_limit: route.limit,
+    p_window_seconds: route.windowSeconds,
+  });
+  if (error) {
+    console.error('checkout rate limit:', error.message);
+    return false;
+  }
+  return data === false;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
   const path = new URL(req.url).pathname.replace(/\/+$/, '');
+
+  // Webhook e estorno têm autenticação própria (assinatura / JWT de admin).
+  const route =
+    req.method === 'GET'
+      ? CHECKOUT_LIMITS.read
+      : path.endsWith('/pay')
+        ? CHECKOUT_LIMITS.pay
+        : path.endsWith('/visit')
+          ? CHECKOUT_LIMITS.visit
+          : null;
+  if (route && (await overLimit(req, route))) return json(429, { error: 'rate_limited' });
 
   const offerMatch = /\/offer\/([^/]+)$/.exec(path);
   if (offerMatch && req.method === 'GET') return offer(offerMatch[1]!.toLowerCase());

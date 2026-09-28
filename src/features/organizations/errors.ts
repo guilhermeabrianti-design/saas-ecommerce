@@ -11,6 +11,7 @@ const messages: Partial<Record<string, string>> = {
   'referral.disabled': 'O programa de indicação está pausado. Deixe o código em branco.',
   'referral.invalid_code': 'Código de indicação não encontrado. Confira ou deixe em branco.',
   'referral.self': 'Não vale indicar a si mesmo. Deixe o código em branco.',
+  rate_limited: 'Muitas operações seguidas. Aguarde um pouco e tente de novo.',
   'org.last_owner':
     'A organização precisa de ao menos um proprietário. Promova outra pessoa antes.',
 };

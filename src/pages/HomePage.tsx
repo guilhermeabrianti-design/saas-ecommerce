@@ -15,6 +15,8 @@ import { Alert } from '@/components/ui/Alert';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { OnboardingChecklist } from '@/features/dashboard/components/OnboardingChecklist';
 import { SellerDashboard } from '@/features/dashboard/components/SellerDashboard';
+import { useAuth } from '@/features/auth/auth-context';
+import { mfaRequirement } from '@/features/auth/mfa';
 import { useProfile } from '@/features/auth/profile';
 import { roleLabels } from '@/features/auth/roles';
 import { PendingInvitations } from '@/features/organizations/components/PendingInvitations';
@@ -25,6 +27,7 @@ import { cn } from '@/utils/cn';
 export function HomePage() {
   const profile = useProfile();
   const organization = useOrganization();
+  const { session, user } = useAuth();
 
   if (profile.isPending || organization.isPending) return <PageLoader />;
   if (profile.isError || organization.isError) {
@@ -114,6 +117,16 @@ export function HomePage() {
       </div>
 
       {!isStaff && <PendingInvitations />}
+
+      {isStaff && mfaRequirement({ session, user, isStaff: true }) === 'enroll' && (
+        <Alert tone="info">
+          A administração exige verificação em duas etapas.{' '}
+          <Link to="/conta" className="font-medium underline">
+            Ative em Minha conta
+          </Link>
+          .
+        </Alert>
+      )}
 
       {isSeller && (
         <>

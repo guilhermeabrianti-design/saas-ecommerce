@@ -6,6 +6,7 @@ import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { Section } from '@/components/ui/Section';
+import { MfaSection } from '../components/MfaSection';
 import { TextField } from '@/components/ui/TextField';
 import { useAuth } from '../auth-context';
 import { ChangePasswordForm } from '../components/ChangePasswordForm';
@@ -128,6 +129,13 @@ export function AccountPage() {
           </Alert>
         )}
         <ChangePasswordForm onSuccess={() => setPasswordChanged(true)} />
+      </Section>
+
+      <Section
+        title="Verificação em duas etapas"
+        description="Proteja a conta com um código do celular além da senha."
+      >
+        <MfaSection required={profile.data?.role === 'admin'} />
       </Section>
 
       <Section title="Sessão" description="Encerre o acesso neste dispositivo.">

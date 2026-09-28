@@ -5,6 +5,7 @@ import { PublicLayout } from '@/layouts/PublicLayout';
 import { RedirectIfAuthenticated, RequireAuth, RequireRole } from '@/features/auth/guards';
 import { AccountPage } from '@/features/auth/pages/AccountPage';
 import { ForgotPasswordPage } from '@/features/auth/pages/ForgotPasswordPage';
+import { MfaVerifyPage } from '@/features/auth/pages/MfaVerifyPage';
 import { ResetPasswordPage } from '@/features/auth/pages/ResetPasswordPage';
 import { SignInPage } from '@/features/auth/pages/SignInPage';
 import { SignUpPage } from '@/features/auth/pages/SignUpPage';
@@ -92,6 +93,8 @@ export const router = createBrowserRouter([
       },
       // Needs the recovery session, so it is not behind RedirectIfAuthenticated.
       { path: 'redefinir-senha', element: <ResetPasswordPage /> },
+      // Segundo passo do login (Fase 26): precisa da sessão aal1.
+      { path: 'verificacao', element: <MfaVerifyPage /> },
     ],
   },
   {

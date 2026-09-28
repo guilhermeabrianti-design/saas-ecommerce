@@ -27,6 +27,10 @@ const SUPABASE_BOOTSTRAP = `
     select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
   $$;
   grant execute on function auth.uid() to anon, authenticated;
+  create function auth.jwt() returns jsonb language sql stable as $$
+    select coalesce(nullif(current_setting('request.jwt.claims', true), ''), '{}')::jsonb
+  $$;
+  grant execute on function auth.jwt() to anon, authenticated;
 
   create schema storage;
   grant usage on schema storage to anon, authenticated, service_role;
@@ -94,14 +98,21 @@ export async function signUpUser(
   return id;
 }
 
-/** Runs `fn` as an API request would: role `authenticated` (or `anon` when userId is null). */
+/**
+ * Runs `fn` as an API request would: role `authenticated` (or `anon` when userId is null).
+ * The session is MFA-verified (`aal2`) unless `aal` says otherwise (Fase 26).
+ */
 export function asUser<T>(
   db: PGlite,
   userId: string | null,
   fn: (tx: Transaction) => Promise<T>,
+  aal: 'aal1' | 'aal2' = 'aal2',
 ): Promise<T> {
   return db.transaction(async (tx) => {
     await tx.query("select set_config('request.jwt.claim.sub', $1, true)", [userId ?? '']);
+    await tx.query("select set_config('request.jwt.claims', $1, true)", [
+      userId ? JSON.stringify({ sub: userId, role: 'authenticated', aal }) : '',
+    ]);
     await tx.exec(`set local role ${userId ? 'authenticated' : 'anon'}`);
     return fn(tx);
   });

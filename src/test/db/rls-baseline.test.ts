@@ -137,6 +137,8 @@ const AUTHENTICATED_RPCS = [
 const POLICY_HELPERS = [
   'academy_file_readable',
   'can_manage_listing',
+  // MFA da equipe (Fase 26): lido por is_platform_admin nas policies.
+  'current_aal',
   'current_email',
   'has_org_role',
   'is_catalog_image',

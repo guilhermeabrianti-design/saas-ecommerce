@@ -379,7 +379,8 @@ const messages: Record<string, string> = {
     'O código só pode ser informado nos primeiros 30 dias e antes da primeira venda.',
   'referral.forbidden': 'Só o proprietário informa o código de indicação.',
   'referral.invalid_settings': 'Revise as regras: recompensa maior que zero para ligar.',
-  'admin.forbidden': 'Apenas a equipe da plataforma.',
+  'admin.forbidden': 'Apenas a equipe da plataforma (com verificação em duas etapas).',
+  rate_limited: 'Muitas operações seguidas. Aguarde um pouco e tente de novo.',
 };
 
 export function affiliateErrorMessage(error: unknown): string {

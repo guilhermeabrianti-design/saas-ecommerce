@@ -205,6 +205,16 @@ Documento vivo — cada fase acrescenta os controles que implementa. Status atua
 - Valores em dinheiro só para owner/admin; `link` aceita só caminho interno (banco e tela recusam
   URL externa e `//host`).
 
+## Implementado (Fase 26)
+
+- MFA (TOTP) obrigatório para a equipe: `private.is_platform_admin()` exige `aal2` no JWT, então
+  nenhuma RPC ou policy da administração funciona só com a senha — nem chamando a API direto.
+- Quem ativa o segundo fator passa a precisar do código em todo login (`/verificacao`).
+- Rate limiting no banco (`private.rate_limits`, fora da API) por organização/usuário nas escritas
+  repetíveis, e por IP (hash SHA-256, nunca o IP) nas rotas públicas do checkout.
+- Pendente: CSP e cabeçalhos de segurança (dependem da hospedagem do frontend), CAPTCHA no
+  cadastro, CORS restrito por origem nas Edge Functions.
+
 ## Planejado (por fase)
 
 | Controle                                                                    | Fase  |
