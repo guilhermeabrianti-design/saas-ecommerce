@@ -7,6 +7,8 @@ import { PageLoader } from '@/components/ui/PageLoader';
 import { Section } from '@/components/ui/Section';
 import { CheckoutPaymentSection } from '@/features/checkout/components/CheckoutPaymentSection';
 import { financeErrorMessage, usePaySupplierOrder } from '@/features/finance/api';
+import { useMySupplierReviews } from '@/features/reviews/api';
+import { SupplierReviewForm } from '@/features/reviews/components/SupplierReviewForm';
 import { PaymentSection } from '@/features/finance/components/PaymentSection';
 import { useOrganization } from '@/features/organizations/organization-context';
 import { orgPermissions } from '@/features/organizations/roles';
@@ -88,6 +90,7 @@ export function OrderPage() {
   const canFinance = orgPermissions.viewFinance(active!.role);
   const order = useOrder(orgId, orderId);
   const paySupplier = usePaySupplierOrder(orgId);
+  const supplierReviews = useMySupplierReviews(orderId, canFinance);
   const payError = paySupplier.isError ? paySupplier.error : null;
   const o = order.data;
 
@@ -193,6 +196,13 @@ export function OrderPage() {
                       {s.paid_at && <p className="text-muted text-xs">Pago em {when(s.paid_at)}</p>}
                     </div>
                     <SupplierOrderStatusBadge status={s.status} />
+                    {canFinance && s.status === 'shipped' && (
+                      <SupplierReviewForm
+                        orderId={o.id}
+                        supplierOrderId={s.id}
+                        existing={supplierReviews.data?.find((r) => r.supplier_order_id === s.id)}
+                      />
+                    )}
                     {canFinance && s.status === 'shipped' && !s.paid_at && (
                       <ConfirmButton
                         confirmLabel={`Pagar ${formatBRL(s.total_wholesale_cents)}`}

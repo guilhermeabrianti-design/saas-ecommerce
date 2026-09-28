@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.28.0] — Fase 28: Avaliações e reputação
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20261004120000_reviews.sql`):
+  - **Só avalia quem comprou/recebeu**: o comprador do checkout avalia a loja pelo link de
+    acompanhamento depois do envio; o vendedor avalia o fornecedor por pedido de fornecimento
+    enviado. Uma avaliação por pedido, 1–5 estrelas e comentário opcional.
+  - Aparece só o primeiro nome do comprador ou "Vendedor verificado" — nada de e-mail ou documento.
+  - A organização avaliada **responde uma vez**; a equipe **oculta** com motivo (sai da média,
+    auditado). Tabela sem leitura direta: tudo por RPCs que já filtram as ocultas.
+  - **Métricas objetivas** (90 dias, a partir de 5 pedidos): fornecedor — pedidos enviados,
+    cancelamentos e tempo médio até o envio; vendedor — vendas pagas entregues, enviadas e canceladas.
+  - Aviso de nova avaliação na central de notificações.
+- **Edge Function `checkout`**: `POST /review` (limite por IP) e nota da loja na página do produto
+  e na vitrine.
+- **Telas**:
+  - Comprador: "Avalie sua compra" no acompanhamento do pedido; nota da loja no checkout e na vitrine.
+  - Vendedor: "Avaliar fornecedor" no pedido; **reputação do fornecedor** no anúncio do catálogo.
+  - Vendedor e fornecedor: **Reputação** (nota, distribuição, métricas, avaliações e resposta).
+  - Equipe: **Avaliações** (todas, 1–2 estrelas, ocultas; ocultar/reexibir).
+- **Testes**: 7 de banco e 8 de frontend/parser.
+
+### Limitações conhecidas
+
+- Vitrine de vendedor não é visível a outras contas conectadas (só o público vê a nota na vitrine).
+- Pedidos de marketplace não geram avaliação aqui (cada marketplace tem a sua).
+
 ## [0.27.0] — Fase 27: Suporte e denúncias
 
 ### Adicionado

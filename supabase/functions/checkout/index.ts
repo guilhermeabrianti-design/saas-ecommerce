@@ -8,6 +8,7 @@
  *   GET  /store/<código>   vitrine pública do vendedor (Fase 23)
  *   GET  /link/<código>    destino de um link de divulgação
  *   POST /visit            conta um acesso (link ou vitrine)
+ *   POST /review           avaliação do comprador (Fase 28)
  *
  * Implantada sem verificação de JWT (o comprador não tem conta): /pay e
  * /offer só usam RPCs do service role que validam tudo no banco; /webhook
@@ -36,6 +37,7 @@ import {
 } from '../_shared/payments/mercadopago.ts';
 import { parsePublicCode, parseVisit } from '../_shared/affiliates.ts';
 import { CHECKOUT_LIMITS, clientIp, ipSubject, type RouteLimit } from '../_shared/ratelimit.ts';
+import { parseReview } from '../_shared/reviews.ts';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const MAX_BODY_BYTES = 20_000;
@@ -77,6 +79,10 @@ const dbErrors: Record<string, [number, string]> = {
   'checkout.not_found': [404, 'not_found'],
   'checkout.not_refundable': [409, 'not_refundable'],
   'checkout.already_shipped': [409, 'already_shipped'],
+  'reviews.not_found': [404, 'not_found'],
+  'reviews.invalid': [400, 'invalid_body'],
+  'reviews.not_allowed': [409, 'review_not_allowed'],
+  'reviews.already_reviewed': [409, 'already_reviewed'],
 };
 
 function dbError(where: string, error: { message: string; code?: string }) {
@@ -170,8 +176,9 @@ async function offer(productId: string) {
   }
   const { image_paths: _paths, ...rest } = data as Record<string, unknown>;
   const config = mpConfig();
+  const rating = await db.rpc('store_rating', { p_product: productId, p_store_code: null });
   return json(200, {
-    offer: { ...rest, images },
+    offer: { ...rest, images, rating: rating.data ?? null },
     payments: config ? { configured: true, public_key: config.publicKey } : { configured: false },
   });
 }
@@ -382,9 +389,11 @@ async function store(rawCode: string) {
     const signed = await db.storage.from('product-images').createSignedUrls(paths, 3600);
     for (const s of signed.data ?? []) if (s.path && s.signedUrl) urls.set(s.path, s.signedUrl);
   }
+  const rating = await db.rpc('store_rating', { p_product: null, p_store_code: code });
   return json(200, {
     store: {
       ...data,
+      rating: rating.data ?? null,
       products: products.map(({ image_path, ...rest }) => ({
         ...rest,
         image: image_path ? (urls.get(image_path) ?? null) : null,
@@ -421,6 +430,26 @@ async function visit(req: Request) {
   return json(200, { ok: true });
 }
 
+/** Avaliação do comprador pelo token do acompanhamento (Fase 28). */
+async function submitReview(req: Request) {
+  const raw = await req.text();
+  if (raw.length > 4_000) return json(413, { error: 'too_large' });
+  let input;
+  try {
+    input = parseReview(JSON.parse(raw));
+  } catch {
+    input = null;
+  }
+  if (!input) return json(400, { error: 'invalid_body' });
+  const { error } = await service().rpc('checkout_submit_review', {
+    p_token: input.token,
+    p_rating: input.rating,
+    p_comment: input.comment,
+  });
+  if (error) return dbError('review', error);
+  return json(200, { ok: true });
+}
+
 /**
  * Limite por IP (Fase 26). Sem IP identificável ou com falha no contador,
  * segue: o limite protege, mas não pode derrubar a venda.
@@ -453,7 +482,9 @@ Deno.serve(async (req) => {
         ? CHECKOUT_LIMITS.pay
         : path.endsWith('/visit')
           ? CHECKOUT_LIMITS.visit
-          : null;
+          : path.endsWith('/review')
+            ? CHECKOUT_LIMITS.pay
+            : null;
   if (route && (await overLimit(req, route))) return json(429, { error: 'rate_limited' });
 
   const offerMatch = /\/offer\/([^/]+)$/.exec(path);
@@ -467,5 +498,6 @@ Deno.serve(async (req) => {
   if (path.endsWith('/webhook')) return webhook(req);
   if (path.endsWith('/refund')) return refund(req);
   if (path.endsWith('/visit')) return visit(req);
+  if (path.endsWith('/review')) return submitReview(req);
   return json(404, { error: 'not_found' });
 });

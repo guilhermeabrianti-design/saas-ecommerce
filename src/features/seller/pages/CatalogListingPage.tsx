@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
+import { SupplierReputationSection } from '@/features/reviews/components/SupplierReputationSection';
 import { ArrowLeft, Download, ImageOff } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
@@ -186,6 +187,8 @@ export function CatalogListingPage() {
             listingId={d.listing_id}
             suggestedPriceCents={d.suggested_price_cents}
           />
+
+          <SupplierReputationSection listingId={d.listing_id} />
 
           {d.description && (
             <Section title="Descrição" description="Texto do fornecedor.">

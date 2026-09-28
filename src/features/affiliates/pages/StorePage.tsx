@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router';
 import { ImageOff } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
 import { PageLoader } from '@/components/ui/PageLoader';
+import { RatingBadge } from '@/features/reviews/components/Stars';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { formatBRL } from '@/utils/money';
 import { currentAttribution, rememberAttribution, type PublicStore } from '../affiliates';
@@ -72,7 +73,10 @@ export function StorePage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold tracking-tight">{store.data.store_name}</h1>
+      <div className="space-y-1">
+        <h1 className="text-2xl font-semibold tracking-tight">{store.data.store_name}</h1>
+        <RatingBadge rating={store.data.rating} />
+      </div>
       <Products store={store.data} />
     </div>
   );

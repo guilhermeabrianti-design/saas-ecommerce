@@ -133,6 +133,10 @@ export const storeSchema = z.object({
   store: z.object({
     store_name: z.string(),
     store_code: z.string(),
+    rating: z
+      .object({ rating_avg: z.number().nullable(), rating_count: z.number().int() })
+      .nullable()
+      .optional(),
     products: z.array(
       z.object({
         product_id: z.uuid(),

@@ -32,6 +32,8 @@ import { CheckoutAdminPage } from '@/features/checkout/pages/CheckoutAdminPage';
 import { CheckoutPage } from '@/features/checkout/pages/CheckoutPage';
 import { CheckoutStatusPage } from '@/features/checkout/pages/CheckoutStatusPage';
 import { ModerationPage } from '@/features/moderation/pages/ModerationPage';
+import { ReputationPage } from '@/features/reviews/pages/ReputationPage';
+import { ReviewsAdminPage } from '@/features/reviews/pages/ReviewsAdminPage';
 import { AdminTicketPage, SupportAdminPage } from '@/features/support/pages/SupportAdminPage';
 import { SupportPage, TicketPage } from '@/features/support/pages/SupportPage';
 import { NotificationsPage } from '@/features/notifications/pages/NotificationsPage';
@@ -126,6 +128,7 @@ export const router = createBrowserRouter([
               { path: 'admin/saques', element: <WithdrawalsAdminPage /> },
               { path: 'admin/indicacoes', element: <ReferralsAdminPage /> },
               { path: 'admin/suporte', element: <SupportAdminPage /> },
+              { path: 'admin/avaliacoes', element: <ReviewsAdminPage /> },
               { path: 'admin/suporte/:ticketId', element: <AdminTicketPage /> },
               { path: 'admin/moderacao', element: <ModerationPage /> },
               { path: 'admin/academia', element: <AcademyAdminPage /> },
@@ -147,6 +150,7 @@ export const router = createBrowserRouter([
               { path: 'financeiro', element: <FinancePage /> },
               { path: 'carteira', element: <WalletPage /> },
               { path: 'indicacoes', element: <ReferralsPage /> },
+              { path: 'reputacao', element: <ReputationPage /> },
               {
                 element: <RequireOrgKind kind="seller" />,
                 children: [

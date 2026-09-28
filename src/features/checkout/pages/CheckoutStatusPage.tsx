@@ -6,6 +6,7 @@ import { PageLoader } from '@/components/ui/PageLoader';
 import { Section } from '@/components/ui/Section';
 import { formatBRL } from '@/utils/money';
 import { useCheckoutOrderStatus } from '../api';
+import { BuyerReview } from '../components/BuyerReview';
 import {
   checkoutMethodLabels,
   paymentStatusLabels,
@@ -124,6 +125,8 @@ export function CheckoutStatusPage() {
           </ul>
         </Section>
       )}
+
+      <BuyerReview token={token} s={s} />
     </div>
   );
 }

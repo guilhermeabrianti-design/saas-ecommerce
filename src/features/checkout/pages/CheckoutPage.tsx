@@ -10,6 +10,7 @@ import { Section } from '@/components/ui/Section';
 import { Select } from '@/components/ui/Select';
 import { TextField } from '@/components/ui/TextField';
 import { describeAttributes } from '@/features/products/variants';
+import { RatingBadge } from '@/features/reviews/components/Stars';
 import { currentAttribution } from '@/features/affiliates/affiliates';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { UFS } from '@/utils/br';
@@ -212,6 +213,7 @@ function Checkout({ data }: { data: CheckoutOffer }) {
         <Gallery images={offer.images} name={offer.name} />
         <div>
           <p className="text-muted text-sm">Vendido por {offer.store_name}</p>
+          <RatingBadge rating={offer.rating} />
           <h1 className="text-2xl font-semibold tracking-tight">{offer.name}</h1>
           {offer.brand && <p className="text-muted text-sm">{offer.brand}</p>}
         </div>

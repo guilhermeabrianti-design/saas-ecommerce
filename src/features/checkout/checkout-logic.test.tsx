@@ -25,6 +25,7 @@ const mocks = vi.hoisted(() => ({ status: null as unknown }));
 
 vi.mock('./api', () => ({
   useCheckoutOrderStatus: () => ({ isPending: false, isError: false, data: mocks.status }),
+  useSubmitReview: () => ({ mutate: vi.fn(), isPending: false, isError: false }),
 }));
 
 const validBuyer = {
@@ -55,6 +56,7 @@ const baseStatus: CheckoutOrderStatus = {
   expires_at: '2026-09-28T13:00:00Z',
   refund_pending: false,
   tracking: null,
+  can_review: false,
 };
 
 describe('comprador', () => {

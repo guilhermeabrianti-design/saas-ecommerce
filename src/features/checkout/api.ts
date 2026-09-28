@@ -88,6 +88,19 @@ export function usePay() {
   });
 }
 
+export function useSubmitReview(token: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { rating: number; comment: string }) => {
+      const { error } = await getSupabase().functions.invoke('checkout/review', {
+        body: { token, rating: input.rating, comment: input.comment.trim() || null },
+      });
+      if (error) throw await toCheckoutError(error);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: checkoutKeys.status(token) }),
+  });
+}
+
 export function useCheckoutOrderStatus(token: string) {
   return useQuery({
     queryKey: checkoutKeys.status(token),

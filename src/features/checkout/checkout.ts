@@ -29,6 +29,11 @@ export const offerSchema = z.object({
     available: z.number().int().nullable(),
     variants: z.array(offerVariantSchema),
     images: z.array(z.string()),
+    // Nota da loja (Fase 28).
+    rating: z
+      .object({ rating_avg: z.number().nullable(), rating_count: z.number().int() })
+      .nullable()
+      .optional(),
   }),
   payments: z.union([
     z.object({ configured: z.literal(true), public_key: z.string().min(1) }),
@@ -159,6 +164,16 @@ export const orderStatusSchema = z.object({
   expires_at: z.string().nullable(),
   refund_pending: z.boolean(),
   tracking: z.array(z.object({ carrier: z.string().nullable(), code: z.string() })).nullable(),
+  // Avaliação do comprador (Fase 28).
+  can_review: z.boolean().optional().default(false),
+  review: z
+    .object({
+      rating: z.number().int(),
+      comment: z.string().nullable(),
+      reply: z.string().nullable(),
+    })
+    .nullable()
+    .optional(),
 });
 
 export type CheckoutOrderStatus = z.infer<typeof orderStatusSchema>;

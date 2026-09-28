@@ -478,6 +478,17 @@ receita da TheSigns**. Nenhuma taxa fica no código; o cálculo é feito só no 
   equipe: `admin_support_overview`, `admin_support_tickets`, `admin_support_ticket_context`.
 - `private.notify_user` envia notificação para uma pessoa (sem organização).
 
+### Avaliações e reputação (Fase 28)
+
+- `reviews`: alvo (organização), origem `buyer` (pedido do checkout, único) ou `seller` (pedido de
+  fornecimento, único), nota 1–5, comentário, resposta única, ocultação com motivo. RLS ligada sem
+  policy: leitura só pelas RPCs.
+- Métricas em `private.org_reputation` (90 dias); avaliações visíveis em `private.org_reviews`.
+- RPCs: `organization_reputation` (membros, equipe, fornecedores ativos), `listing_supplier_reputation`,
+  `review_supplier_order`, `my_supplier_reviews`, `reply_review`; equipe: `admin_reviews`,
+  `admin_set_review_hidden` (auditada `review.hide`/`review.show`). Service role:
+  `checkout_submit_review`, `store_rating`. `checkout_order_status` ganhou `can_review` e `review`.
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,
