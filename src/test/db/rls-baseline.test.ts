@@ -117,6 +117,7 @@ const AUTHENTICATED_RPCS = [
   'record_order_payment',
   'referral_summary',
   'refund_order_payment',
+  'register_shipping_label',
   'remove_member',
   'reply_review',
   'reply_support_ticket',
@@ -146,6 +147,7 @@ const AUTHENTICATED_RPCS = [
   'unlink_listing',
   'update_affiliate_link',
   'update_member_role',
+  'void_shipping_label',
   'wallet_pending',
   'wallet_summary',
 ];
@@ -166,11 +168,14 @@ const POLICY_HELPERS = [
   // Check constraints de profiles.phone/document (rodam com o papel de quem grava).
   'is_valid_document',
   'is_valid_phone',
+  // Etiquetas (Fase 30): policies do bucket e da tabela.
+  'label_file_access',
   'org_kind',
   'org_role_of',
   'product_image_path_org',
   'sales_file_readable',
   'sales_material_listing',
+  'shipment_org',
   'valid_variant_attributes',
   'visible_listing',
 ];

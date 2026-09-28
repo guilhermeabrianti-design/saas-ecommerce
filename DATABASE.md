@@ -503,6 +503,15 @@ receita da TheSigns**. Nenhuma taxa fica no código; o cálculo é feito só no 
   `inventory_items_enqueue_dropship_sync` enfileira no `stock_sync_outbox` as cópias importadas
   vinculadas quando o estoque do fornecedor muda.
 
+### Etiquetas de envio (Fase 30)
+
+- Bucket privado `shipping-labels` (PDF/PNG/JPG, 5 MB), pasta `so-<fornecimento>` ou `o-<pedido>`;
+  policies de leitura e envio por `private.label_file_access` (quem participa do envio, via
+  `private.shipment_org`). Sem exclusão de arquivo: anula-se o registro.
+- `shipping_labels`: envio (fornecimento XOR pedido), caminho, nome, transportadora, rastreio,
+  quem enviou, anulação. RLS: quem participa do envio. RPCs `register_shipping_label` (confere a
+  pasta e a existência do arquivo; avisa o outro lado) e `void_shipping_label`.
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,

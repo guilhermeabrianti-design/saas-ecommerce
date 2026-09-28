@@ -7,6 +7,9 @@ import { Button } from '@/components/ui/Button';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { Section } from '@/components/ui/Section';
 import { TextField } from '@/components/ui/TextField';
+import { useShippingLabels } from '@/features/labels/api';
+import { LabelsSection } from '@/features/labels/components/LabelsSection';
+import { latestTracking } from '@/features/labels/labels';
 import { SupplierOrderStatusBadge } from '@/features/orders/components/OrderStatusBadge';
 import { useOrganization } from '@/features/organizations/organization-context';
 import { orgPermissions } from '@/features/organizations/roles';
@@ -22,7 +25,13 @@ import {
   type SupplierOrderDetail,
 } from '../supplier-orders';
 
-function ShipForm({ order }: { order: SupplierOrderDetail }) {
+function ShipForm({
+  order,
+  defaults,
+}: {
+  order: SupplierOrderDetail;
+  defaults: { carrier: string | null; tracking_code: string | null } | null;
+}) {
   const { active } = useOrganization();
   const ship = useShipSupplierOrder(active!.organization.id, order.id);
   const {
@@ -31,7 +40,11 @@ function ShipForm({ order }: { order: SupplierOrderDetail }) {
     formState: { errors },
   } = useForm<ShipFormValues>({
     resolver: zodResolver(shipFormSchema),
-    defaultValues: { carrier: '', trackingCode: '' },
+    // Rastreio da etiqueta anexada (ex.: gerada pelo marketplace do vendedor).
+    defaultValues: {
+      carrier: defaults?.carrier ?? '',
+      trackingCode: defaults?.tracking_code ?? '',
+    },
   });
 
   return (
@@ -60,6 +73,12 @@ function ShipForm({ order }: { order: SupplierOrderDetail }) {
       </Button>
     </form>
   );
+}
+
+function ShipFormWithLabel({ order }: { order: SupplierOrderDetail }) {
+  const labels = useShippingLabels({ supplierOrderId: order.id, orderId: null });
+  const latest = labels.data ? latestTracking(labels.data) : null;
+  return <ShipForm key={latest?.id ?? 'none'} order={order} defaults={latest} />;
 }
 
 export function SupplierOrderPage() {
@@ -142,9 +161,17 @@ export function SupplierOrderPage() {
             </div>
           </Section>
 
+          <Section title="Etiqueta" description="Etiqueta anexada pelo vendedor ou por você.">
+            <LabelsSection
+              shipment={{ supplierOrderId: o.id, orderId: null }}
+              canUpload={o.status !== 'cancelled' && orgPermissions.editCatalog(active!.role)}
+              emptyText="Nenhuma etiqueta anexada. Gere na transportadora e anexe, ou aguarde a do vendedor."
+            />
+          </Section>
+
           {o.status === 'pending' && orgPermissions.editCatalog(active!.role) && (
             <Section title="Envio" description="Informe a postagem.">
-              <ShipForm order={o} />
+              <ShipFormWithLabel order={o} />
             </Section>
           )}
           {o.status === 'shipped' && (

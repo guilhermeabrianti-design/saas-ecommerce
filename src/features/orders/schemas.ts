@@ -160,3 +160,18 @@ export const emptyOrderForm: OrderFormValues = {
   notes: '',
   items: [],
 };
+
+/**
+ * "Em trânsito" (Fase 30): derivado do envio com rastreio e sem entrega.
+ * O status automático por evento da transportadora depende da API dela.
+ */
+export function inTransit(order: {
+  status: OrderStatus;
+  supplier_orders: { status: SupplierOrderStatus; tracking_code: string | null }[];
+}): boolean {
+  if (order.status === 'shipped') return true;
+  return (
+    order.status === 'confirmed' &&
+    order.supplier_orders.some((s) => s.status === 'shipped' && s.tracking_code)
+  );
+}

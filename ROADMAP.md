@@ -31,13 +31,13 @@ integração fictícia** ("Não configurado" / "Não suportado pela API atual").
 | Ferramentas com IA                                      | Reaproveita a Edge Function `ai` (cota por organização, saída revisável, nada salvo sem revisão).                                                                                                                                                                        |
 | Dados de exemplo                                        | Seed só em desenvolvimento, marcado como tal. Depoimentos/produtos da landing não podem ser inventados.                                                                                                                                                                  |
 
-## Entregue (v0.1 – v0.29)
+## Entregue (v0.1 – v0.30)
 
 1 Setup · 2 Auth/sessão/RBAC · 3 Organizações + RLS · 4 Produtos · 5 Variações/imagens · 6 Estoque
 (ledger) · 7 Catálogo de fornecedores · 8 Pedidos + roteamento ao fornecedor · 9 Financeiro (ledger)
 · 10 Integrações (núcleo, webhooks Shopify/Woo) · 11 Analytics · 12 Admin da plataforma · 13 IA
 (descrição) · 14 Credenciais criptografadas + envio de estoque · **15 Taxas de marketplace, comissão
-do vendedor, categorias e calculadora da divisão** · **16 Moderação de fornecedores e anúncios** · **17 Academia (YouTube)** · **18 Onboarding e painel do vendedor** · **19 Central de Vendas e campanhas para lives** · **20 Ferramentas (preço-alvo, simulador de lucro, textos com IA)** · **21 Checkout próprio + Mercado Pago** · **22 Carteira e saques** · **23 Afiliados e indicação (links, vitrine, QR Code, atribuição e indique e ganhe)** · **24 Notificações em tempo real e alertas** · **25 Landing page** · **26 Rate limiting, endurecimento e MFA da equipe** · **27 Suporte e denúncias** · **28 Avaliações e reputação** · **29 Gerenciador de anúncios e publicação (Shopify/WooCommerce)**.
+do vendedor, categorias e calculadora da divisão** · **16 Moderação de fornecedores e anúncios** · **17 Academia (YouTube)** · **18 Onboarding e painel do vendedor** · **19 Central de Vendas e campanhas para lives** · **20 Ferramentas (preço-alvo, simulador de lucro, textos com IA)** · **21 Checkout próprio + Mercado Pago** · **22 Carteira e saques** · **23 Afiliados e indicação (links, vitrine, QR Code, atribuição e indique e ganhe)** · **24 Notificações em tempo real e alertas** · **25 Landing page** · **26 Rate limiting, endurecimento e MFA da equipe** · **27 Suporte e denúncias** · **28 Avaliações e reputação** · **29 Gerenciador de anúncios e publicação (Shopify/WooCommerce)** · **30 Etiquetas de envio (upload e vínculo)**.
 
 ## Próximas fases
 
@@ -45,7 +45,6 @@ Ordem pensada para fechar primeiro o **MVP da seção 26** e depois o ecossistem
 
 | Fase  | Entrega                                                                                                                                   | Seções |
 | ----- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| 30    | **Etiquetas**: upload/vínculo manual e geração via API oficial quando houver; status `in_transit`.                                        | 41, 10 |
 | 31–34 | **Mercado Livre, Shopee, TikTok Shop, Amazon (SP-API)** — uma fase por marketplace, cada uma dependente de app de desenvolvedor aprovado. | 11, 38 |
 | 35    | **Mentoria e Comunidade** (fora do MVP): mentores, comissão de mentor, aulas ao vivo, grupos, desafios.                                   | 8, 44  |
 | 36    | **Gamificação**: pontos por eventos reais, níveis, conquistas, ranking — configurável.                                                    | 45     |
@@ -65,7 +64,9 @@ verde, revisão de segurança e entrada no [CHANGELOG.md](CHANGELOG.md).
 4. **Preço no checkout** (decidido provisoriamente na Fase 21): vale o preço do produto do vendedor,
    com piso = fornecedor + comissão; a TheSigns fica com o restante. Confirmar com o dono do produto
    (alternativa: preço sugerido do fornecedor fixo).
-5. **Frete no checkout**: hoje incluso no preço. Cotação real depende da Fase 30.
+5. **Frete no checkout e etiquetas por API**: frete hoje incluso no preço; cotação real, geração de
+   etiqueta e "em trânsito" automático dependem de contrato com Melhor Envio/Correios (Fase 30 entregou
+   o upload manual).
 6. **Repasse automático de saques**: hoje a equipe faz o PIX no painel do Mercado Pago e registra
    o identificador. Automatizar depende de liberação da API de Money Out na conta da plataforma.
 7. **Certificados**: PDF gerado na Edge Function com código de verificação público.

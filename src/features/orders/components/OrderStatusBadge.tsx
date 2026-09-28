@@ -49,6 +49,10 @@ export function OrderChannelBadge({ channel }: { channel: OrderChannel }) {
   );
 }
 
+export function InTransitBadge() {
+  return <span className={cn(base, 'bg-warning/10 text-warning')}>Em trânsito</span>;
+}
+
 export function SupplierOrderStatusBadge({ status }: { status: SupplierOrderStatus }) {
   return (
     <span className={cn(base, supplierTone[status])}>{supplierOrderStatusLabels[status]}</span>

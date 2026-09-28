@@ -7,6 +7,7 @@ import { PageLoader } from '@/components/ui/PageLoader';
 import { Section } from '@/components/ui/Section';
 import { CheckoutPaymentSection } from '@/features/checkout/components/CheckoutPaymentSection';
 import { financeErrorMessage, usePaySupplierOrder } from '@/features/finance/api';
+import { LabelsSection } from '@/features/labels/components/LabelsSection';
 import { useMySupplierReviews } from '@/features/reviews/api';
 import { SupplierReviewForm } from '@/features/reviews/components/SupplierReviewForm';
 import { PaymentSection } from '@/features/finance/components/PaymentSection';
@@ -20,7 +21,9 @@ import {
   OrderChannelBadge,
   OrderStatusBadge,
   SupplierOrderStatusBadge,
+  InTransitBadge,
 } from '../components/OrderStatusBadge';
+import { inTransit } from '../schemas';
 
 const when = (iso: string | null) => (iso ? new Date(iso).toLocaleString('pt-BR') : null);
 
@@ -116,6 +119,7 @@ export function OrderPage() {
             <h1 className="text-2xl font-semibold tracking-tight">Pedido #{o.number}</h1>
             <OrderStatusBadge status={o.status} channel={o.channel} />
             <OrderChannelBadge channel={o.channel} />
+            {inTransit(o) && <InTransitBadge />}
             <Link
               to={`/suporte?categoria=order&pedido=${o.id}`}
               className="text-muted hover:text-fg ml-auto text-sm underline-offset-2 hover:underline"
@@ -215,6 +219,36 @@ export function OrderPage() {
                   </li>
                 ))}
               </ul>
+            </Section>
+          )}
+
+          {o.status !== 'pending' && (
+            <Section
+              title="Etiquetas de envio"
+              description="Anexe a etiqueta gerada pelo marketplace (ou pela transportadora) para quem envia."
+            >
+              <div className="space-y-6">
+                {o.supplier_orders.map((s) => (
+                  <div key={s.id} className="space-y-2">
+                    <p className="text-sm font-medium">Fornecimento #{s.number}</p>
+                    <LabelsSection
+                      shipment={{ supplierOrderId: s.id, orderId: null }}
+                      canUpload={canEdit && s.status !== 'cancelled'}
+                      emptyText="Nenhuma etiqueta. Se o marketplace gerou a etiqueta, anexe aqui para o fornecedor imprimir."
+                    />
+                  </div>
+                ))}
+                {o.order_items.some((i) => i.fulfillment === 'own_stock') && (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">Itens do seu estoque</p>
+                    <LabelsSection
+                      shipment={{ supplierOrderId: null, orderId: o.id }}
+                      canUpload={canEdit && o.status !== 'cancelled' && o.status !== 'delivered'}
+                      emptyText="Nenhuma etiqueta anexada."
+                    />
+                  </div>
+                )}
+              </div>
             </Section>
           )}
 

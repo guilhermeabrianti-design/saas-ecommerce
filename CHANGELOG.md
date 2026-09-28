@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.30.0] — Fase 30: Etiquetas de envio
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20261006120000_shipping_labels.sql`):
+  - **Etiqueta anexada ao envio** (PDF, PNG ou JPG até 5 MB) no bucket privado `shipping-labels`,
+    vinculada a um pedido de fornecimento ou a um pedido de estoque próprio. Pasta por envio; só
+    quem participa (fornecedor e vendedor daquele fornecimento, ou o vendedor do pedido) lê e envia.
+  - Caso principal: o vendedor anexa a **etiqueta gerada pelo marketplace** e o fornecedor baixa,
+    imprime e envia — o rastreio da etiqueta já preenche o formulário de envio dele.
+  - Anular etiqueta errada; envio cancelado ou entregue não recebe etiqueta; o outro lado é avisado.
+- **Telas**: seção de etiquetas no pedido (por fornecimento e para os itens do estoque próprio) e no
+  fornecimento; selo **"Em trânsito"** no pedido enviado ou com fornecimento enviado com rastreio.
+- **Testes**: 4 de banco e 7 de frontend.
+
+### Decisões
+
+- **Geração de etiqueta pela API oficial** (Melhor Envio, Correios com contrato) **não foi feita**:
+  depende de contrato e credenciais da plataforma. Sem isso, o fluxo é o upload — nada de etiqueta
+  simulada. Mesmo motivo para o "em trânsito" automático por evento da transportadora: hoje ele é
+  derivado do envio com rastreio.
+
 ## [0.29.0] — Fase 29: Gerenciador de anúncios e publicação
 
 ### Adicionado
