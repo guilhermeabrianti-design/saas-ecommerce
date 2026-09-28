@@ -171,6 +171,17 @@ Documento vivo — cada fase acrescenta os controles que implementa. Status atua
 - Estorno pela equipe exige JWT de admin, é auditado e só vale antes de o fornecedor enviar.
 - Pendente: rate limit por IP no checkout (Fase 26; hoje só limite por loja no banco), CAPTCHA.
 
+## Implementado (Fase 22)
+
+- Saldo sempre calculado a partir do livro-razão imutável; não há coluna de saldo para adulterar.
+- Saque só pelo proprietário, com trava por organização (dois pedidos simultâneos não gastam o mesmo
+  saldo) e idempotência por `request_id`. O disponível é conferido de novo na aprovação.
+- Débito no razão só quando a equipe registra o pagamento, com o identificador da transferência;
+  aprovar, recusar, pagar e mudar as regras ficam na auditoria.
+- Chave PIX e documento do titular visíveis só para owner/admin da organização e para a equipe.
+- Risco conhecido: a entrega é marcada pelo vendedor. O prazo após a entrega (padrão 7 dias) é a
+  proteção; a equipe pode aumentá-lo.
+
 ## Planejado (por fase)
 
 | Controle                                                                    | Fase  |

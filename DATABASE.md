@@ -397,6 +397,27 @@ receita da TheSigns**. Nenhuma taxa fica no código; o cálculo é feito só no 
 - Equipe: `admin_checkout_summary`, `admin_checkout_payments`, `admin_checkout_refund_begin`
   (auditoria `checkout.refund`; só antes de o fornecedor enviar).
 
+### Carteira e saques (Fase 22)
+
+- Carteira = visão de `ledger_entries` só com o dinheiro que passou pela plataforma
+  (`checkout_commission`, `checkout_supplier`, `checkout_reversal`, `withdrawal`). Lançamentos
+  manuais da Fase 9 ficam fora. Saldos em `private.wallet_balance` (sem coluna de saldo).
+- Liberação por pedido (`private.order_release_at`): o que vier primeiro entre entrega + N dias e
+  último envio do fornecedor + M dias. Estorno/contestação do mesmo pedido se compensa com ele;
+  depois da liberação, reduz o disponível (que pode ficar negativo).
+- `wallet_settings` (linha única): N, M e saque mínimo. Leitura para contas conectadas; escrita só
+  por `admin_save_wallet_settings` (auditada `wallet.settings`).
+- `withdrawal_requests`: `requested → approved → paid`, ou `rejected` / `cancelled`. Chave PIX
+  normalizada e validada no banco (`private.is_valid_pix_key`), titular com CPF/CNPJ válido.
+  Owner/admin da organização leem; escrita só por RPC.
+- Organização: `wallet_summary`, `wallet_pending` (owner/admin), `request_withdrawal` (só owner;
+  idempotente por `request_id`; trava consultiva por organização contra saque duplo) e
+  `cancel_withdrawal` (só owner, enquanto solicitado).
+- Equipe: `admin_withdrawals_overview`, `admin_withdrawals`, `admin_approve_withdrawal` (disponível
+  não pode ficar negativo; organização suspensa não), `admin_reject_withdrawal` (com motivo) e
+  `admin_pay_withdrawal` (identificador da transferência; lança `withdrawal` negativo com
+  `request_id` = id do saque). Tudo auditado (`wallet.*`).
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router';
 import {
   Activity,
+  Banknote,
+  PiggyBank,
   Calculator,
   ChartColumn,
   CreditCard,
@@ -84,6 +86,13 @@ const navItems: NavItem[] = [
     staffOnly: true,
   },
   {
+    to: '/admin/saques',
+    label: 'Saques',
+    icon: Banknote,
+    requiresAuth: true,
+    staffOnly: true,
+  },
+  {
     to: '/admin/taxas',
     label: 'Taxas e comissões',
     icon: Percent,
@@ -142,6 +151,7 @@ const navItems: NavItem[] = [
   },
   { to: '/analises', label: 'Análises', icon: ChartColumn, requiresAuth: true, tenantOnly: true },
   { to: '/financeiro', label: 'Financeiro', icon: Wallet, requiresAuth: true, tenantOnly: true },
+  { to: '/carteira', label: 'Carteira', icon: PiggyBank, requiresAuth: true, tenantOnly: true },
   {
     to: '/organizacao',
     label: 'Organização',

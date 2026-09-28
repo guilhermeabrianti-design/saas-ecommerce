@@ -4,6 +4,7 @@ import { useAuth } from '@/features/auth/auth-context';
 import { feesAuditLabels } from '@/features/fees/fees';
 import { moderationAuditLabels } from '@/features/moderation/moderation';
 import { salesAuditLabels } from '@/features/sales/sales';
+import { walletAuditLabels } from '@/features/wallet/wallet';
 import { orgErrorMessage } from '@/features/organizations/errors';
 import { orgKinds } from '@/features/organizations/roles';
 import { getSupabase } from '@/lib/supabase';
@@ -155,6 +156,8 @@ export const auditActionLabels: Record<string, string> = {
   ...feesAuditLabels,
   ...moderationAuditLabels,
   ...salesAuditLabels,
+  ...walletAuditLabels,
+  'checkout.refund': 'Estorno do checkout',
 };
 
 const messages: Partial<Record<string, string>> = {

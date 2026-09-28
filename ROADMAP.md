@@ -31,13 +31,13 @@ integração fictícia** ("Não configurado" / "Não suportado pela API atual").
 | Ferramentas com IA                                      | Reaproveita a Edge Function `ai` (cota por organização, saída revisável, nada salvo sem revisão).                                                                                                                                                                        |
 | Dados de exemplo                                        | Seed só em desenvolvimento, marcado como tal. Depoimentos/produtos da landing não podem ser inventados.                                                                                                                                                                  |
 
-## Entregue (v0.1 – v0.21)
+## Entregue (v0.1 – v0.22)
 
 1 Setup · 2 Auth/sessão/RBAC · 3 Organizações + RLS · 4 Produtos · 5 Variações/imagens · 6 Estoque
 (ledger) · 7 Catálogo de fornecedores · 8 Pedidos + roteamento ao fornecedor · 9 Financeiro (ledger)
 · 10 Integrações (núcleo, webhooks Shopify/Woo) · 11 Analytics · 12 Admin da plataforma · 13 IA
 (descrição) · 14 Credenciais criptografadas + envio de estoque · **15 Taxas de marketplace, comissão
-do vendedor, categorias e calculadora da divisão** · **16 Moderação de fornecedores e anúncios** · **17 Academia (YouTube)** · **18 Onboarding e painel do vendedor** · **19 Central de Vendas e campanhas para lives** · **20 Ferramentas (preço-alvo, simulador de lucro, textos com IA)** · **21 Checkout próprio + Mercado Pago**.
+do vendedor, categorias e calculadora da divisão** · **16 Moderação de fornecedores e anúncios** · **17 Academia (YouTube)** · **18 Onboarding e painel do vendedor** · **19 Central de Vendas e campanhas para lives** · **20 Ferramentas (preço-alvo, simulador de lucro, textos com IA)** · **21 Checkout próprio + Mercado Pago** · **22 Carteira e saques**.
 
 ## Próximas fases
 
@@ -45,7 +45,6 @@ Ordem pensada para fechar primeiro o **MVP da seção 26** e depois o ecossistem
 
 | Fase  | Entrega                                                                                                                                                                       | Seções         |
 | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
-| 22    | **Carteira e saques**: disponível/pendente/bloqueado, solicitação de saque, aprovação da equipe, pagamento via Mercado Pago.                                                  | 16             |
 | 23    | **Afiliados e indicação**: link/código/QR, página pública do vendedor, cliques, visitas e vendas atribuídas pelo checkout, recompensa de indicação configurável.              | 14, 15         |
 | 24    | **Notificações em tempo real** (Supabase Realtime) e alertas de estoque baixo/esgotado/alteração de preço ou fornecedor.                                                      | 21, 13         |
 | 25    | **Landing page** pública (headline, como funciona, vendedores, fornecedores, Academia, planos, FAQ, CTA) — sem depoimentos inventados.                                        | 24             |
@@ -69,9 +68,11 @@ verde, revisão de segurança e entrada no [CHANGELOG.md](CHANGELOG.md).
 2. **Shopee fora de live**: nenhuma taxa cadastrada ("Taxa não configurada" até a equipe cadastrar).
 3. **Pedidos de marketplace x divisão**: no checkout (Fase 21) a plataforma recebe e repassa. Pedidos
    de marketplace continuam caindo na conta do vendedor, que paga o atacado (Fase 9); a cobrança da
-   parte da TheSigns nesses pedidos ainda precisa de regra (definir com a Fase 22).
+   parte da TheSigns nesses pedidos ainda precisa de regra (a carteira da Fase 22 cobre só o checkout).
 4. **Preço no checkout** (decidido provisoriamente na Fase 21): vale o preço do produto do vendedor,
    com piso = fornecedor + comissão; a TheSigns fica com o restante. Confirmar com o dono do produto
    (alternativa: preço sugerido do fornecedor fixo).
 5. **Frete no checkout**: hoje incluso no preço. Cotação real depende da Fase 30.
-6. **Certificados**: PDF gerado na Edge Function com código de verificação público.
+6. **Repasse automático de saques**: hoje a equipe faz o PIX no painel do Mercado Pago e registra
+   o identificador. Automatizar depende de liberação da API de Money Out na conta da plataforma.
+7. **Certificados**: PDF gerado na Edge Function com código de verificação público.

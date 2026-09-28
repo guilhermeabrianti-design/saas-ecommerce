@@ -35,6 +35,8 @@ import { SalesListingPage } from '@/features/sales/pages/SalesListingPage';
 import { ToolsPage } from '@/features/tools/pages/ToolsPage';
 import { AnalyticsPage } from '@/features/analytics/pages/AnalyticsPage';
 import { FinancePage } from '@/features/finance/pages/FinancePage';
+import { WalletPage } from '@/features/wallet/pages/WalletPage';
+import { WithdrawalsAdminPage } from '@/features/wallet/pages/WithdrawalsAdminPage';
 import { IntegrationPage } from '@/features/integrations/pages/IntegrationPage';
 import { IntegrationsPage } from '@/features/integrations/pages/IntegrationsPage';
 import { NewOrderPage } from '@/features/orders/pages/NewOrderPage';
@@ -98,6 +100,7 @@ export const router = createBrowserRouter([
               { path: 'admin', element: <AdminPage /> },
               { path: 'admin/taxas', element: <FeesAdminPage /> },
               { path: 'admin/pagamentos', element: <CheckoutAdminPage /> },
+              { path: 'admin/saques', element: <WithdrawalsAdminPage /> },
               { path: 'admin/moderacao', element: <ModerationPage /> },
               { path: 'admin/academia', element: <AcademyAdminPage /> },
               { path: 'admin/academia/:courseId', element: <CourseEditorPage /> },
@@ -116,6 +119,7 @@ export const router = createBrowserRouter([
               { path: 'estoque/:itemId', element: <InventoryItemPage /> },
               { path: 'analises', element: <AnalyticsPage /> },
               { path: 'financeiro', element: <FinancePage /> },
+              { path: 'carteira', element: <WalletPage /> },
               {
                 element: <RequireOrgKind kind="seller" />,
                 children: [

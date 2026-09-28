@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.22.0] — Fase 22: Carteira e saques
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20260929120000_wallet.sql`):
+  - **Carteira** calculada do livro-razão com o dinheiro que passou pela plataforma (checkout):
+    **disponível**, **pendente** (prazo de garantia) e **bloqueado** (saques em andamento).
+    Recebimentos manuais continuam só no Financeiro.
+  - Cada venda libera no que vier primeiro: **entrega + 7 dias** ou **envio do fornecedor + 30 dias**.
+    Os dois prazos e o **saque mínimo (R$ 10,00)** são editáveis pela equipe (`wallet_settings`).
+  - Estorno/contestação antes da liberação se compensa no próprio pedido; depois dela, reduz o
+    disponível (pode ficar negativo até novas vendas cobrirem).
+  - **Saque por PIX**: o proprietário solicita (chave CPF/CNPJ/e-mail/celular/aleatória validada,
+    titular com CPF/CNPJ), pode cancelar enquanto solicitado; a equipe **aprova** (confere o saldo de
+    novo), **recusa** com motivo ou **registra o pagamento** com o identificador da transferência
+    no Mercado Pago, e só então o débito `withdrawal` entra no razão. Tudo auditado.
+- **Telas**:
+  - Vendedor e fornecedor: **Carteira** (saldos, regra de liberação, solicitar/cancelar saque,
+    histórico, vendas em garantia com a data de liberação).
+  - Equipe: **Saques** (resumo, fila de abertas com dados para copiar, aprovar/recusar/registrar
+    pagamento, regras da carteira).
+  - Financeiro: novo tipo de lançamento "Saque".
+- **Testes**: 12 de banco e 8 de frontend. Linha de base de RLS atualizada.
+
+### Limitações conhecidas
+
+- O PIX é feito pela equipe no painel do Mercado Pago e registrado aqui: o repasse automático pela
+  API depende de liberação da conta (Money Out) e fica para depois.
+- A entrega é marcada pelo vendedor; o prazo após a entrega é a proteção contra liberação antecipada.
+- Pedidos de marketplace (dinheiro direto na conta do vendedor) continuam fora da carteira; a
+  cobrança da parte da TheSigns nesses pedidos segue em aberto (ROADMAP, ponto 3).
+
 ## [0.21.0] — Fase 21: Checkout próprio + Mercado Pago
 
 ### Adicionado

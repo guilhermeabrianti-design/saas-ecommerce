@@ -21,6 +21,7 @@ export const ledgerKinds = [
   'checkout_commission',
   'checkout_supplier',
   'checkout_reversal',
+  'withdrawal',
 ] as const;
 export type LedgerKind = (typeof ledgerKinds)[number];
 
@@ -32,6 +33,7 @@ export const ledgerKindLabels: Record<LedgerKind, string> = {
   checkout_commission: 'Comissão do checkout',
   checkout_supplier: 'Venda pelo checkout (fornecedor)',
   checkout_reversal: 'Estorno do checkout',
+  withdrawal: 'Saque',
 };
 
 export const periods = [
