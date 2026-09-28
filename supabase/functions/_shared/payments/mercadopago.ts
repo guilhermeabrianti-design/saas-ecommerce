@@ -8,6 +8,7 @@
  *  * O estado do pagamento é sempre lido na API (GET /v1/payments/:id);
  *    a notificação só diz qual pagamento consultar.
  */
+import { parseAttribution, type Attribution } from '../affiliates.ts';
 import { decimalToCents, timingSafeEqual } from '../integrations/common.ts';
 
 export const MP_API = 'https://api.mercadopago.com';
@@ -119,6 +120,8 @@ export interface CheckoutRequest {
   buyer: Buyer;
   payment: BrickPayment;
   method: CheckoutMethod;
+  /** Por onde o comprador chegou (link ou página da loja); opcional. */
+  attribution: Attribution | null;
 }
 
 const BOLETO_METHODS = new Set(['bolbradesco', 'pec']);
@@ -177,6 +180,7 @@ export function parseCheckoutRequest(input: unknown): CheckoutRequest {
     buyer: parseBuyer(b.buyer),
     payment,
     method,
+    attribution: parseAttribution(b.attribution),
   };
 }
 

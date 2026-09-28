@@ -6,13 +6,14 @@ import { Button } from '@/components/ui/Button';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { Section } from '@/components/ui/Section';
 import { TextField } from '@/components/ui/TextField';
+import { clearReferralCode, pendingReferralCode } from '@/features/affiliates/affiliates';
 import { useProfile } from '@/features/auth/profile';
 import { useCreateOrganization } from '../api';
 import { PendingInvitations } from '../components/PendingInvitations';
 import { orgErrorMessage } from '../errors';
 import { useOrganization } from '../organization-context';
 import { orgKindLabels } from '../roles';
-import { organizationFormSchema, type OrganizationFormValues } from '../schemas';
+import { createOrganizationFormSchema, type CreateOrganizationFormValues } from '../schemas';
 
 export function CreateOrganizationPage() {
   const profile = useProfile();
@@ -23,9 +24,10 @@ export function CreateOrganizationPage() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<OrganizationFormValues>({
-    resolver: zodResolver(organizationFormSchema),
-    defaultValues: { name: '' },
+  } = useForm<CreateOrganizationFormValues>({
+    resolver: zodResolver(createOrganizationFormSchema),
+    // Código guardado pelo link de indicação (/cadastro?indicacao=…).
+    defaultValues: { name: '', referral_code: pendingReferralCode() ?? '' },
   });
 
   if (profile.isPending) return <PageLoader />;
@@ -36,13 +38,17 @@ export function CreateOrganizationPage() {
   const role = profile.data.role;
   const firstTime = memberships.length === 0;
 
-  const onSubmit = handleSubmit(({ name }) => {
-    create.mutate(name, {
-      onSuccess: (orgId) => {
-        selectOrganization(orgId);
-        void navigate('/');
+  const onSubmit = handleSubmit(({ name, referral_code }) => {
+    create.mutate(
+      { name, referralCode: referral_code },
+      {
+        onSuccess: (orgId) => {
+          clearReferralCode();
+          selectOrganization(orgId);
+          void navigate('/');
+        },
       },
-    });
+    );
   });
 
   return (
@@ -74,6 +80,13 @@ export function CreateOrganizationPage() {
               autoComplete="organization"
               error={errors.name?.message}
               {...register('name')}
+            />
+            <TextField
+              label="Código de indicação (opcional)"
+              placeholder="Quem convidou você para a TheSigns"
+              autoComplete="off"
+              error={errors.referral_code?.message}
+              {...register('referral_code')}
             />
             <Button type="submit" loading={create.isPending}>
               Criar organização

@@ -10,6 +10,7 @@ import { Section } from '@/components/ui/Section';
 import { Select } from '@/components/ui/Select';
 import { TextField } from '@/components/ui/TextField';
 import { describeAttributes } from '@/features/products/variants';
+import { currentAttribution } from '@/features/affiliates/affiliates';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { UFS } from '@/utils/br';
 import { formatBRL } from '@/utils/money';
@@ -192,6 +193,7 @@ function Checkout({ data }: { data: CheckoutOffer }) {
           request_id: crypto.randomUUID(),
           buyer: toBuyerPayload(locked.buyer),
           payment: toPaymentPayload(formData),
+          attribution: currentAttribution(),
         });
         // Cartão recusado: fica aqui para tentar outro cartão ou meio.
         if (result.status === 'rejected') throw new CheckoutError('payment_rejected');

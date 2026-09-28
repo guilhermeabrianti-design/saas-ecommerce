@@ -21,6 +21,11 @@ import { CourseEditorPage } from '@/features/academy/pages/CourseEditorPage';
 import { CoursePage } from '@/features/academy/pages/CoursePage';
 import { LessonPage } from '@/features/academy/pages/LessonPage';
 import { AdminPage } from '@/features/admin/pages/AdminPage';
+import { AffiliatesPage } from '@/features/affiliates/pages/AffiliatesPage';
+import { LinkRedirectPage } from '@/features/affiliates/pages/LinkRedirectPage';
+import { ReferralsAdminPage } from '@/features/affiliates/pages/ReferralsAdminPage';
+import { ReferralsPage } from '@/features/affiliates/pages/ReferralsPage';
+import { StorePage } from '@/features/affiliates/pages/StorePage';
 import { FeesAdminPage } from '@/features/fees/pages/FeesAdminPage';
 import { CheckoutAdminPage } from '@/features/checkout/pages/CheckoutAdminPage';
 import { CheckoutPage } from '@/features/checkout/pages/CheckoutPage';
@@ -60,6 +65,9 @@ export const router = createBrowserRouter([
     children: [
       { path: 'c/pedido/:token', element: <CheckoutStatusPage /> },
       { path: 'c/:productId', element: <CheckoutPage /> },
+      // Divulgação do vendedor (Fase 23).
+      { path: 'loja/:code', element: <StorePage /> },
+      { path: 'r/:code', element: <LinkRedirectPage /> },
     ],
   },
   {
@@ -101,6 +109,7 @@ export const router = createBrowserRouter([
               { path: 'admin/taxas', element: <FeesAdminPage /> },
               { path: 'admin/pagamentos', element: <CheckoutAdminPage /> },
               { path: 'admin/saques', element: <WithdrawalsAdminPage /> },
+              { path: 'admin/indicacoes', element: <ReferralsAdminPage /> },
               { path: 'admin/moderacao', element: <ModerationPage /> },
               { path: 'admin/academia', element: <AcademyAdminPage /> },
               { path: 'admin/academia/:courseId', element: <CourseEditorPage /> },
@@ -120,6 +129,7 @@ export const router = createBrowserRouter([
               { path: 'analises', element: <AnalyticsPage /> },
               { path: 'financeiro', element: <FinancePage /> },
               { path: 'carteira', element: <WalletPage /> },
+              { path: 'indicacoes', element: <ReferralsPage /> },
               {
                 element: <RequireOrgKind kind="seller" />,
                 children: [
@@ -130,6 +140,7 @@ export const router = createBrowserRouter([
                   { path: 'central/lives/:campaignId', element: <LiveCampaignPage /> },
                   { path: 'central/:listingId', element: <SalesListingPage /> },
                   { path: 'ferramentas', element: <ToolsPage /> },
+                  { path: 'divulgacao', element: <AffiliatesPage /> },
                   { path: 'integracoes', element: <IntegrationsPage /> },
                   { path: 'integracoes/:connectionId', element: <IntegrationPage /> },
                   { path: 'pedidos', element: <OrdersPage /> },

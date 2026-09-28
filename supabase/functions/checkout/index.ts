@@ -5,6 +5,9 @@
  *   POST /pay              cria o pedido e o pagamento (PIX, cartão ou boleto)
  *   POST /webhook          notificação do Mercado Pago (assinatura x-signature)
  *   POST /refund           estorno pedido pela equipe (JWT de admin)
+ *   GET  /store/<código>   vitrine pública do vendedor (Fase 23)
+ *   GET  /link/<código>    destino de um link de divulgação
+ *   POST /visit            conta um acesso (link ou vitrine)
  *
  * Implantada sem verificação de JWT (o comprador não tem conta): /pay e
  * /offer só usam RPCs do service role que validam tudo no banco; /webhook
@@ -31,6 +34,7 @@ import {
   verifyWebhookSignature,
   type NormalizedPayment,
 } from '../_shared/payments/mercadopago.ts';
+import { parsePublicCode, parseVisit } from '../_shared/affiliates.ts';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const MAX_BODY_BYTES = 20_000;
@@ -208,6 +212,16 @@ async function pay(req: Request) {
     description: string;
   };
 
+  if (input.attribution) {
+    // Origem é informativa: falha aqui não impede o pagamento.
+    const attributed = await db.rpc('checkout_attribute_order', {
+      p_order: order.order_id,
+      p_store_code: input.attribution.store_code,
+      p_link_code: input.attribution.link_code,
+    });
+    if (attributed.error) console.error('checkout pay: attribution', attributed.error.message);
+  }
+
   let payment: NormalizedPayment;
   try {
     if (order.external_id) {
@@ -348,15 +362,78 @@ async function refund(req: Request) {
   }
 }
 
+// ---------------------------------------------------------------------
+// Afiliados (Fase 23)
+// ---------------------------------------------------------------------
+
+async function store(rawCode: string) {
+  const code = parsePublicCode(rawCode);
+  if (!code) return json(404, { error: 'not_found' });
+  const db = service();
+  const { data, error } = await db.rpc('store_public', { p_code: code });
+  if (error) return dbError('store', error);
+  if (!data) return json(404, { error: 'not_found' });
+
+  const products = (data.products ?? []) as { image_path: string | null }[];
+  const paths = products.flatMap((p) => (p.image_path ? [p.image_path] : []));
+  const urls = new Map<string, string>();
+  if (paths.length) {
+    const signed = await db.storage.from('product-images').createSignedUrls(paths, 3600);
+    for (const s of signed.data ?? []) if (s.path && s.signedUrl) urls.set(s.path, s.signedUrl);
+  }
+  return json(200, {
+    store: {
+      ...data,
+      products: products.map(({ image_path, ...rest }) => ({
+        ...rest,
+        image: image_path ? (urls.get(image_path) ?? null) : null,
+      })),
+    },
+  });
+}
+
+async function link(rawCode: string) {
+  const code = parsePublicCode(rawCode);
+  if (!code) return json(404, { error: 'not_found' });
+  const { data, error } = await service().rpc('affiliate_link_target', { p_code: code });
+  if (error) return dbError('link', error);
+  if (!data) return json(404, { error: 'not_found' });
+  return json(200, { link: data });
+}
+
+async function visit(req: Request) {
+  const raw = await req.text();
+  if (raw.length > 2_000) return json(413, { error: 'too_large' });
+  let input;
+  try {
+    input = await parseVisit(JSON.parse(raw));
+  } catch {
+    input = null;
+  }
+  if (!input) return json(400, { error: 'invalid_body' });
+  const { error } = await service().rpc('affiliate_record_visit', {
+    p_store_code: input.link_code ? null : input.store_code,
+    p_link_code: input.link_code,
+    p_visitor_hash: input.visitor,
+  });
+  if (error) return dbError('visit', error);
+  return json(200, { ok: true });
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
   const path = new URL(req.url).pathname.replace(/\/+$/, '');
 
   const offerMatch = /\/offer\/([^/]+)$/.exec(path);
   if (offerMatch && req.method === 'GET') return offer(offerMatch[1]!.toLowerCase());
+  const storeMatch = /\/store\/([^/]+)$/.exec(path);
+  if (storeMatch && req.method === 'GET') return store(storeMatch[1]!);
+  const linkMatch = /\/link\/([^/]+)$/.exec(path);
+  if (linkMatch && req.method === 'GET') return link(linkMatch[1]!);
   if (req.method !== 'POST') return json(405, { error: 'method_not_allowed' });
   if (path.endsWith('/pay')) return pay(req);
   if (path.endsWith('/webhook')) return webhook(req);
   if (path.endsWith('/refund')) return refund(req);
+  if (path.endsWith('/visit')) return visit(req);
   return json(404, { error: 'not_found' });
 });

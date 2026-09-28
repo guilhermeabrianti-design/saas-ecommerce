@@ -1,5 +1,51 @@
 # Changelog
 
+## [0.23.0] — Fase 23: Afiliados e indicação
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20260930120000_affiliates.sql`):
+  - **Código público** de cada organização (gerado; o proprietário pode trocar): endereço da
+    vitrine e código de indicação.
+  - **Links de divulgação** do vendedor (`/r/<código>`) para um produto do checkout ou para a
+    vitrine. Código próprio ou gerado; nome editável e pausa (código e destino fixos para não
+    misturar estatísticas).
+  - **Cliques e visitas**: cada acesso soma um clique; visita = navegador diferente por dia (só o
+    hash do id aleatório do navegador vai para o banco).
+  - **Vendas atribuídas pelo checkout**: o pedido guarda o link (ou a vitrine) por onde o comprador
+    chegou, dentro de 30 dias. Só vale link ativo da própria loja.
+  - **Desempenho** por origem (vitrine, cada link e acesso direto ao produto): cliques, visitas,
+    pedidos, vendas pagas (sem estornos), valor, comissão e conversão, em 7/30/90 dias.
+  - **Indique e ganhe**: a organização nova informa o código de quem a indicou (no cadastro, pelo
+    link `/cadastro?indicacao=<código>`, ou em até 30 dias antes da primeira venda). Na primeira
+    venda paga pelo checkout da indicada (como vendedora ou fornecedora), dentro do prazo e acima
+    da venda mínima, quem indicou ganha a recompensa, paga da receita da TheSigns e liberada na
+    carteira junto com essa venda. Estorno da venda desfaz a recompensa. Recompensa, venda mínima e
+    prazo são da equipe, ficam congelados em cada indicação e o programa **nasce desligado**.
+  - Carteira passa a considerar a recompensa de indicação; Financeiro ganha o tipo "Recompensa de
+    indicação".
+- **Edge Function `checkout`**: `GET /store/<código>` (vitrine com fotos assinadas),
+  `GET /link/<código>` (destino do link), `POST /visit` (conta o acesso) e origem do comprador no
+  `POST /pay`. Origem inválida é descartada, nunca impede a compra.
+- **Telas**:
+  - Público: **vitrine** `/loja/<código>` e redirecionamento `/r/<código>`.
+  - Vendedor: **Links e divulgação** (link e QR Code da loja, troca do endereço, novos links,
+    desempenho, QR Code por link com download em PNG).
+  - Vendedor e fornecedor: **Indique e ganhe** (link/código/QR de indicação, indicações e situação,
+    informar quem indicou). Criação de organização aceita o código de indicação.
+  - Equipe: **Indicações** (regras do programa, resumo e lista).
+- **Testes**: 11 de banco, 7 do módulo de afiliados da Edge Function e 10 de frontend. Linha de base
+  de RLS atualizada.
+
+### Limitações conhecidas
+
+- Visitas podem ser infladas com ids de visitante falsos; o rate limit por IP chega na Fase 26.
+- A atribuição usa o armazenamento do navegador: outro aparelho ou navegador anônimo conta como
+  acesso direto.
+- Indicação combinada entre pessoas diferentes não é detectável automaticamente; a equipe deve
+  manter a recompensa abaixo da margem da TheSigns na venda mínima.
+- Vendas de marketplace não entram em atribuição nem em indicação (só o checkout próprio).
+
 ## [0.22.0] — Fase 22: Carteira e saques
 
 ### Adicionado

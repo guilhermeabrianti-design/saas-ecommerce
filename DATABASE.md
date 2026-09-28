@@ -418,6 +418,36 @@ receita da TheSigns**. Nenhuma taxa fica no código; o cálculo é feito só no 
   `admin_pay_withdrawal` (identificador da transferência; lança `withdrawal` negativo com
   `request_id` = id do saque). Tudo auditado (`wallet.*`).
 
+### Afiliados e indicação (Fase 23)
+
+- `organizations.public_code`: código público (4–32, minúsculas/dígitos/hífen), gerado na criação e
+  trocado só pelo owner (`set_public_code`). É o endereço da vitrine (`/loja/<código>`) e o código
+  de indicação.
+- `affiliate_links`: links de divulgação do vendedor (`/r/<código>`), destino = produto da própria
+  loja ou vitrine. Membros leem; `create_affiliate_link` / `update_affiliate_link` (owner/admin;
+  código e destino imutáveis, só nome e pausa).
+- `affiliate_visits`: uma linha por organização, link (nulo = vitrine), dia e hash do visitante;
+  cliques somam até 1000. Sem acesso direto; gravada só por `affiliate_record_visit` (service role).
+- `order_attributions`: origem de um pedido do checkout (`link` ou `store`), gravada por
+  `checkout_attribute_order` (service role; só link ativo da mesma loja; primeira origem vale).
+  Owner/admin leem.
+- `affiliate_stats` (owner/admin): cliques, visitas, pedidos, pagos, valor e comissão por origem
+  (vitrine, cada link, acesso direto) no período.
+- Público (service role, via Edge Function `checkout`): `store_public`, `affiliate_link_target`,
+  `affiliate_record_visit`, `checkout_attribute_order`.
+- `referral_settings` (linha única, nasce desligada): recompensa, venda mínima e prazo; escrita só
+  por `admin_save_referral_settings` (auditada `referral.settings`).
+- `organization_referrals`: quem indicou cada organização, com a regra congelada. Registrada por
+  `create_organization(p_name, p_referral_code)` (atômico) ou `apply_referral_code` (owner, até 30
+  dias e antes da primeira venda). Recusa autoindicação (mesmo criador ou membro em comum).
+- Recompensa: `private.checkout_settle` chama `private.referral_reward` — primeira venda paga da
+  indicada (vendedor do pedido ou fornecedor que recebeu por ele), dentro do prazo e acima do
+  mínimo: `referral_reward` positivo no razão de quem indicou (`order_id` = pedido que gerou,
+  liberado com ele na carteira) e `referral_reward` negativo em `platform_ledger_entries`. Estorno
+  do pedido (`private.referral_reverse`) lança `checkout_reversal` e `referral_reversal`, e a
+  indicação volta a esperar uma venda.
+- Consultas: `referral_summary` (owner/admin), `admin_referrals_overview`, `admin_referrals`.
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,

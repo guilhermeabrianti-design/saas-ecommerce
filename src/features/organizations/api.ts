@@ -121,8 +121,13 @@ async function rpc(fn: string, args: Record<string, unknown>) {
 export function useCreateOrganization() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (name: string) =>
-      z.uuid().parse(await rpc('create_organization', { p_name: name })),
+    mutationFn: async ({ name, referralCode }: { name: string; referralCode?: string | null }) =>
+      z.uuid().parse(
+        await rpc('create_organization', {
+          p_name: name,
+          p_referral_code: referralCode?.trim() || null,
+        }),
+      ),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['memberships'] }),
   });
 }

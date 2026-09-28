@@ -74,6 +74,8 @@ export interface PayInput {
   request_id: string;
   buyer: Record<string, unknown>;
   payment: Record<string, unknown>;
+  /** Link ou vitrine por onde o comprador chegou (Fase 23). */
+  attribution?: { store_code: string | null; link_code: string | null } | null;
 }
 
 export function usePay() {

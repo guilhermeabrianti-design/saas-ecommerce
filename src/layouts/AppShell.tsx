@@ -12,6 +12,8 @@ import {
   Boxes,
   Building2,
   GraduationCap,
+  Gift,
+  Link2,
   House,
   ListChecks,
   LogOut,
@@ -93,6 +95,13 @@ const navItems: NavItem[] = [
     staffOnly: true,
   },
   {
+    to: '/admin/indicacoes',
+    label: 'Indicações',
+    icon: Gift,
+    requiresAuth: true,
+    staffOnly: true,
+  },
+  {
     to: '/admin/taxas',
     label: 'Taxas e comissões',
     icon: Percent,
@@ -126,6 +135,14 @@ const navItems: NavItem[] = [
     orgKind: 'seller',
   },
   {
+    to: '/divulgacao',
+    label: 'Links e divulgação',
+    icon: Link2,
+    requiresAuth: true,
+    tenantOnly: true,
+    orgKind: 'seller',
+  },
+  {
     to: '/ferramentas',
     label: 'Ferramentas',
     icon: Calculator,
@@ -152,6 +169,7 @@ const navItems: NavItem[] = [
   { to: '/analises', label: 'Análises', icon: ChartColumn, requiresAuth: true, tenantOnly: true },
   { to: '/financeiro', label: 'Financeiro', icon: Wallet, requiresAuth: true, tenantOnly: true },
   { to: '/carteira', label: 'Carteira', icon: PiggyBank, requiresAuth: true, tenantOnly: true },
+  { to: '/indicacoes', label: 'Indique e ganhe', icon: Gift, requiresAuth: true, tenantOnly: true },
   {
     to: '/organizacao',
     label: 'Organização',

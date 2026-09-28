@@ -182,6 +182,20 @@ Documento vivo — cada fase acrescenta os controles que implementa. Status atua
 - Risco conhecido: a entrega é marcada pelo vendedor. O prazo após a entrega (padrão 7 dias) é a
   proteção; a equipe pode aumentá-lo.
 
+## Implementado (Fase 23)
+
+- Vitrine, destino de link, contagem de visitas e atribuição só pela Edge Function com o service
+  role; nenhuma dessas funções é executável por `anon` ou contas conectadas.
+- Visitante identificado por um id aleatório do navegador, guardado só como hash SHA-256; nada de
+  IP, e-mail ou documento nas estatísticas.
+- Atribuição informativa: só aceita link ativo da mesma loja do pedido e não move dinheiro.
+- Indicação: recusa autoindicação (mesmo criador ou membro em comum), vale só para organizações
+  novas e antes da primeira venda, paga só depois de venda aprovada e é desfeita no estorno. O
+  crédito segue a garantia da carteira. Regras mudam só pela equipe, com auditoria.
+- Riscos conhecidos: visitas podem ser infladas com ids falsos (rate limit por IP na Fase 26);
+  indicação combinada entre contas de pessoas diferentes não é detectável — a equipe deve manter a
+  recompensa abaixo da margem da TheSigns na venda mínima.
+
 ## Planejado (por fase)
 
 | Controle                                                                    | Fase  |

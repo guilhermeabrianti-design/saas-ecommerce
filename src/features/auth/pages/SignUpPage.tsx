@@ -1,11 +1,12 @@
-import { useState } from 'react';
-import { Link } from 'react-router';
+import { useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { MailCheck } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
+import { isValidCode, normalizeCode, rememberReferralCode } from '@/features/affiliates/affiliates';
 import { getSupabase } from '@/lib/supabase';
 import { onlyDigits } from '@/utils/br';
 import { cn } from '@/utils/cn';
@@ -24,6 +25,13 @@ const roleDescriptions: Record<SignUpRole, string> = {
 export function SignUpPage() {
   const [error, setError] = useState<string | null>(null);
   const [sentTo, setSentTo] = useState<string | null>(null);
+  // Link de indicação (/cadastro?indicacao=código): usado ao criar a organização.
+  const [params] = useSearchParams();
+  const rawReferral = params.get('indicacao') ?? '';
+  const referral = isValidCode(rawReferral) ? normalizeCode(rawReferral) : null;
+  useEffect(() => {
+    if (referral) rememberReferralCode(referral);
+  }, [referral]);
 
   const {
     register,
@@ -96,6 +104,11 @@ export function SignUpPage() {
 
       <form onSubmit={onSubmit} noValidate className="space-y-4">
         {error && <Alert tone="error">{error}</Alert>}
+        {referral && (
+          <Alert tone="info">
+            Você chegou por um convite (código {referral}). Ele será usado ao criar sua organização.
+          </Alert>
+        )}
 
         <fieldset>
           <legend className="mb-1.5 text-sm font-medium">Tipo de conta</legend>
