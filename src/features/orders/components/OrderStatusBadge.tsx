@@ -1,6 +1,8 @@
 import { cn } from '@/utils/cn';
 import {
-  orderStatusLabels,
+  orderStatusLabel,
+  type OrderChannel,
+  orderChannelLabels,
   supplierOrderStatusLabels,
   type OrderStatus,
   type SupplierOrderStatus,
@@ -22,8 +24,29 @@ const supplierTone: Record<SupplierOrderStatus, string> = {
 
 const base = 'rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap';
 
-export function OrderStatusBadge({ status }: { status: OrderStatus }) {
-  return <span className={cn(base, tone[status])}>{orderStatusLabels[status]}</span>;
+export function OrderStatusBadge({
+  status,
+  channel = 'manual',
+}: {
+  status: OrderStatus;
+  channel?: OrderChannel;
+}) {
+  return <span className={cn(base, tone[status])}>{orderStatusLabel(status, channel)}</span>;
+}
+
+/** Selo de origem do pedido (só para os que não são manuais). */
+export function OrderChannelBadge({ channel }: { channel: OrderChannel }) {
+  if (channel === 'manual') return null;
+  return (
+    <span
+      className={cn(
+        base,
+        channel === 'checkout' ? 'bg-success/10 text-success' : 'bg-surface-2 text-muted',
+      )}
+    >
+      {orderChannelLabels[channel]}
+    </span>
+  );
 }
 
 export function SupplierOrderStatusBadge({ status }: { status: SupplierOrderStatus }) {

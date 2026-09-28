@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useParams } from 'react-router';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, Check, Copy } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { ConfirmButton } from '@/components/ui/ConfirmButton';
+import { CopyField } from '@/components/ui/CopyField';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { Section } from '@/components/ui/Section';
 import { Select } from '@/components/ui/Select';
@@ -83,40 +84,6 @@ function Status({ connection }: { connection: Connection }) {
           Pausada: pedidos recebidos são ignorados e o estoque não é enviado.
         </p>
       )}
-    </div>
-  );
-}
-
-function CopyField({ value }: { value: string }) {
-  const [copied, setCopied] = useState(false);
-  return (
-    <div className="flex gap-2">
-      <input
-        readOnly
-        value={value}
-        aria-label="URL do webhook"
-        onFocus={(e) => e.currentTarget.select()}
-        className="border-border bg-surface-2 h-10 min-w-0 flex-1 rounded-lg border px-3 font-mono text-xs"
-      />
-      <Button
-        variant="secondary"
-        aria-label="Copiar URL"
-        onClick={async () => {
-          try {
-            await navigator.clipboard.writeText(value);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-          } catch {
-            // Sem permissão de área de transferência: o campo continua selecionável.
-          }
-        }}
-      >
-        {copied ? (
-          <Check className="size-4" aria-hidden />
-        ) : (
-          <Copy className="size-4" aria-hidden />
-        )}
-      </Button>
     </div>
   );
 }
@@ -389,7 +356,10 @@ export function IntegrationPage() {
                     <li key={step}>{step}</li>
                   ))}
                 </ol>
-                <CopyField value={webhookUrl(env.supabase?.url, c.provider, c.id)} />
+                <CopyField
+                  value={webhookUrl(env.supabase?.url, c.provider, c.id)}
+                  label="URL do webhook"
+                />
                 <RotateSecret connection={c} />
               </div>
             </Section>

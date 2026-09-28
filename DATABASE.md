@@ -371,6 +371,32 @@ receita da TheSigns**. Nenhuma taxa fica no código; o cálculo é feito só no 
   com a loja participando e o produto incluído vence as demais regras (fonte `live_campaign`).
   `private.compute_split` passou a usar esta versão.
 
+### Checkout próprio (Fase 21)
+
+- `orders.channel` (`manual` | `marketplace` | `checkout`): pedidos de marketplace marcados pelo
+  trigger de `external_orders`. Pedidos `checkout` recusam `confirm_order`, `cancel_order`,
+  `record_order_payment` e `refund_order_payment` (`orders.checkout_managed`): quem decide é o pagamento.
+  Os núcleos `private.confirm_order_core` / `private.cancel_order_core` são compartilhados.
+- `products.checkout_enabled`: só pela RPC `set_product_checkout` (owner/admin, produto importado do
+  catálogo, ativo, anúncio visível). `checkout_product_summary` mostra comissão e motivo de bloqueio.
+- `checkout_payments` (1 por pedido): pagamento no Mercado Pago (`external_id`, meio, situação, taxa,
+  PIX/boleto, `needs_refund`). Owner/admin do vendedor leem colunas sem token/PIX; escrita só pelo
+  service role. `public_token` = consulta do comprador por `checkout_order_status` (única RPC de `anon`).
+- `order_splits` (1 por pedido): divisão congelada na criação (comissão e regra) e fechada na
+  aprovação com a taxa real e o atacado dos pedidos de fornecimento. Owner/admin do vendedor leem.
+- `platform_ledger_entries`: receita da TheSigns (`checkout_revenue` / `checkout_reversal`), imutável,
+  sem acesso pela API (equipe via `admin_checkout_summary`).
+- `ledger_entries`: novos tipos `checkout_commission` (vendedor, +), `checkout_supplier` (fornecedor, +)
+  e `checkout_reversal` (−). Na aprovação `supplier_orders.paid_at` é preenchido (a plataforma acerta).
+- Service role (Edge Function `checkout`): `checkout_offer`, `checkout_create_order` (idempotente
+  por `request_id`; sem reserva antes do pagamento; limpa tentativas sem pagamento com mais de 1 h;
+  até 100 pendentes/hora por loja), `checkout_sync_payment` (máquina de estados idempotente:
+  aprovado → confirma e lança; sem estoque/valor divergente → `refund_required`; recusado/vencido →
+  cancela; estornado/contestado → desfaz, fornecedor que já enviou fica com o atacado) e
+  `checkout_abandon`.
+- Equipe: `admin_checkout_summary`, `admin_checkout_payments`, `admin_checkout_refund_begin`
+  (auditoria `checkout.refund`; só antes de o fornecedor enviar).
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,

@@ -4,8 +4,10 @@ import { inventoryKeys } from '@/features/inventory/api';
 import { orgErrorMessage } from '@/features/organizations/errors';
 import { productErrorMessage } from '@/features/products/errors';
 import { sanitizeSearch } from '@/features/products/api';
+import { paymentStatuses } from '@/features/checkout/checkout';
 import { getSupabase } from '@/lib/supabase';
 import {
+  orderChannels,
   orderStatuses,
   supplierOrderStatuses,
   type OrderStatus,
@@ -23,6 +25,7 @@ const orderListSchema = z.object({
   ship_state: z.string(),
   total_cents: z.number().int(),
   created_at: z.string(),
+  channel: z.enum(orderChannels),
 });
 
 const orderItemSchema = z.object({
@@ -67,6 +70,25 @@ const orderDetailSchema = orderListSchema.extend({
   cancelled_at: z.string().nullable(),
   order_items: z.array(orderItemSchema),
   supplier_orders: z.array(supplierOrderSummarySchema),
+  // Só owner/admin leem (RLS): para os demais vem nulo.
+  checkout_payments: z
+    .object({
+      method: z.enum(['pix', 'card', 'boleto']).nullable(),
+      status: z.enum(paymentStatuses),
+      amount_cents: z.number().int(),
+      expires_at: z.string().nullable(),
+      needs_refund: z.boolean(),
+      approved_at: z.string().nullable(),
+    })
+    .nullable(),
+  order_splits: z
+    .object({
+      seller_commission_bps: z.number().int(),
+      seller_commission_source: z.string(),
+      seller_commission_cents: z.number().int(),
+      settled_at: z.string().nullable(),
+    })
+    .nullable(),
 });
 
 export type OrderListItem = z.infer<typeof orderListSchema>;
@@ -93,7 +115,7 @@ export function useOrders(orgId: string, filters: OrderFilters) {
       let query = getSupabase()
         .from('orders')
         .select(
-          'id, number, status, customer_name, ship_city, ship_state, total_cents, created_at',
+          'id, number, status, customer_name, ship_city, ship_state, total_cents, created_at, channel',
           {
             count: 'exact',
           },
@@ -124,9 +146,11 @@ export function useOrder(orgId: string, id: string) {
           `id, number, status, customer_name, customer_email, customer_phone, customer_document,
            ship_postal_code, ship_street, ship_number, ship_complement, ship_district, ship_city, ship_state,
            subtotal_cents, shipping_cents, discount_cents, total_cents, paid_cents, refunded_cents,
-           notes, created_at, confirmed_at, shipped_at, delivered_at, cancelled_at,
+           notes, created_at, confirmed_at, shipped_at, delivered_at, cancelled_at, channel,
            order_items (id, sku, name, attributes, quantity, unit_price_cents, fulfillment),
-           supplier_orders (id, number, status, total_wholesale_cents, carrier, tracking_code, shipped_at, paid_at)`,
+           supplier_orders (id, number, status, total_wholesale_cents, carrier, tracking_code, shipped_at, paid_at),
+           checkout_payments (method, status, amount_cents, expires_at, needs_refund, approved_at),
+           order_splits (seller_commission_bps, seller_commission_source, seller_commission_cents, settled_at)`,
         )
         .eq('organization_id', orgId)
         .eq('id', id)
@@ -193,6 +217,8 @@ const messages: Partial<Record<string, string>> = {
   'orders.supplier_already_shipped':
     'O fornecedor já enviou: o pedido não pode mais ser cancelado.',
   'orders.reservation_mismatch': 'Reserva de estoque inconsistente. Contate o suporte.',
+  'orders.checkout_managed':
+    'Pedido do checkout: confirmação, cancelamento e pagamento seguem o Mercado Pago.',
 };
 
 export function orderErrorMessage(error: unknown): string {

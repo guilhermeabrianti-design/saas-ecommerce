@@ -1,5 +1,54 @@
 # Changelog
 
+## [0.21.0] — Fase 21: Checkout próprio + Mercado Pago
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20260928120000_checkout.sql`):
+  - O vendedor liga o **checkout** num produto importado do catálogo (`set_product_checkout`) e
+    divulga o link `/c/<produto>`. Preço = preço do produto do vendedor; preço que não cobre
+    fornecedor + comissão é recusado.
+  - **Pedido do checkout** (`orders.channel = checkout`): nasce aguardando pagamento, sem reserva.
+    Pagamento **aprovado** confirma sozinho (reserva no fornecedor e pedido de fornecimento) e lança
+    a **divisão**: comissão do vendedor e atacado do fornecedor no livro-razão de cada um, receita da
+    TheSigns num livro-razão próprio (`platform_ledger_entries`), com a **taxa real do Mercado Pago**.
+    Comissão e regra de origem ficam **congeladas** no pedido (`order_splits`).
+  - Aprovado **sem estoque** (ou com valor divergente) → pedido cancelado e **estorno automático**.
+    PIX/boleto vencido ou cartão recusado → cancela. **Estorno/contestação** desfaz a divisão; se o
+    fornecedor já enviou, ele fica com o atacado e a perda é da plataforma.
+  - Vendedor não confirma, cancela nem registra pagamento de pedido do checkout; o fornecedor recebe
+    pela plataforma (o vendedor não paga o atacado). Pedidos de marketplace ganham o canal
+    `marketplace`.
+  - Equipe: resumo (vendas, taxas, fornecedores, comissões, receita), lista de pagamentos e
+    **estorno** auditado (antes do envio do fornecedor).
+- **Edge Function `checkout`**: oferta pública (fotos com URL assinada), pagamento pela API v1 do
+  Mercado Pago (PIX 30 min, boleto 3 dias, cartão até 12x), webhook com verificação da assinatura
+  `x-signature` e releitura do pagamento na API, estorno. Tudo idempotente.
+- **Telas**:
+  - Comprador (sem conta): página do produto com opção, quantidade, dados de entrega e **Payment
+    Brick** (PIX, cartão, boleto); acompanhamento com QR Code/copia-e-cola do PIX, link do boleto,
+    atualização automática e rastreio.
+  - Vendedor: seção **Checkout próprio** no produto importado (comissão prevista, link, ligar/desligar);
+    selo **Checkout** e "Aguardando pagamento" nos pedidos; pagamento e comissão no pedido.
+  - Equipe: **Pagamentos** (resumo, filtros, estorno).
+- **Testes**: 18 de banco, 14 do módulo do Mercado Pago e 10 de frontend. Linha de base de RLS
+  atualizada (`checkout_order_status` é a única função liberada para `anon`).
+
+### Limitações conhecidas
+
+- A Edge Function não foi executada aqui (sem Deno nem credenciais): validação, corpo do pagamento,
+  leitura da resposta e assinatura estão testados; valide com as **credenciais de teste** do Mercado
+  Pago antes de produção.
+- Sem os segredos `MERCADOPAGO_*` o checkout mostra "Pagamentos ainda não configurados".
+- Um produto por pedido, até 10 unidades, frete incluso no preço (cotação de frete fica para a Fase 30).
+- Estorno parcial não é tratado (só total). Na contestação/estorno, a devolução da taxa do Mercado
+  Pago não é conciliada.
+- Pedido do checkout aguardando pagamento conta como pendente nas análises (igual aos pedidos
+  manuais pendentes) até vencer.
+- Se a notificação se perder, o pedido fica pendente até a próxima notificação do Mercado Pago (não
+  há conciliação periódica ainda).
+- Disponível/pendente/saque dos valores lançados: Fase 22.
+
 ## [0.20.0] — Fase 20: Ferramentas
 
 ### Adicionado

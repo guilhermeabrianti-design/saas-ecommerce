@@ -18,6 +18,9 @@ export const ledgerKinds = [
   'refund',
   'supplier_payment',
   'supplier_receipt',
+  'checkout_commission',
+  'checkout_supplier',
+  'checkout_reversal',
 ] as const;
 export type LedgerKind = (typeof ledgerKinds)[number];
 
@@ -26,6 +29,9 @@ export const ledgerKindLabels: Record<LedgerKind, string> = {
   refund: 'Estorno',
   supplier_payment: 'Pagamento a fornecedor',
   supplier_receipt: 'Recebimento de fornecimento',
+  checkout_commission: 'Comissão do checkout',
+  checkout_supplier: 'Venda pelo checkout (fornecedor)',
+  checkout_reversal: 'Estorno do checkout',
 };
 
 export const periods = [

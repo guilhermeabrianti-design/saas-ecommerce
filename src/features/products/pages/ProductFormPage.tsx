@@ -11,6 +11,7 @@ import { Select } from '@/components/ui/Select';
 import { TextField } from '@/components/ui/TextField';
 import { useOrganization } from '@/features/organizations/organization-context';
 import { GenerateDescriptionButton } from '@/features/ai/components/GenerateDescriptionButton';
+import { ProductCheckoutSection } from '@/features/checkout/components/ProductCheckoutSection';
 import { orgPermissions } from '@/features/organizations/roles';
 import { CatalogListingSection } from '@/features/supplier/components/CatalogListingSection';
 import { SupplierMaterialsSection } from '@/features/sales/components/SupplierMaterialsSection';
@@ -307,6 +308,12 @@ export function EditProductPage() {
             product={product.data}
             canEdit={orgPermissions.editCatalog(active!.role)}
           />
+          {active!.organization.kind === 'seller' && product.data.source_listing_id && (
+            <ProductCheckoutSection
+              productId={product.data.id}
+              canEdit={orgPermissions.editCatalog(active!.role)}
+            />
+          )}
           {active!.organization.kind === 'supplier' && (
             <>
               <CatalogListingSection

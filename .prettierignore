@@ -4,3 +4,6 @@ coverage
 package-lock.json
 supabase/.temp
 src/types/database.generated.ts
+
+# Ferramentas locais do Claude Code (skills instaladas)
+.claude

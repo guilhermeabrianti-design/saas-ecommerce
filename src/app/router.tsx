@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router';
 import { AppShell } from '@/layouts/AppShell';
 import { AuthLayout } from '@/layouts/AuthLayout';
+import { PublicLayout } from '@/layouts/PublicLayout';
 import { RedirectIfAuthenticated, RequireAuth, RequireRole } from '@/features/auth/guards';
 import { AccountPage } from '@/features/auth/pages/AccountPage';
 import { ForgotPasswordPage } from '@/features/auth/pages/ForgotPasswordPage';
@@ -21,6 +22,9 @@ import { CoursePage } from '@/features/academy/pages/CoursePage';
 import { LessonPage } from '@/features/academy/pages/LessonPage';
 import { AdminPage } from '@/features/admin/pages/AdminPage';
 import { FeesAdminPage } from '@/features/fees/pages/FeesAdminPage';
+import { CheckoutAdminPage } from '@/features/checkout/pages/CheckoutAdminPage';
+import { CheckoutPage } from '@/features/checkout/pages/CheckoutPage';
+import { CheckoutStatusPage } from '@/features/checkout/pages/CheckoutStatusPage';
 import { ModerationPage } from '@/features/moderation/pages/ModerationPage';
 import { LiveCampaignEditorPage } from '@/features/sales/pages/LiveCampaignEditorPage';
 import { LiveCampaignPage } from '@/features/sales/pages/LiveCampaignPage';
@@ -48,6 +52,14 @@ import { SystemStatusPage } from '@/pages/SystemStatusPage';
 // Routes are added per phase. Only routes with working pages are registered
 // (no placeholder screens or dead links).
 export const router = createBrowserRouter([
+  {
+    // Checkout público: quem compra não tem conta.
+    element: <PublicLayout />,
+    children: [
+      { path: 'c/pedido/:token', element: <CheckoutStatusPage /> },
+      { path: 'c/:productId', element: <CheckoutPage /> },
+    ],
+  },
   {
     element: <AuthLayout />,
     children: [
@@ -85,6 +97,7 @@ export const router = createBrowserRouter([
             children: [
               { path: 'admin', element: <AdminPage /> },
               { path: 'admin/taxas', element: <FeesAdminPage /> },
+              { path: 'admin/pagamentos', element: <CheckoutAdminPage /> },
               { path: 'admin/moderacao', element: <ModerationPage /> },
               { path: 'admin/academia', element: <AcademyAdminPage /> },
               { path: 'admin/academia/:courseId', element: <CourseEditorPage /> },

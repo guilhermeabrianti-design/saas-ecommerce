@@ -23,7 +23,8 @@
 | `ANTHROPIC_API_KEY` (Fase 13), `AI_MODEL` (opcional)                   | Supabase Secrets         | **não**                 |
 | `STOCK_SYNC_SECRET` (Fase 14)                                          | Supabase Secrets + cron  | **não**                 |
 | `MERCADOLIVRE_*`, `SHOPEE_*`, `TIKTOK_*`, `SHOPIFY_*`, `WOOCOMMERCE_*` | Supabase Secrets         | **não**                 |
-| `PAYMENT_PROVIDER_KEY`                                                 | Supabase Secrets         | **não**                 |
+| `MERCADOPAGO_ACCESS_TOKEN`, `MERCADOPAGO_WEBHOOK_SECRET` (Fase 21)     | Supabase Secrets         | **não**                 |
+| `MERCADOPAGO_PUBLIC_KEY` (Fase 21; entregue ao navegador pela função)  | Supabase Secrets         | sim (chave pública)     |
 
 Definir segredos das Edge Functions:
 

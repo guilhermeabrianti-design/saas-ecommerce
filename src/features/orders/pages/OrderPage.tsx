@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { ConfirmButton } from '@/components/ui/ConfirmButton';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { Section } from '@/components/ui/Section';
+import { CheckoutPaymentSection } from '@/features/checkout/components/CheckoutPaymentSection';
 import { financeErrorMessage, usePaySupplierOrder } from '@/features/finance/api';
 import { PaymentSection } from '@/features/finance/components/PaymentSection';
 import { useOrganization } from '@/features/organizations/organization-context';
@@ -13,7 +14,11 @@ import { describeAttributes } from '@/features/products/variants';
 import { formatCep } from '@/utils/br';
 import { formatBRL } from '@/utils/money';
 import { orderErrorMessage, useOrder, useOrderAction, type OrderDetail } from '../api';
-import { OrderStatusBadge, SupplierOrderStatusBadge } from '../components/OrderStatusBadge';
+import {
+  OrderChannelBadge,
+  OrderStatusBadge,
+  SupplierOrderStatusBadge,
+} from '../components/OrderStatusBadge';
 
 const when = (iso: string | null) => (iso ? new Date(iso).toLocaleString('pt-BR') : null);
 
@@ -23,12 +28,14 @@ function Actions({ order }: { order: OrderDetail }) {
   const busy = (a: string) => action.isPending && action.variables === a;
   const waitingSupplier = order.supplier_orders.some((s) => s.status !== 'shipped');
   const supplierShipped = order.supplier_orders.some((s) => s.status === 'shipped');
+  // Checkout: confirmar e cancelar seguem o pagamento (Mercado Pago), não o vendedor.
+  const managed = order.channel === 'checkout';
 
   return (
     <div className="space-y-3">
       {action.isError && <Alert tone="error">{orderErrorMessage(action.error)}</Alert>}
       <div className="flex flex-wrap gap-2">
-        {order.status === 'pending' && (
+        {order.status === 'pending' && !managed && (
           <Button loading={busy('confirm_order')} onClick={() => action.mutate('confirm_order')}>
             Confirmar pedido
           </Button>
@@ -47,19 +54,23 @@ function Actions({ order }: { order: OrderDetail }) {
             Marcar como entregue
           </Button>
         )}
-        {(order.status === 'pending' || order.status === 'confirmed') && !supplierShipped && (
-          <ConfirmButton
-            confirmLabel="Cancelar pedido"
-            loading={busy('cancel_order')}
-            onConfirm={() => action.mutate('cancel_order')}
-          >
-            Cancelar
-          </ConfirmButton>
-        )}
+        {(order.status === 'pending' || order.status === 'confirmed') &&
+          !supplierShipped &&
+          !managed && (
+            <ConfirmButton
+              confirmLabel="Cancelar pedido"
+              loading={busy('cancel_order')}
+              onConfirm={() => action.mutate('cancel_order')}
+            >
+              Cancelar
+            </ConfirmButton>
+          )}
       </div>
       {order.status === 'pending' && (
         <p className="text-muted text-sm">
-          Confirmar reserva o estoque próprio e envia os itens de fornecedor para eles.
+          {managed
+            ? 'Aguardando o pagamento do cliente. Aprovado, o pedido é confirmado e enviado ao fornecedor.'
+            : 'Confirmar reserva o estoque próprio e envia os itens de fornecedor para eles.'}
         </p>
       )}
       {order.status === 'confirmed' && waitingSupplier && (
@@ -100,7 +111,8 @@ export function OrderPage() {
         <div key={o.id} className="space-y-6">
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-2xl font-semibold tracking-tight">Pedido #{o.number}</h1>
-            <OrderStatusBadge status={o.status} />
+            <OrderStatusBadge status={o.status} channel={o.channel} />
+            <OrderChannelBadge channel={o.channel} />
           </div>
 
           {canEdit && o.status !== 'delivered' && o.status !== 'cancelled' && <Actions order={o} />}
@@ -144,7 +156,13 @@ export function OrderPage() {
             </dl>
           </Section>
 
-          <PaymentSection order={o} orgId={orgId} canEdit={canFinance} />
+          {o.channel === 'checkout' ? (
+            <CheckoutPaymentSection
+              info={{ payment: o.checkout_payments, split: o.order_splits }}
+            />
+          ) : (
+            <PaymentSection order={o} orgId={orgId} canEdit={canFinance} />
+          )}
 
           {o.supplier_orders.length > 0 && (
             <Section

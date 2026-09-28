@@ -13,6 +13,22 @@ export const orderStatusLabels: Record<OrderStatus, string> = {
   cancelled: 'Cancelado',
 };
 
+export const orderChannels = ['manual', 'marketplace', 'checkout'] as const;
+export type OrderChannel = (typeof orderChannels)[number];
+
+export const orderChannelLabels: Record<OrderChannel, string> = {
+  manual: 'Manual',
+  marketplace: 'Marketplace',
+  checkout: 'Checkout',
+};
+
+/** Pedido do checkout ainda sem pagamento aparece como "Aguardando pagamento". */
+export function orderStatusLabel(status: OrderStatus, channel: OrderChannel): string {
+  return channel === 'checkout' && status === 'pending'
+    ? 'Aguardando pagamento'
+    : orderStatusLabels[status];
+}
+
 export const supplierOrderStatuses = ['pending', 'shipped', 'cancelled'] as const;
 export type SupplierOrderStatus = (typeof supplierOrderStatuses)[number];
 

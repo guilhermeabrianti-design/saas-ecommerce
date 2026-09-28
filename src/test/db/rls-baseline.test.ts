@@ -28,6 +28,9 @@ const AUTHENTICATED_RPCS = [
   'admin_answer_question',
   'admin_approve_unlock',
   'admin_audit_entries',
+  'admin_checkout_payments',
+  'admin_checkout_refund_begin',
+  'admin_checkout_summary',
   'admin_delete_commission_rule',
   'admin_issue_certificate',
   'admin_list_commission_rules',
@@ -60,6 +63,8 @@ const AUTHENTICATED_RPCS = [
   'analytics_series',
   'analytics_top_items',
   'cancel_order',
+  'checkout_order_status',
+  'checkout_product_summary',
   'confirm_order',
   'connection_credentials_status',
   'create_connection',
@@ -97,6 +102,7 @@ const AUTHENTICATED_RPCS = [
   'seller_suggestions',
   'set_connection_status',
   'set_live_campaign_participation',
+  'set_product_checkout',
   'set_product_image_order',
   'set_stock',
   'ship_order',
@@ -180,14 +186,15 @@ describe('RLS deny-by-default', () => {
     await db.exec('drop function public.future_fn();');
   });
 
-  it('anon não executa nenhuma função de public/private', async () => {
+  // Única exceção: o comprador do checkout (sem conta) consulta o próprio pedido pelo token.
+  it('anon só executa a consulta do pedido do checkout', async () => {
     const res = await db.query<{ proname: string }>(`
       select p.proname from pg_proc p
       join pg_namespace n on n.oid = p.pronamespace
       where n.nspname in ('public', 'private')
         and has_function_privilege('anon', p.oid, 'execute')
     `);
-    expect(res.rows.map((r) => r.proname)).toEqual([]);
+    expect(res.rows.map((r) => r.proname)).toEqual(['checkout_order_status']);
   });
 
   it('authenticated executa apenas as RPCs previstas no schema public', async () => {

@@ -158,6 +158,19 @@ Documento vivo — cada fase acrescenta os controles que implementa. Status atua
 - SMTP próprio (o SMTP padrão do Supabase tem limite baixo e não é para produção)
 - Recomendado antes de abrir cadastro público: CAPTCHA (Turnstile/hCaptcha) — ainda não integrado.
 
+## Implementado (Fase 21)
+
+- Checkout sem conta: toda escrita passa pela Edge Function `checkout` com o service role; o banco
+  valida produto, estoque, preço e comprador. O valor cobrado vem do pedido no banco, nunca do navegador.
+- Cartão só no Payment Brick (iframe do Mercado Pago): o sistema recebe apenas o token de uso único.
+- Webhook: assinatura `x-signature` (HMAC-SHA256, comparação em tempo constante) e o estado é sempre
+  relido na API do Mercado Pago; aplicação idempotente (repetições não lançam duas vezes).
+- Idempotência também na criação (`X-Idempotency-Key` = id do pedido) e no estorno.
+- Comprador consulta o pedido por token aleatório (sem id do pedido, e-mail ou documento na URL); o
+  código PIX some depois que deixa de valer.
+- Estorno pela equipe exige JWT de admin, é auditado e só vale antes de o fornecedor enviar.
+- Pendente: rate limit por IP no checkout (Fase 26; hoje só limite por loja no banco), CAPTCHA.
+
 ## Planejado (por fase)
 
 | Controle                                                                    | Fase  |

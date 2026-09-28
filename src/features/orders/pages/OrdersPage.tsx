@@ -10,7 +10,7 @@ import { orgPermissions } from '@/features/organizations/roles';
 import { cn } from '@/utils/cn';
 import { formatBRL } from '@/utils/money';
 import { ORDERS_PAGE_SIZE, orderErrorMessage, useOrders, type OrderFilters } from '../api';
-import { OrderStatusBadge } from '../components/OrderStatusBadge';
+import { OrderChannelBadge, OrderStatusBadge } from '../components/OrderStatusBadge';
 import { orderStatuses, orderStatusLabels, type OrderStatus } from '../schemas';
 
 function readFilters(params: URLSearchParams): OrderFilters {
@@ -159,11 +159,12 @@ export function OrdersPage() {
                     >
                       #{o.number} · {o.customer_name}
                     </Link>
+                    <OrderChannelBadge channel={o.channel} />
                     <span className="text-muted block truncate text-xs">
                       {o.ship_city}/{o.ship_state}
                     </span>
                     <span className="mt-1 md:hidden">
-                      <OrderStatusBadge status={o.status} />
+                      <OrderStatusBadge status={o.status} channel={o.channel} />
                     </span>
                   </td>
                   <td className="text-muted hidden px-4 py-3 whitespace-nowrap sm:table-cell">
@@ -173,7 +174,7 @@ export function OrdersPage() {
                     {formatBRL(o.total_cents)}
                   </td>
                   <td className="hidden px-4 py-3 md:table-cell">
-                    <OrderStatusBadge status={o.status} />
+                    <OrderStatusBadge status={o.status} channel={o.channel} />
                   </td>
                 </tr>
               ))}
