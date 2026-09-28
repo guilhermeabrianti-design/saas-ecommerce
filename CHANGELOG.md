@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.27.0] — Fase 27: Suporte e denúncias
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20261003120000_support.sql`):
+  - **Chamados** por categoria (pedido/entrega, pagamento/carteira/saque, produto/catálogo, conta,
+    denúncia, outro), com **conversa** pessoa ↔ equipe. Mensagens imutáveis.
+  - Pode anexar um **pedido** da organização e, nas **denúncias**, o anúncio do catálogo ou o código
+    público da loja/fornecedor denunciado (obrigatório ter alvo).
+  - Estados: com a equipe → respondido (vez da pessoa) → encerrado; responder reabre.
+  - Quem abriu vê os seus; a equipe (com MFA) vê todos. Escrita só por RPC.
+  - Avisos na central de notificações: equipe recebe chamados, denúncias e respostas; a pessoa
+    recebe respostas e encerramento.
+  - Limites: 10 chamados por dia e 60 mensagens por hora por pessoa.
+- **Telas**:
+  - **Suporte** (`/suporte`): abrir chamado, meus chamados e conversa.
+  - Atalhos: "Pedir ajuda com este pedido" (pedido e fornecimento) e "Denunciar anúncio"
+    (catálogo), que já preenchem o chamado.
+  - Equipe: **Suporte e denúncias** (resumo, fila por estado e categoria, conversa com o contexto:
+    pessoa, organização, pedido, denunciado e se está suspenso).
+- **Testes**: 7 de banco e 5 de frontend.
+
+### Limitações conhecidas
+
+- Sem anexos (fotos/arquivos) nas mensagens.
+- Comprador sem conta (checkout) ainda não abre chamado nem denuncia pela vitrine.
+- Sem atribuição de chamado a uma pessoa específica da equipe.
+
 ## [0.26.0] — Fase 26: Rate limiting, endurecimento e MFA da equipe
 
 ### Adicionado

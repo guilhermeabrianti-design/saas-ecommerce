@@ -129,6 +129,12 @@ export function CatalogListingPage() {
                 <p className="text-muted text-sm">{d.supplier_name}</p>
                 <h1 className="text-2xl font-semibold tracking-tight">{d.name}</h1>
                 {d.brand && <p className="text-muted text-sm">{d.brand}</p>}
+                <Link
+                  to={`/suporte?categoria=report&anuncio=${d.listing_id}`}
+                  className="text-muted hover:text-danger text-xs underline-offset-2 hover:underline"
+                >
+                  Denunciar anúncio
+                </Link>
               </div>
               <dl className="grid grid-cols-2 gap-3 text-sm">
                 <div>

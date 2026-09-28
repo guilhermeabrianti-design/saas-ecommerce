@@ -90,6 +90,12 @@ export function SupplierOrderPage() {
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-2xl font-semibold tracking-tight">Fornecimento #{o.number}</h1>
             <SupplierOrderStatusBadge status={o.status} />
+            <Link
+              to="/suporte?categoria=order"
+              className="text-muted hover:text-fg ml-auto text-sm underline-offset-2 hover:underline"
+            >
+              Pedir ajuda
+            </Link>
           </div>
 
           <Section title="Itens" description="Separe e envie estes itens.">

@@ -469,6 +469,15 @@ receita da TheSigns**. Nenhuma taxa fica no código; o cálculo é feito só no 
   `products`). `public.rate_limit_hit` só para o service role (Edge Function, por hash do IP).
 - `private.current_aal()` lê `auth.jwt() ->> 'aal'`; `private.is_platform_admin()` exige `aal2`.
 
+### Suporte e denúncias (Fase 27)
+
+- `support_tickets` (número sequencial, categoria `ticket_category`, estado `ticket_status`,
+  pedido e denunciado opcionais) e `support_messages` (imutáveis, `from_staff`). RLS: quem abriu
+  ou a equipe (`is_platform_admin`, aal2). Escrita só por RPC; limites por gatilho (Fase 26).
+- RPCs: `create_support_ticket`, `reply_support_ticket`, `close_support_ticket`;
+  equipe: `admin_support_overview`, `admin_support_tickets`, `admin_support_ticket_context`.
+- `private.notify_user` envia notificação para uma pessoa (sem organização).
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,

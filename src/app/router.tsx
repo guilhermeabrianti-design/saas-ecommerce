@@ -32,6 +32,8 @@ import { CheckoutAdminPage } from '@/features/checkout/pages/CheckoutAdminPage';
 import { CheckoutPage } from '@/features/checkout/pages/CheckoutPage';
 import { CheckoutStatusPage } from '@/features/checkout/pages/CheckoutStatusPage';
 import { ModerationPage } from '@/features/moderation/pages/ModerationPage';
+import { AdminTicketPage, SupportAdminPage } from '@/features/support/pages/SupportAdminPage';
+import { SupportPage, TicketPage } from '@/features/support/pages/SupportPage';
 import { NotificationsPage } from '@/features/notifications/pages/NotificationsPage';
 import { LiveCampaignEditorPage } from '@/features/sales/pages/LiveCampaignEditorPage';
 import { LiveCampaignPage } from '@/features/sales/pages/LiveCampaignPage';
@@ -107,6 +109,8 @@ export const router = createBrowserRouter([
         children: [
           { path: 'conta', element: <AccountPage /> },
           { path: 'notificacoes', element: <NotificationsPage /> },
+          { path: 'suporte', element: <SupportPage /> },
+          { path: 'suporte/:ticketId', element: <TicketPage /> },
           { path: 'organizacao/nova', element: <CreateOrganizationPage /> },
           // Academia: qualquer conta (não depende de organização).
           { path: 'academia', element: <AcademyPage /> },
@@ -121,6 +125,8 @@ export const router = createBrowserRouter([
               { path: 'admin/pagamentos', element: <CheckoutAdminPage /> },
               { path: 'admin/saques', element: <WithdrawalsAdminPage /> },
               { path: 'admin/indicacoes', element: <ReferralsAdminPage /> },
+              { path: 'admin/suporte', element: <SupportAdminPage /> },
+              { path: 'admin/suporte/:ticketId', element: <AdminTicketPage /> },
               { path: 'admin/moderacao', element: <ModerationPage /> },
               { path: 'admin/academia', element: <AcademyAdminPage /> },
               { path: 'admin/academia/:courseId', element: <CourseEditorPage /> },

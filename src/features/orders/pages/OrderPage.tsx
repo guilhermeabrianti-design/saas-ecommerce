@@ -113,6 +113,12 @@ export function OrderPage() {
             <h1 className="text-2xl font-semibold tracking-tight">Pedido #{o.number}</h1>
             <OrderStatusBadge status={o.status} channel={o.channel} />
             <OrderChannelBadge channel={o.channel} />
+            <Link
+              to={`/suporte?categoria=order&pedido=${o.id}`}
+              className="text-muted hover:text-fg ml-auto text-sm underline-offset-2 hover:underline"
+            >
+              Pedir ajuda com este pedido
+            </Link>
           </div>
 
           {canEdit && o.status !== 'delivered' && o.status !== 'cancelled' && <Actions order={o} />}
