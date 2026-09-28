@@ -54,12 +54,20 @@ import { SupplierOrderPage } from '@/features/supplier/pages/SupplierOrderPage';
 import { SupplierOrdersPage } from '@/features/supplier/pages/SupplierOrdersPage';
 import { ProductsPage } from '@/features/products/pages/ProductsPage';
 import { HomePage } from '@/pages/HomePage';
+import { RootRoute } from '@/pages/landing/RootRoute';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { SystemStatusPage } from '@/pages/SystemStatusPage';
 
 // Routes are added per phase. Only routes with working pages are registered
 // (no placeholder screens or dead links).
 export const router = createBrowserRouter([
+  {
+    // Landing page para visitantes (Fase 25); Início do app para quem entrou.
+    // Home decides itself: staff accounts have no organization.
+    path: '/',
+    element: <RootRoute />,
+    children: [{ index: true, element: <HomePage /> }],
+  },
   {
     // Checkout público: quem compra não tem conta.
     element: <PublicLayout />,
@@ -94,8 +102,6 @@ export const router = createBrowserRouter([
       {
         element: <RequireAuth />,
         children: [
-          // Home decides itself: staff accounts have no organization.
-          { index: true, element: <HomePage /> },
           { path: 'conta', element: <AccountPage /> },
           { path: 'notificacoes', element: <NotificationsPage /> },
           { path: 'organizacao/nova', element: <CreateOrganizationPage /> },

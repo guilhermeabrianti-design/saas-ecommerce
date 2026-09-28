@@ -31,13 +31,13 @@ integração fictícia** ("Não configurado" / "Não suportado pela API atual").
 | Ferramentas com IA                                      | Reaproveita a Edge Function `ai` (cota por organização, saída revisável, nada salvo sem revisão).                                                                                                                                                                        |
 | Dados de exemplo                                        | Seed só em desenvolvimento, marcado como tal. Depoimentos/produtos da landing não podem ser inventados.                                                                                                                                                                  |
 
-## Entregue (v0.1 – v0.24)
+## Entregue (v0.1 – v0.25)
 
 1 Setup · 2 Auth/sessão/RBAC · 3 Organizações + RLS · 4 Produtos · 5 Variações/imagens · 6 Estoque
 (ledger) · 7 Catálogo de fornecedores · 8 Pedidos + roteamento ao fornecedor · 9 Financeiro (ledger)
 · 10 Integrações (núcleo, webhooks Shopify/Woo) · 11 Analytics · 12 Admin da plataforma · 13 IA
 (descrição) · 14 Credenciais criptografadas + envio de estoque · **15 Taxas de marketplace, comissão
-do vendedor, categorias e calculadora da divisão** · **16 Moderação de fornecedores e anúncios** · **17 Academia (YouTube)** · **18 Onboarding e painel do vendedor** · **19 Central de Vendas e campanhas para lives** · **20 Ferramentas (preço-alvo, simulador de lucro, textos com IA)** · **21 Checkout próprio + Mercado Pago** · **22 Carteira e saques** · **23 Afiliados e indicação (links, vitrine, QR Code, atribuição e indique e ganhe)** · **24 Notificações em tempo real e alertas**.
+do vendedor, categorias e calculadora da divisão** · **16 Moderação de fornecedores e anúncios** · **17 Academia (YouTube)** · **18 Onboarding e painel do vendedor** · **19 Central de Vendas e campanhas para lives** · **20 Ferramentas (preço-alvo, simulador de lucro, textos com IA)** · **21 Checkout próprio + Mercado Pago** · **22 Carteira e saques** · **23 Afiliados e indicação (links, vitrine, QR Code, atribuição e indique e ganhe)** · **24 Notificações em tempo real e alertas** · **25 Landing page**.
 
 ## Próximas fases
 
@@ -45,7 +45,6 @@ Ordem pensada para fechar primeiro o **MVP da seção 26** e depois o ecossistem
 
 | Fase  | Entrega                                                                                                                                                                       | Seções         |
 | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
-| 25    | **Landing page** pública (headline, como funciona, vendedores, fornecedores, Academia, planos, FAQ, CTA) — sem depoimentos inventados.                                        | 24             |
 | 26    | **Rate limiting e endurecimento**, MFA para equipe.                                                                                                                           | 27             |
 | 27    | **Suporte e denúncias**: tickets por categoria com conversa usuário ↔ suporte.                                                                                                | 20             |
 | 28    | **Avaliações e reputação**: estrelas/comentários + métricas objetivas (vendas, taxa de entrega, taxa de cancelamento).                                                        | 19             |

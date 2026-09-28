@@ -47,7 +47,8 @@ export function SignUpPage() {
       document: '',
       password: '',
       confirmPassword: '',
-      accountType: 'seller',
+      // /cadastro?conta=fornecedor (landing page) já marca fornecedor.
+      accountType: params.get('conta') === 'fornecedor' ? 'supplier' : 'seller',
     },
   });
   const password = useWatch({ control, name: 'password' });

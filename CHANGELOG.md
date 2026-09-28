@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.25.0] — Fase 25: Landing page
+
+### Adicionado
+
+- **Landing page** em `/` para visitantes (quem já entrou continua indo para o Início do app):
+  headline, como funciona (4 etapas), vendedores, fornecedores, Academia, planos, dúvidas
+  frequentes e chamada final. Textos em `src/pages/landing/content.ts`.
+- Só descreve o que o sistema faz hoje: **sem depoimentos, números de clientes ou preços
+  inventados**. Integrações ainda não entregues (Mercado Livre, Shopee, TikTok Shop) e planos pagos
+  aparecem como "em preparação" / "ainda não existem".
+- "Sou fornecedor" abre o cadastro com o tipo fornecedor marcado (`/cadastro?conta=fornecedor`).
+- Descrição da página (`meta description`) e título próprios.
+- **Testes**: 3 de frontend (landing para visitante, app para quem entrou, nada inventado).
+
+### Alterado
+
+- Visitante em `/` vê a landing em vez de ser mandado para `/entrar`.
+
 ## [0.24.0] — Fase 24: Notificações em tempo real e alertas
 
 ### Adicionado
