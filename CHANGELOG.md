@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.29.0] — Fase 29: Gerenciador de anúncios e publicação
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20261005120000_channel_listings.sql`):
+  - **Anúncio no canal**: produto do vendedor numa conexão Shopify ou WooCommerce, com título,
+    descrição e preço próprios. Criar, editar, **duplicar** para outra loja, apagar rascunho.
+  - **Publicar, pausar e reativar** com **etapas reais** gravadas na hora (conferência dos dados,
+    credenciais, produto no marketplace, preço e estoque, vínculo dos SKUs, conclusão) — o histórico
+    fica como **log de sincronização**, junto com os eventos da integração.
+  - Publicar **vincula cada SKU**: pedidos do marketplace entram sozinhos e o estoque sincroniza.
+    SKU já vinculado a outro item é apontado, não sobrescrito.
+  - **Dropshipping**: anúncio de produto importado envia o **estoque do fornecedor**; mudanças no
+    estoque dele entram na fila de envio.
+  - Uma ação por vez por anúncio; atualizar um anúncio pausado mantém pausado.
+- **Edge Function `listings`** (JWT de quem pediu): Shopify Admin GraphQL (`productSet` com opções,
+  variações, SKU, preço e fotos; `inventorySetQuantities` no local configurado; `productUpdate`
+  para pausar) e WooCommerce REST v3 (produto simples ou variável, variações em lote casadas pelo
+  SKU, status `draft`/`publish`). Credenciais decifradas só em memória.
+- **Telas**: **Anúncios** (novo rascunho, lista por situação) e página do anúncio (conteúdo,
+  publicar/enviar alterações, pausar/reativar, andamento etapa a etapa, histórico, duplicar).
+- **Testes**: 6 de banco, 8 do módulo de publicação (respostas simuladas) e 4 de frontend.
+
+### Limitações conhecidas
+
+- **As chamadas às APIs não foram exercitadas contra lojas reais** (só respostas simuladas): valide
+  numa loja de desenvolvimento Shopify/WooCommerce antes de usar em produção.
+- Fotos vão só na criação do anúncio; trocar fotos depois ainda não é enviado.
+- Remover o anúncio do marketplace não é feito daqui (pause no lugar).
+- Produto do fornecedor que sai do catálogo não zera o estoque anunciado automaticamente (o
+  vendedor é avisado pela notificação e deve pausar).
+- Mercado Livre, Shopee, TikTok Shop e Amazon seguem nas fases 31–34.
+
 ## [0.28.0] — Fase 28: Avaliações e reputação
 
 ### Adicionado

@@ -49,6 +49,8 @@ import { FinancePage } from '@/features/finance/pages/FinancePage';
 import { WalletPage } from '@/features/wallet/pages/WalletPage';
 import { WithdrawalsAdminPage } from '@/features/wallet/pages/WithdrawalsAdminPage';
 import { IntegrationPage } from '@/features/integrations/pages/IntegrationPage';
+import { ListingPage } from '@/features/listings/pages/ListingPage';
+import { ListingsPage } from '@/features/listings/pages/ListingsPage';
 import { IntegrationsPage } from '@/features/integrations/pages/IntegrationsPage';
 import { NewOrderPage } from '@/features/orders/pages/NewOrderPage';
 import { OrderPage } from '@/features/orders/pages/OrderPage';
@@ -162,6 +164,8 @@ export const router = createBrowserRouter([
                   { path: 'central/:listingId', element: <SalesListingPage /> },
                   { path: 'ferramentas', element: <ToolsPage /> },
                   { path: 'divulgacao', element: <AffiliatesPage /> },
+                  { path: 'anuncios', element: <ListingsPage /> },
+                  { path: 'anuncios/:listingId', element: <ListingPage /> },
                   { path: 'integracoes', element: <IntegrationsPage /> },
                   { path: 'integracoes/:connectionId', element: <IntegrationPage /> },
                   { path: 'pedidos', element: <OrdersPage /> },

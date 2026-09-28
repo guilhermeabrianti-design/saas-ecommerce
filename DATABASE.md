@@ -489,6 +489,20 @@ receita da TheSigns**. Nenhuma taxa fica no código; o cálculo é feito só no 
   `admin_set_review_hidden` (auditada `review.hide`/`review.show`). Service role:
   `checkout_submit_review`, `store_rating`. `checkout_order_status` ganhou `can_review` e `review`.
 
+### Anúncios e publicação (Fase 29)
+
+- `channel_listings` (conexão × produto, único): título, descrição, preço opcional, estado
+  `channel_listing_status` (draft, publishing, active, paused, error), execução em andamento
+  (`run_id`, `run_action`), id/URL no marketplace. `channel_listing_steps`: etapas de cada execução.
+  Owner/admin leem; escrita só por RPC.
+- Vendedor: `save_channel_listing`, `duplicate_channel_listing`, `delete_channel_listing` (só
+  rascunho nunca publicado), `channel_listing_begin` (valida e devolve variações com SKU, preço,
+  disponível e opções). Service role (Edge Function `listings`): `channel_listing_step`,
+  `channel_listing_finish` (cria os `listing_links` e registra `integration_events`).
+- Estoque anunciável: `private.link_available` (do fornecedor quando importado);
+  `inventory_items_enqueue_dropship_sync` enfileira no `stock_sync_outbox` as cópias importadas
+  vinculadas quando o estoque do fornecedor muda.
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,
