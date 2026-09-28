@@ -94,6 +94,8 @@ const AUTHENTICATED_RPCS = [
   'list_organization_members',
   'live_campaign_for_seller',
   'live_campaigns_for_seller',
+  'mark_all_notifications_read',
+  'mark_notifications_read',
   'my_pending_invitations',
   'my_suspended_organizations',
   'pay_supplier_order',

@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.24.0] — Fase 24: Notificações em tempo real e alertas
+
+### Adicionado
+
+- **Banco** (`supabase/migrations/20261001120000_notifications.sql`):
+  - Tabela `notifications` (uma linha por destinatário), publicada no **Supabase Realtime**. Cada
+    pessoa só lê e marca as suas; notificação de organização some para quem saiu dela. Guardadas
+    por 90 dias.
+  - Todas nascem de gatilhos em fatos reais do banco:
+    - **Estoque**: baixo (disponível ≤ mínimo do item, a regra das Análises) e esgotado para o dono
+      do estoque; baixo, esgotado e de volta para quem revende o produto do fornecedor. Dispara na
+      passagem do limite, não a cada movimento.
+    - **Catálogo**: preço de atacado alterado (owner/admin de quem revende, com valores), produto
+      indisponível/disponível de novo (anúncio despublicado, produto arquivado, fornecedor suspenso
+      ou fora de análise), resultado da moderação para o fornecedor.
+    - **Pedidos**: novo pedido de fornecimento e cancelamento (fornecedor), envio do fornecedor
+      (vendedor), novo pedido de marketplace.
+    - **Dinheiro** (só owner/admin): venda paga e estorno do checkout, saque aprovado/pago/recusado,
+      nova indicação e recompensa de indicação.
+    - **Equipe**: fornecedor aguardando análise, saque solicitado, estorno pendente.
+  - `mark_notifications_read` e `mark_all_notifications_read`.
+- **Telas**: sino no cabeçalho com contador de não lidas, últimas 10, "marcar todas como lidas" e
+  atualização em tempo real; página **Notificações** (todas / não lidas, carregar mais). Com mais de
+  uma organização, cada notificação mostra de qual é.
+- **Testes**: 9 de banco e 5 de frontend. Linha de base de RLS atualizada.
+
+### Limitações conhecidas
+
+- Só dentro do app: sem e-mail, push ou WhatsApp.
+- Sem preferências por tipo (não dá para silenciar um tipo de aviso).
+- O Realtime não foi exercitado nos testes locais (sem servidor Realtime); o contador também
+  recarrega a cada 5 minutos como garantia.
+
 ## [0.23.0] — Fase 23: Afiliados e indicação
 
 ### Adicionado

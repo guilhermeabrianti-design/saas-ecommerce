@@ -31,6 +31,7 @@ import { CheckoutAdminPage } from '@/features/checkout/pages/CheckoutAdminPage';
 import { CheckoutPage } from '@/features/checkout/pages/CheckoutPage';
 import { CheckoutStatusPage } from '@/features/checkout/pages/CheckoutStatusPage';
 import { ModerationPage } from '@/features/moderation/pages/ModerationPage';
+import { NotificationsPage } from '@/features/notifications/pages/NotificationsPage';
 import { LiveCampaignEditorPage } from '@/features/sales/pages/LiveCampaignEditorPage';
 import { LiveCampaignPage } from '@/features/sales/pages/LiveCampaignPage';
 import { LiveCampaignsAdminPage } from '@/features/sales/pages/LiveCampaignsAdminPage';
@@ -96,6 +97,7 @@ export const router = createBrowserRouter([
           // Home decides itself: staff accounts have no organization.
           { index: true, element: <HomePage /> },
           { path: 'conta', element: <AccountPage /> },
+          { path: 'notificacoes', element: <NotificationsPage /> },
           { path: 'organizacao/nova', element: <CreateOrganizationPage /> },
           // Academia: qualquer conta (não depende de organização).
           { path: 'academia', element: <AcademyPage /> },

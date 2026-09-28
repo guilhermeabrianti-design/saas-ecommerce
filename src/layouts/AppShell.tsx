@@ -37,6 +37,7 @@ import { useAuth } from '@/features/auth/auth-context';
 import { SupplierApprovalNotice } from '@/features/moderation/components/SupplierApprovalNotice';
 import { useProfile } from '@/features/auth/profile';
 import { roleLabels } from '@/features/auth/roles';
+import { NotificationBell } from '@/features/notifications/components/NotificationBell';
 import { OrganizationSwitcher } from '@/features/organizations/components/OrganizationSwitcher';
 import { useOrganization } from '@/features/organizations/organization-context';
 import type { OrgKind } from '@/features/organizations/roles';
@@ -263,6 +264,7 @@ export function AppShell() {
             </div>
             <div className="ml-auto flex min-w-0 items-center gap-3">
               {authenticated && <OrganizationSwitcher />}
+              {authenticated && <NotificationBell />}
               <EnvBadge />
               <ThemeToggle />
               {authenticated ? (

@@ -448,6 +448,18 @@ receita da TheSigns**. Nenhuma taxa fica no código; o cálculo é feito só no 
   indicação volta a esperar uma venda.
 - Consultas: `referral_summary` (owner/admin), `admin_referrals_overview`, `admin_referrals`.
 
+### Notificações (Fase 24)
+
+- `notifications`: uma linha por destinatário (`user_id`), `organization_id` nulo = equipe. RLS:
+  só o destinatário, e só enquanto for membro da organização. Sem escrita direta; publicada em
+  `supabase_realtime`. `link` restrito a caminho interno. Retenção de 90 dias (limpeza a cada envio).
+- Envio só por gatilhos (`private.notify_org` com papéis, `private.notify_staff`):
+  `inventory_items` (baixo/esgotado/de volta, na passagem do limite), `catalog_listings` (preço,
+  disponibilidade, moderação), `products.status` e `organizations` (fornecedor em análise,
+  suspenso), `supplier_orders`, `external_orders`, `checkout_payments`, `withdrawal_requests`,
+  `organization_referrals`.
+- RPCs: `mark_notifications_read(p_ids)`, `mark_all_notifications_read(p_org)` (só as próprias).
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,

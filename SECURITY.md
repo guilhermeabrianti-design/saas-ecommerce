@@ -196,6 +196,15 @@ Documento vivo — cada fase acrescenta os controles que implementa. Status atua
   indicação combinada entre contas de pessoas diferentes não é detectável — a equipe deve manter a
   recompensa abaixo da margem da TheSigns na venda mínima.
 
+## Implementado (Fase 24)
+
+- Notificações só nascem de gatilhos no banco; o navegador não cria nem altera (só marca as
+  próprias como lidas por RPC).
+- Destinatário por linha + RLS: o Realtime entrega a cada usuário só o que ele pode ler. Quem sai
+  da organização deixa de ver as notificações dela.
+- Valores em dinheiro só para owner/admin; `link` aceita só caminho interno (banco e tela recusam
+  URL externa e `//host`).
+
 ## Planejado (por fase)
 
 | Controle                                                                    | Fase  |
