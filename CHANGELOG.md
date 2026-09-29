@@ -1,5 +1,41 @@
 # Changelog
 
+## [0.31.0] — Fase 31: Mercado Livre (pedidos e estoque)
+
+### Adicionado
+
+- **Conexão por OAuth 2.0 com PKCE** (Edge Function `mercadolivre`): o vendedor autoriza no próprio
+  Mercado Livre e volta conectado. Estado e `code_verifier` ficam no banco sem acesso pela API e
+  valem 10 minutos; tokens ficam cifrados (mesma chave das credenciais). Uma conta do Mercado Livre
+  fica ligada a uma loja por vez.
+- **Renovação de token** automática (antes de vencer), com gravação por versão: duas renovações ao
+  mesmo tempo não se atropelam (o token de renovação do Mercado Livre é de uso único).
+- **Pedidos pelas notificações** (`orders_v2`): cada notificação é validada pelo id do app e o
+  pedido é **relido na API** com o token do vendedor, junto com o envio. Pagos entram pela mesma
+  ingestão dos outros canais; **Full**, retirada/a combinar, cancelados e aguardando pagamento são
+  ignorados.
+- **Estoque**: a fila de envio passa a atualizar o Mercado Livre (anúncio ou variação achados pelo
+  SKU do vendedor). O **vínculo manual de SKU agora aceita produto importado do fornecedor**
+  (anuncia o estoque dele) — vale para todos os canais.
+- **Telas**: "Conectar Mercado Livre" em Integrações, avisos da volta do OAuth e painel da conexão
+  (como funciona, reconectar).
+- **Testes**: 4 de banco, 9 do módulo do Mercado Livre e 3 de frontend.
+
+### Para ativar
+
+- Criar o app em developers.mercadolivre.com.br com a URL de retorno
+  `<SUPABASE_URL>/functions/v1/mercadolivre/callback`, notificações em
+  `<SUPABASE_URL>/functions/v1/mercadolivre/notifications` (tópico **orders_v2**), e cadastrar os
+  segredos `MERCADOLIVRE_CLIENT_ID`, `MERCADOLIVRE_CLIENT_SECRET` e `APP_URL` (além da
+  `CREDENTIALS_ENCRYPTION_KEY`). Sem eles a tela mostra "não configurado".
+
+### Limitações conhecidas
+
+- **Não exercitado contra contas reais** (só respostas simuladas): valide com usuários de teste do
+  Mercado Livre antes de produção.
+- Publicar anúncio no Mercado Livre pela TheSigns ainda não (categoria e atributos obrigatórios).
+- Mensagens, perguntas e reclamações do Mercado Livre não são trazidas.
+
 ## [0.30.0] — Fase 30: Etiquetas de envio
 
 ### Adicionado

@@ -110,6 +110,7 @@ const AUTHENTICATED_RPCS = [
   'my_pending_invitations',
   'my_supplier_reviews',
   'my_suspended_organizations',
+  'oauth_begin',
   'organization_reputation',
   'pay_supplier_order',
   'pricing_simulate',

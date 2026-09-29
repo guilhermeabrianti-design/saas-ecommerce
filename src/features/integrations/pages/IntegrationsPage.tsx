@@ -1,5 +1,5 @@
 import { useForm, useWatch } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate, useSearchParams } from 'react-router';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ChevronRight } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
@@ -12,6 +12,8 @@ import { useOrganization } from '@/features/organizations/organization-context';
 import { orgPermissions } from '@/features/organizations/roles';
 import { integrationErrorMessage, useConnections, useCreateConnection } from '../api';
 import { ConnectionStatusBadge } from '../components/ConnectionStatusBadge';
+import { MercadoLivreConnect } from '../components/MercadoLivreConnect';
+import { mercadoLivreReturnMessages } from '../mercadolivre';
 import {
   accountHints,
   connectableProviders,
@@ -103,6 +105,8 @@ export function IntegrationsPage() {
   const { active } = useOrganization();
   const orgId = active!.organization.id;
   const connections = useConnections(orgId);
+  const [params] = useSearchParams();
+  const mlReturn = mercadoLivreReturnMessages[params.get('ml') ?? ''];
 
   if (!orgPermissions.manageIntegrations(active!.role)) {
     return (
@@ -114,7 +118,9 @@ export function IntegrationsPage() {
     );
   }
 
-  const soon = providers.filter((p) => !(connectableProviders as readonly string[]).includes(p));
+  const soon = providers.filter(
+    (p) => !(connectableProviders as readonly string[]).includes(p) && p !== 'mercadolivre',
+  );
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -156,6 +162,15 @@ export function IntegrationsPage() {
             ))}
           </ul>
         )}
+      </Section>
+
+      {mlReturn && <Alert tone={mlReturn.tone}>{mlReturn.text}</Alert>}
+
+      <Section
+        title="Mercado Livre"
+        description="Pedidos pagos entram sozinhos (Mercado Envios; Full fica com o Mercado Livre) e o estoque sincroniza pelos SKUs."
+      >
+        <MercadoLivreConnect orgId={orgId} />
       </Section>
 
       <Section title="Nova conexão" description="Shopify e WooCommerce, via webhook de pedidos.">

@@ -425,3 +425,8 @@ verify_jwt = false
 
 [functions.checkout]
 verify_jwt = false
+
+# mercadolivre: callback do OAuth e notificações vêm do Mercado Livre (sem JWT);
+# /connect confere o JWT de quem chamou pela RPC oauth_begin.
+[functions.mercadolivre]
+verify_jwt = false

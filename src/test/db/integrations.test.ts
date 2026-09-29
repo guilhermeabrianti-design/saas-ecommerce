@@ -249,7 +249,7 @@ describe('vínculos', () => {
     expect(await rows(seller, 'select 1 from public.listing_links')).toEqual([]);
   });
 
-  it('não vincula estoque de outra organização, dropshipping nem produto com variações sem variação', async () => {
+  it('não vincula estoque de outra organização nem produto com variações sem variação', async () => {
     const foreign = await scalar<string>(
       outsider,
       "insert into public.products (organization_id, sku, name, price_cents, status) values ($1, 'XX', 'Xis', 1, 'active') returning id",

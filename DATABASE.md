@@ -512,6 +512,15 @@ receita da TheSigns**. Nenhuma taxa fica no código; o cálculo é feito só no 
   quem enviou, anulação. RLS: quem participa do envio. RPCs `register_shipping_label` (confere a
   pasta e a existência do arquivo; avisa o outro lado) e `void_shipping_label`.
 
+### Mercado Livre (Fase 31)
+
+- `oauth_states` (sem privilégio para a API): estado, organização, quem começou, `code_verifier`,
+  uso único em 10 minutos. `oauth_begin` (owner/admin do vendedor); service role: `oauth_consume`,
+  `oauth_complete` (cria/reativa a conexão; conta do Mercado Livre em uma loja por vez),
+  `put_connection_credentials`, `swap_connection_credentials` (grava tokens renovados só na versão
+  esperada em `config.token_version`), `mercadolivre_connection` (conexão pelo id do usuário).
+- `link_listing` passou a aceitar itens de produto importado e enfileira `private.link_available`.
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,

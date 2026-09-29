@@ -165,7 +165,10 @@ export function useIntegrationEvents(orgId: string, connectionId: string) {
   });
 }
 
-/** Itens de estoque próprio que podem ser vinculados (sem dropshipping, ativos). */
+/**
+ * Itens que podem ser vinculados (ativos). Produto importado do fornecedor
+ * também: o anúncio recebe o estoque do fornecedor (Fase 31).
+ */
 export function useSellableItems(orgId: string) {
   return useQuery({
     queryKey: integrationKeys.sellable(orgId),
@@ -174,7 +177,6 @@ export function useSellableItems(orgId: string) {
         .from('inventory_levels')
         .select('id, sku, product_name, attributes')
         .eq('organization_id', orgId)
-        .eq('is_dropship', false)
         .eq('is_active', true)
         .order('product_name')
         .order('sku')

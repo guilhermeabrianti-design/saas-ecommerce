@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link, useParams } from 'react-router';
+import { Link, useParams, useSearchParams } from 'react-router';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
@@ -33,6 +33,8 @@ import {
 } from '../api';
 import { ConnectionStatusBadge } from '../components/ConnectionStatusBadge';
 import { CredentialsSection } from '../components/CredentialsSection';
+import { MercadoLivreConnect } from '../components/MercadoLivreConnect';
+import { mercadoLivreReturnMessages } from '../mercadolivre';
 import {
   connectableProviders,
   generateSecret,
@@ -304,6 +306,8 @@ function Activity({ connection, canEdit }: { connection: Connection; canEdit: bo
 
 export function IntegrationPage() {
   const { connectionId = '' } = useParams();
+  const [params] = useSearchParams();
+  const mlParam = params.get('ml') ?? '';
   const { active } = useOrganization();
   const orgId = active!.organization.id;
   const canEdit = orgPermissions.manageIntegrations(active!.role);
@@ -344,6 +348,43 @@ export function IntegrationPage() {
           </div>
 
           <Status connection={c} />
+
+          {c.provider === 'mercadolivre' && mercadoLivreReturnMessages[mlParam] && (
+            <Alert tone={mercadoLivreReturnMessages[mlParam].tone}>
+              {mercadoLivreReturnMessages[mlParam].text}
+            </Alert>
+          )}
+
+          {c.provider === 'mercadolivre' && (
+            <Section
+              title="Mercado Livre"
+              description="Conectado por autorização (OAuth). Nada para configurar no painel do Mercado Livre."
+            >
+              <div className="space-y-4 text-sm">
+                <ul className="text-muted list-disc space-y-1 pl-5">
+                  <li>
+                    Pedidos pagos entram como pedidos pendentes pelas notificações do Mercado Livre.
+                  </li>
+                  <li>
+                    Envios Full ficam com o Mercado Livre e não entram; retirada/a combinar também
+                    não.
+                  </li>
+                  <li>
+                    Estoque: use o mesmo SKU no campo "SKU" (SELLER_SKU) do anúncio no Mercado Livre
+                    e vincule abaixo.
+                  </li>
+                  <li>Publicar anúncio no Mercado Livre pela TheSigns ainda não é suportado.</li>
+                </ul>
+                {canEdit && c.status !== 'disconnected' && (
+                  <MercadoLivreConnect
+                    orgId={active!.organization.id}
+                    defaultName={c.name}
+                    label="Reconectar"
+                  />
+                )}
+              </div>
+            </Section>
+          )}
 
           {c.status !== 'disconnected' && isConnectable(c.provider) && (
             <Section

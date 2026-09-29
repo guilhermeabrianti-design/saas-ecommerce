@@ -24,6 +24,8 @@ import {
   type ShopifyCredentials,
   type WooCredentials,
 } from '../_shared/integrations/stock.ts';
+import { pushMercadoLivreStock } from '../_shared/integrations/mercadolivre.ts';
+import { mlAccessToken } from '../_shared/integrations/mltoken.ts';
 
 const BATCH = 5;
 const DEADLINE_MS = 90_000;
@@ -84,7 +86,24 @@ Deno.serve(async (req) => {
     return entry;
   };
 
+  // Mercado Livre (Fase 31): token OAuth renovado quando preciso, um por conexão.
+  const mlTokens = new Map<string, Promise<string>>();
+
   const push = async (row: Claimed): Promise<void> => {
+    if (row.provider === 'mercadolivre') {
+      let token = mlTokens.get(row.connection_id);
+      if (!token) {
+        token = mlAccessToken(supabase, fetch, row.connection_id);
+        mlTokens.set(row.connection_id, token);
+      }
+      await pushMercadoLivreStock(fetch, {
+        accessToken: await token,
+        userId: row.external_account_id,
+        sku: row.external_id,
+        available: row.available,
+      });
+      return;
+    }
     const creds = await load(row.connection_id);
     if (creds instanceof Error) throw new StockPushError(creds.message);
     if (row.provider === 'shopify') {
