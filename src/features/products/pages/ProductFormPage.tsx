@@ -11,6 +11,7 @@ import { Select } from '@/components/ui/Select';
 import { TextField } from '@/components/ui/TextField';
 import { useOrganization } from '@/features/organizations/organization-context';
 import { GenerateDescriptionButton } from '@/features/ai/components/GenerateDescriptionButton';
+import { ChannelsSection } from '@/features/channels/components/ChannelsSection';
 import { ProductCheckoutSection } from '@/features/checkout/components/ProductCheckoutSection';
 import { orgPermissions } from '@/features/organizations/roles';
 import { CatalogListingSection } from '@/features/supplier/components/CatalogListingSection';
@@ -300,6 +301,12 @@ export function EditProductPage() {
         // Keyed so switching products (or organizations) resets all local state.
         <div key={`${orgId}:${product.data.id}`} className="space-y-6">
           <ProductForm product={product.data} />
+          {active!.organization.kind === 'seller' && (
+            <ChannelsSection
+              product={product.data}
+              canEdit={orgPermissions.editCatalog(active!.role)}
+            />
+          )}
           <VariantsSection
             product={product.data}
             canEdit={orgPermissions.editCatalog(active!.role)}

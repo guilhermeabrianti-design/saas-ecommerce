@@ -126,6 +126,7 @@ const AUTHENTICATED_RPCS = [
   'revoke_invitation',
   'sales_center',
   'sales_center_listing',
+  'save_product_channel_config',
   'search_catalog',
   'seller_dashboard',
   'seller_onboarding',

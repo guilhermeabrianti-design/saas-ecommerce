@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.34.0] — Fase 34: Configuração por canal no cadastro do produto
+
+### Adicionado
+
+- **Canais de venda no produto** (só vendedor): ao cadastrar ou importar, o produto já mostra uma
+  aba por canal — Mercado Livre, Shopee e TikTok Shop — com título (no limite de cada canal: 60,
+  120 e 255), preço, tipo de anúncio, categoria e frete grátis **pré-preenchidos** a partir do
+  produto. O vendedor revisa e salva; "vender neste canal" liga/desliga sem perder o preenchido.
+- **Taxa e lucro estimado** em cada canal, com as mesmas regras de taxa das ferramentas de preço
+  (custo = custo do produto; antes de impostos e frete).
+- Aviso do Mercado Livre: frete grátis obrigatório a partir de R$ 79.
+- Tipo de anúncio só entre os que têm taxa ativa cadastrada pela equipe (Shopee comum aparece
+  como "taxa não cadastrada" até a equipe cadastrar).
+- **Testes**: 4 de banco e 5 de frontend.
+
+### Limitações conhecidas
+
+- Publicar no marketplace a partir desta configuração ainda não (próxima fase: Mercado Livre).
+
 ## [0.33.0] — Fase 33: Ambientes separados e só Mercado Livre, Shopee e TikTok Shop
 
 ### Alterado
