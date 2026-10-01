@@ -43,9 +43,7 @@ import { LiveCampaignsAdminPage } from '@/features/sales/pages/LiveCampaignsAdmi
 import { LiveCampaignsPage } from '@/features/sales/pages/LiveCampaignsPage';
 import { SalesCenterPage } from '@/features/sales/pages/SalesCenterPage';
 import { SalesListingPage } from '@/features/sales/pages/SalesListingPage';
-import { ToolsPage } from '@/features/tools/pages/ToolsPage';
 import { AnalyticsPage } from '@/features/analytics/pages/AnalyticsPage';
-import { FinancePage } from '@/features/finance/pages/FinancePage';
 import { WalletPage } from '@/features/wallet/pages/WalletPage';
 import { WithdrawalsAdminPage } from '@/features/wallet/pages/WithdrawalsAdminPage';
 import { IntegrationPage } from '@/features/integrations/pages/IntegrationPage';
@@ -54,7 +52,7 @@ import { NewOrderPage } from '@/features/orders/pages/NewOrderPage';
 import { OrderPage } from '@/features/orders/pages/OrderPage';
 import { OrdersPage } from '@/features/orders/pages/OrdersPage';
 import { CatalogListingPage } from '@/features/seller/pages/CatalogListingPage';
-import { CatalogPage } from '@/features/seller/pages/CatalogPage';
+import { CatalogPage, SupplierStorePage } from '@/features/seller/pages/CatalogPage';
 import { SupplierOrderPage } from '@/features/supplier/pages/SupplierOrderPage';
 import { SupplierOrdersPage } from '@/features/supplier/pages/SupplierOrdersPage';
 import { ProductsPage } from '@/features/products/pages/ProductsPage';
@@ -157,7 +155,8 @@ export const router = createBrowserRouter([
               { path: 'estoque', element: <InventoryPage /> },
               { path: 'estoque/:itemId', element: <InventoryItemPage /> },
               { path: 'analises', element: <AnalyticsPage /> },
-              { path: 'financeiro', element: <FinancePage /> },
+              // Financeiro foi unido à Carteira.
+              { path: 'financeiro', element: <Navigate to="/carteira" replace /> },
               { path: 'carteira', element: <WalletPage /> },
               { path: 'reputacao', element: <ReputationPage /> },
               {
@@ -165,12 +164,14 @@ export const router = createBrowserRouter([
                 children: [
                   { path: 'indicacoes', element: <ReferralsPage /> },
                   { path: 'catalogo', element: <CatalogPage /> },
+                  { path: 'catalogo/loja/:supplierId', element: <SupplierStorePage /> },
                   { path: 'catalogo/:listingId', element: <CatalogListingPage /> },
                   { path: 'central', element: <SalesCenterPage /> },
                   { path: 'central/lives', element: <LiveCampaignsPage /> },
                   { path: 'central/lives/:campaignId', element: <LiveCampaignPage /> },
                   { path: 'central/:listingId', element: <SalesListingPage /> },
-                  { path: 'ferramentas', element: <ToolsPage /> },
+                  // Ferramentas ficam dentro do produto, ao exportar para um marketplace.
+                  { path: 'ferramentas', element: <Navigate to="/produtos" replace /> },
                   { path: 'divulgacao', element: <AffiliatesPage /> },
                   { path: 'integracoes', element: <IntegrationsPage /> },
                   { path: 'integracoes/:connectionId', element: <IntegrationPage /> },

@@ -14,6 +14,7 @@ export const CATALOG_PAGE_SIZE = 24;
 
 const searchRowSchema = z.object({
   listing_id: z.uuid(),
+  supplier_id: z.uuid(),
   supplier_name: z.string(),
   name: z.string(),
   brand: z.string().nullable(),
@@ -55,13 +56,15 @@ const detailSchema = z.object({
 export type CatalogItem = z.infer<typeof searchRowSchema> & { cover_url: string | null };
 export type CatalogDetail = z.infer<typeof detailSchema> & { image_urls: (string | null)[] };
 
-export function useCatalogSearch(search: string, page: number) {
+/** Anúncios visíveis; com `supplierId`, só os da loja desse fornecedor. */
+export function useCatalogSearch(search: string, page: number, supplierId: string | null = null) {
   return useQuery({
-    queryKey: ['catalog', 'search', search, page] as const,
+    queryKey: ['catalog', 'search', search, page, supplierId] as const,
     placeholderData: keepPreviousData,
     queryFn: async () => {
-      const { data, error } = await getSupabase().rpc('search_catalog', {
+      const { data, error } = await getSupabase().rpc('catalog_browse', {
         p_query: search.trim().slice(0, 100),
+        p_supplier: supplierId,
         p_limit: CATALOG_PAGE_SIZE,
         p_offset: (page - 1) * CATALOG_PAGE_SIZE,
       });
@@ -72,6 +75,42 @@ export function useCatalogSearch(search: string, page: number) {
       );
       let i = 0;
       const items: CatalogItem[] = rows.map((r) => ({
+        ...r,
+        cover_url: r.cover_path ? (covers[i++] ?? null) : null,
+      }));
+      return { items, total: rows[0]?.total_count ?? 0 };
+    },
+  });
+}
+
+const supplierRowSchema = z.object({
+  supplier_id: z.uuid(),
+  supplier_name: z.string(),
+  listings: z.number().int(),
+  rating_avg: z.coerce.number().nullable(),
+  rating_count: z.number().int(),
+  cover_path: z.string().nullable(),
+  total_count: z.coerce.number().int(),
+});
+export type CatalogSupplier = z.infer<typeof supplierRowSchema> & { cover_url: string | null };
+
+/** Lojas de fornecedores (apelido, nota, quantidade de anúncios e capa). */
+export function useCatalogSuppliers(page: number) {
+  return useQuery({
+    queryKey: ['catalog', 'suppliers', page] as const,
+    placeholderData: keepPreviousData,
+    queryFn: async () => {
+      const { data, error } = await getSupabase().rpc('catalog_suppliers', {
+        p_limit: CATALOG_PAGE_SIZE,
+        p_offset: (page - 1) * CATALOG_PAGE_SIZE,
+      });
+      if (error) throw error;
+      const rows = z.array(supplierRowSchema).parse(data);
+      const covers = await signImagePaths(
+        rows.flatMap((r) => (r.cover_path ? [r.cover_path] : [])),
+      );
+      let i = 0;
+      const items: CatalogSupplier[] = rows.map((r) => ({
         ...r,
         cover_url: r.cover_path ? (covers[i++] ?? null) : null,
       }));

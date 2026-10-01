@@ -10,6 +10,7 @@ import { categoryPath, feeOptions, sortCategories, type FeeOptions } from '@/fea
 import { providerLabels, providers, type Provider } from '@/features/integrations/schemas';
 import type { Product } from '@/features/products/api';
 import { usePricingSimulation } from '@/features/tools/api';
+import { ProductToolsPanel } from '@/features/tools/components/ProductToolsPanel';
 import { cn } from '@/utils/cn';
 import { formatBRL, parseBRL } from '@/utils/money';
 import { useChannelConfigs, useSaveChannelConfig } from '../api';
@@ -202,64 +203,68 @@ function ChannelTab({
 }
 
 /**
- * Anúncio de cada canal (Mercado Livre, Shopee, TikTok Shop) já pronto no
- * cadastro do produto. Só vendedor.
+ * Exportar o produto para um marketplace (só vendedor). Fica fechado até o
+ * vendedor escolher o canal; aí aparecem a configuração do anúncio e as
+ * ferramentas (preço ideal, lucro e textos com IA) já com este produto.
  */
 export function ChannelsSection({ product, canEdit }: { product: Product; canEdit: boolean }) {
   const configs = useChannelConfigs(product.id);
   const rules = useFeeRules();
   const options = useMemo(() => feeOptions(rules.data ?? []), [rules.data]);
-  const [tab, setTab] = useState<Provider>('mercadolivre');
-  const current = configs.data?.find((c) => c.provider === tab);
+  const [open, setOpen] = useState<Provider | null>(null);
+  const current = open ? configs.data?.find((c) => c.provider === open) : undefined;
 
   return (
     <Section
-      title="Canais de venda"
-      description="Deixe o anúncio de cada marketplace pronto: título, preço, tipo de anúncio, categoria e frete."
+      title="Exportar para marketplaces"
+      description="Escolha onde vender este produto. O anúncio e as ferramentas aparecem ao escolher."
     >
       {configs.isPending || rules.isPending ? (
         <PageLoader />
       ) : configs.isError ? (
         <Alert tone="error">{channelErrorMessage(configs.error)}</Alert>
       ) : (
-        <div className="space-y-4">
-          <div role="tablist" aria-label="Canais" className="border-border flex gap-1 border-b">
+        <div className="space-y-6">
+          <div className="flex flex-wrap gap-2">
             {providers.map((p) => {
               const saved = configs.data.find((c) => c.provider === p);
               return (
-                <button
+                <Button
                   key={p}
-                  type="button"
-                  role="tab"
-                  aria-selected={tab === p}
-                  onClick={() => setTab(p)}
-                  className={cn(
-                    '-mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors',
-                    tab === p
-                      ? 'border-brand text-brand'
-                      : 'text-muted hover:text-fg border-transparent',
-                  )}
+                  variant={open === p ? 'primary' : 'secondary'}
+                  aria-pressed={open === p}
+                  onClick={() => setOpen(open === p ? null : p)}
                 >
-                  {providerLabels[p]}
-                  <span className="text-muted ml-1.5 text-xs">
-                    {saved ? (saved.enabled ? '· pronto' : '· desligado') : '· não salvo'}
-                  </span>
-                </button>
+                  Exportar para {providerLabels[p]}
+                  {saved && (
+                    <span className="text-xs font-normal opacity-80">
+                      {saved.enabled ? '· pronto' : '· desligado'}
+                    </span>
+                  )}
+                </Button>
               );
             })}
           </div>
-          <ChannelTab
-            key={`${tab}:${current?.updated_at ?? 'novo'}:${options.length}`}
-            product={product}
-            provider={tab}
-            saved={current}
-            options={options}
-            canEdit={canEdit}
-          />
-          <p className="text-muted text-xs">
-            Publicar direto no marketplace a partir daqui chega nas próximas fases. Pedidos do
-            Mercado Livre já entram e vão sozinhos ao fornecedor.
-          </p>
+
+          {open && (
+            <>
+              <ChannelTab
+                key={`${open}:${current?.updated_at ?? 'novo'}:${options.length}`}
+                product={product}
+                provider={open}
+                saved={current}
+                options={options}
+                canEdit={canEdit}
+              />
+              <div className="border-border border-t pt-6">
+                <ProductToolsPanel key={open} product={product} provider={open} />
+              </div>
+              <p className="text-muted text-xs">
+                Publicar direto no marketplace a partir daqui chega nas próximas fases. Pedidos do
+                Mercado Livre já entram e vão sozinhos ao fornecedor.
+              </p>
+            </>
+          )}
         </div>
       )}
     </Section>

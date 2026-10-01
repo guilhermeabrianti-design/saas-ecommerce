@@ -268,7 +268,7 @@ describe('catálogo', () => {
     expect((await inbox(seller)).map((n) => n.kind)).toEqual(['listing.unavailable']);
   });
 
-  it('moderação avisa o fornecedor; fornecedor novo entra na fila da equipe', async () => {
+  it('moderação avisa o fornecedor; fornecedor novo não entra mais em fila (Fase 35)', async () => {
     await db.query(
       "update public.catalog_listings set moderation_status = 'rejected' where id = $1",
       [listing],
@@ -282,14 +282,7 @@ describe('catálogo', () => {
       account_type: 'supplier',
     });
     await scalar(other, "select public.create_organization('Fornecedor Novo')");
-    expect(await inbox(admin, 'staff.supplier_review')).toEqual([
-      {
-        kind: 'staff.supplier_review',
-        title: 'Fornecedor aguardando análise: Fornecedor Novo',
-        body: null,
-        link: '/admin/moderacao',
-      },
-    ]);
+    expect(await inbox(admin, 'staff.supplier_review')).toEqual([]);
     // Equipe não vê notificações das organizações.
     expect((await inbox(admin)).every((n) => n.kind.startsWith('staff.'))).toBe(true);
   });

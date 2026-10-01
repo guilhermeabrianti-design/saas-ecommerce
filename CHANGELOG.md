@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.35.0] — Fase 35: Catálogo aberto, lojas de fornecedores e exportar com ferramentas
+
+### Alterado
+
+- **Publicou, apareceu**: fornecedor novo e anúncio novo não passam mais por aprovação — o produto
+  aparece na hora no catálogo dos vendedores. O que estava "em análise" foi liberado. A equipe
+  ainda pode reprovar ou bloquear depois pela Moderação (agora também fornecedor já aprovado).
+- **Financeiro saiu**: fica só a **Carteira**. Atalhos do painel apontam para Carteira e Pedidos.
+- **Ferramentas e configuração do anúncio só ao exportar**: o menu "Ferramentas" saiu. No produto,
+  a seção **Exportar para marketplaces** mostra os botões Mercado Livre, Shopee e TikTok Shop; ao
+  escolher um, aparecem o anúncio daquele canal e as ferramentas (preço ideal, simulador de lucro
+  e textos com IA) já com o produto, o custo e o preço.
+
+### Adicionado
+
+- **Lojas de fornecedores** no catálogo: aba **Lojas** (apelido, nota, quantidade de produtos e
+  capa) e página de cada loja com todos os anúncios. Cada produto do catálogo leva à loja dele.
+  A busca encontra pelo apelido da loja (não pelo nome real).
+- **Testes**: vitrine e lojas no banco; moderação ajustada ao novo fluxo.
+
 ## [0.34.2] — Empresa e convite por link
 
 ### Alterado

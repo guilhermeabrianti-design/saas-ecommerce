@@ -81,6 +81,13 @@ beforeEach(async () => {
     "insert into storage.objects (bucket_id, name, owner) values ('product-images', $1, $2)",
     [imagePath, supplier],
   );
+  // Fase 35: tudo nasce aprovado. Os testes de fila partem de itens em (nova) análise.
+  await db.query("update public.organizations set approval_status = 'pending' where id = $1", [
+    supplierOrg,
+  ]);
+  await db.query("update public.catalog_listings set moderation_status = 'pending' where id = $1", [
+    listing,
+  ]);
 });
 
 afterEach(async () => {
@@ -88,18 +95,42 @@ afterEach(async () => {
 });
 
 describe('moderação: estado inicial e visibilidade', () => {
-  it('fornecedor e anúncio novos aguardam análise; vendedor não', async () => {
+  it('fornecedor e anúncio novos já nascem aprovados e aparecem na hora (Fase 35)', async () => {
+    const owner = await signUpUser(db, 'nova@example.com', {
+      full_name: 'Nova',
+      account_type: 'supplier',
+    });
+    const org = await scalar<string>(owner, "select public.create_organization('Nova Fábrica')");
+    const p = await scalar<string>(
+      owner,
+      "insert into public.products (organization_id, sku, name, price_cents, status) values ($1, 'N1', 'Novo', 1000, 'active') returning id",
+      [org],
+    );
+    const l = await scalar<string>(
+      owner,
+      `insert into public.catalog_listings (organization_id, product_id, wholesale_price_cents, is_published)
+       values ($1, $2, 500, true) returning id`,
+      [org, p],
+    );
     expect(
-      await scalar(supplier, 'select approval_status from public.organizations where id = $1', [
-        supplierOrg,
-      ]),
-    ).toBe('pending');
+      await scalar(owner, 'select approval_status from public.organizations where id = $1', [org]),
+    ).toBe('approved');
     expect(
-      await scalar(seller, 'select approval_status from public.organizations where id = $1', [
-        sellerOrg,
+      await scalar(owner, 'select moderation_status from public.catalog_listings where id = $1', [
+        l,
       ]),
     ).toBe('approved');
-    expect(await status()).toBe('pending');
+    expect(await rows(seller, 'select listing_id from public.search_catalog(null, 24, 0)')).toEqual(
+      [{ listing_id: l }],
+    );
+  });
+
+  it('a equipe ainda reprova fornecedor já aprovado (some do catálogo)', async () => {
+    await reviewSupplier(true);
+    await moderate('approve');
+    expect(await searchCount()).toBe(1);
+    await reviewSupplier(false, 'Fraude confirmada');
+    expect(await searchCount()).toBe(0);
   });
 
   it('só aparece para vendedores com fornecedor E anúncio aprovados', async () => {

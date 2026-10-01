@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router';
 import { Section } from '@/components/ui/Section';
 import { TextField } from '@/components/ui/TextField';
 import { useOrganization } from '@/features/organizations/organization-context';
+import type { Provider } from '@/features/integrations/schemas';
 import { orgPermissions } from '@/features/organizations/roles';
 import { cn } from '@/utils/cn';
 import { centsToInput, parseBRL } from '@/utils/money';
 import { usePricingSimulation, usePricingTarget, type SimulateArgs, type TargetArgs } from '../api';
-import { AiGenerator } from '../components/AiGenerator';
-import { PricingResult } from '../components/PricingResult';
-import { ChannelFields, CostFields } from '../components/PricingInputs';
+import { AiGenerator } from './AiGenerator';
+import { PricingResult } from './PricingResult';
+import { ChannelFields, CostFields } from './PricingInputs';
 import {
   loadCostPrefs,
   parseCosts,
@@ -42,21 +42,35 @@ function useStableArgs<T>(args: T | null): T | null {
   return debounced === 'null' ? null : (JSON.parse(debounced) as T);
 }
 
-export function ToolsPage() {
+/**
+ * Ferramentas do produto (preço ideal, simulador de lucro e textos com IA),
+ * abertas ao exportar para um marketplace: já vêm com o canal, o custo e o
+ * preço do produto.
+ */
+export function ProductToolsPanel({
+  product,
+  provider,
+}: {
+  product: { id: string; price_cents: number; cost_cents: number | null };
+  provider: Provider;
+}) {
   const { active } = useOrganization();
   const orgId = active!.organization.id;
-  const [params, setParams] = useSearchParams();
-  const tabParam = params.get('aba');
-  const tab: Tab = tabs.some((t) => t.id === tabParam) ? (tabParam as Tab) : 'preco';
+  const [tab, setTab] = useState<Tab>('preco');
 
-  const [channel, setChannel] = useState<Channel | null>(null);
+  const [channel, setChannel] = useState<Channel | null>(() => ({
+    provider,
+    listingType: '',
+    categoryId: null,
+  }));
   const [costs, setCosts] = useState<CostInputs>(() => ({
     cost: '',
     shipping: '',
     ...loadCostPrefs(),
+    ...(product.cost_cents !== null ? { cost: centsToInput(product.cost_cents) } : {}),
   }));
   const [margin, setMargin] = useState('20');
-  const [price, setPrice] = useState('');
+  const [price, setPrice] = useState(() => centsToInput(product.price_cents));
 
   useEffect(() => {
     saveCostPrefs(costs);
@@ -79,12 +93,11 @@ export function ToolsPage() {
   const simulation = usePricingSimulation(tab === 'lucro' ? simulateArgs : null);
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Ferramentas</h1>
+        <h2 className="text-lg font-semibold tracking-tight">Ferramentas</h2>
         <p className="text-muted mt-1 text-sm">
-          Calcule o preço certo com as taxas reais de cada marketplace e gere textos de venda com
-          IA.
+          Preço certo com as taxas reais do marketplace e textos de venda com IA para este produto.
         </p>
       </div>
 
@@ -95,7 +108,7 @@ export function ToolsPage() {
             type="button"
             role="tab"
             aria-selected={tab === t.id}
-            onClick={() => setParams(t.id === 'preco' ? {} : { aba: t.id }, { replace: true })}
+            onClick={() => setTab(t.id)}
             className={cn(
               'rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
               tab === t.id ? 'bg-brand/10 text-brand' : 'text-muted hover:bg-surface-2',
@@ -111,7 +124,11 @@ export function ToolsPage() {
           title="Textos com IA"
           description="Títulos, legendas e roteiros a partir do cadastro do produto."
         >
-          <AiGenerator orgId={orgId} canUse={orgPermissions.editCatalog(active!.role)} />
+          <AiGenerator
+            orgId={orgId}
+            canUse={orgPermissions.editCatalog(active!.role)}
+            initialProductId={product.id}
+          />
         </Section>
       ) : (
         <>

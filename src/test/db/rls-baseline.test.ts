@@ -81,6 +81,8 @@ const AUTHENTICATED_RPCS = [
   'apply_referral_code',
   'cancel_order',
   'cancel_withdrawal',
+  'catalog_browse',
+  'catalog_suppliers',
   'checkout_order_status',
   'checkout_product_summary',
   'close_support_ticket',

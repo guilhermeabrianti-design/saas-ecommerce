@@ -153,7 +153,7 @@ export function summaryCards(s: Summary): SummaryCard[] {
       label: 'Recebido',
       value: formatBRL(s.received_cents),
       hint: 'Recebimentos registrados − estornos',
-      to: '/financeiro',
+      to: '/carteira',
     },
     {
       label: 'Tenho a receber',
@@ -165,7 +165,7 @@ export function summaryCards(s: Summary): SummaryCard[] {
       label: 'A pagar a fornecedores',
       value: formatBRL(s.payable_cents),
       hint: `${int(s.payable_orders)} fornecimento(s) enviado(s) e não pago(s) · hoje`,
-      to: '/financeiro',
+      to: '/pedidos',
     },
   ];
 }

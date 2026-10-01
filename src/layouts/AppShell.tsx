@@ -4,7 +4,6 @@ import {
   Activity,
   Banknote,
   PiggyBank,
-  Calculator,
   ChartColumn,
   CreditCard,
   Percent,
@@ -27,7 +26,6 @@ import {
   ReceiptText,
   Store,
   UserRound,
-  Wallet,
   type LucideIcon,
 } from 'lucide-react';
 import { Logo } from '@/components/brand/Logo';
@@ -166,14 +164,6 @@ const navItems: NavItem[] = [
     orgKind: 'seller',
   },
   {
-    to: '/ferramentas',
-    label: 'Ferramentas',
-    icon: Calculator,
-    requiresAuth: true,
-    tenantOnly: true,
-    orgKind: 'seller',
-  },
-  {
     to: '/integracoes',
     label: 'Integrações',
     icon: Plug,
@@ -190,7 +180,6 @@ const navItems: NavItem[] = [
     orgKind: 'supplier',
   },
   { to: '/analises', label: 'Análises', icon: ChartColumn, requiresAuth: true, tenantOnly: true },
-  { to: '/financeiro', label: 'Financeiro', icon: Wallet, requiresAuth: true, tenantOnly: true },
   { to: '/carteira', label: 'Carteira', icon: PiggyBank, requiresAuth: true, tenantOnly: true },
   { to: '/reputacao', label: 'Reputação', icon: Star, requiresAuth: true, tenantOnly: true },
   {

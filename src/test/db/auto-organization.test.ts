@@ -43,7 +43,12 @@ describe('organização automática no primeiro acesso', () => {
       ).rows,
     ).toEqual([
       { name: 'Loja de Bruno', kind: 'seller', approval_status: 'approved', role: 'owner' },
-      { name: 'Fornecedor Ana Souza', kind: 'supplier', approval_status: 'pending', role: 'owner' },
+      {
+        name: 'Fornecedor Ana Souza',
+        kind: 'supplier',
+        approval_status: 'approved',
+        role: 'owner',
+      },
     ]);
     expect(v1).not.toBe(s1);
   });

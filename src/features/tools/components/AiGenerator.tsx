@@ -44,9 +44,17 @@ function CopyItem({ text, index }: { text: string; index: number }) {
 }
 
 /** Títulos, copy e roteiros a partir de um produto da organização. Nada é salvo. */
-export function AiGenerator({ orgId, canUse }: { orgId: string; canUse: boolean }) {
+export function AiGenerator({
+  orgId,
+  canUse,
+  initialProductId = '',
+}: {
+  orgId: string;
+  canUse: boolean;
+  initialProductId?: string;
+}) {
   const [search, setSearch] = useState('');
-  const [productId, setProductId] = useState('');
+  const [productId, setProductId] = useState(initialProductId);
   const [kind, setKind] = useState<GenerationKind>('title');
   const [brief, setBrief] = useState('');
   const products = useProductOptions(orgId, search);

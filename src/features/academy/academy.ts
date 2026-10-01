@@ -52,7 +52,7 @@ export const lessonActions = [
   { path: '/pedidos/novo', label: 'Registrar pedido' },
   { path: '/estoque', label: 'Controlar estoque' },
   { path: '/analises', label: 'Analisar métricas' },
-  { path: '/financeiro', label: 'Ver financeiro' },
+  { path: '/carteira', label: 'Ver carteira' },
 ] as const;
 
 export const isKnownAction = (path: string) => lessonActions.some((a) => a.path === path);
