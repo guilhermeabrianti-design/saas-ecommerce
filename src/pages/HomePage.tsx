@@ -1,4 +1,5 @@
-import { Link, Navigate } from 'react-router';
+import { Link } from 'react-router';
+import { EnsureOrganization } from '@/features/organizations/components/EnsureOrganization';
 import {
   Activity,
   Boxes,
@@ -36,8 +37,8 @@ export function HomePage() {
 
   const { active } = organization;
   const isStaff = profile.data.role === 'admin';
-  // Customers always work inside an organization; send them to create or join one.
-  if (!active && !isStaff) return <Navigate to="/organizacao/nova" replace />;
+  // Clientes sempre trabalham numa organização: sem nenhuma, a deles é criada na hora.
+  if (!active && !isStaff) return <EnsureOrganization />;
 
   const isSeller = active?.organization.kind === 'seller';
   const firstName = profile.data.full_name.split(' ')[0];

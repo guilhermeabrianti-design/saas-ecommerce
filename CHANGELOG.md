@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.34.1] — Organização automática no primeiro acesso
+
+### Corrigido
+
+- Conta sem organização (vendedor ou fornecedor) não fica mais presa na tela "Criar organização":
+  a organização é criada na hora, do tipo da conta, com nome provisório ("Loja de Ana" /
+  "Fornecedor Ana Souza") que pode ser trocado em Organização. Idempotente (não cria duas) e um
+  código de indicação inválido não impede. Fornecedor novo continua passando pela aprovação da
+  equipe para aparecer no catálogo.
+
 ## [0.34.0] — Fase 34: Configuração por canal no cadastro do produto
 
 ### Adicionado

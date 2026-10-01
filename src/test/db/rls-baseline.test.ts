@@ -90,6 +90,7 @@ const AUTHENTICATED_RPCS = [
   'create_support_ticket',
   'decline_invitation',
   'deliver_order',
+  'ensure_my_organization',
   'estimate_sale_split',
   'finance_summary',
   'get_catalog_listing',

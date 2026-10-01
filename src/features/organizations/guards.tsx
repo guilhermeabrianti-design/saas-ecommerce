@@ -1,11 +1,12 @@
-import { Navigate, Outlet } from 'react-router';
+import { Outlet } from 'react-router';
 import { useMySuspendedOrganizations } from '@/features/admin/api';
 import { Alert } from '@/components/ui/Alert';
 import { PageLoader } from '@/components/ui/PageLoader';
+import { EnsureOrganization } from './components/EnsureOrganization';
 import { useOrganization } from './organization-context';
 import { orgKindLabels, type OrgKind } from './roles';
 
-/** Tenant-scoped area: users without an organization are sent to create or join one. */
+/** Área da organização: quem ainda não tem uma ganha a sua na hora (sem formulário). */
 export function RequireOrganization() {
   const { isPending, isError, active } = useOrganization();
   const suspended = useMySuspendedOrganizations();
@@ -18,9 +19,9 @@ export function RequireOrganization() {
   }
   if (!active) {
     if (suspended.isPending) return <PageLoader />;
-    // Sem organização ativa por causa de suspensão: o aviso (no layout) explica; não mande criar outra.
+    // Sem organização ativa por causa de suspensão: o aviso (no layout) explica; não crie outra.
     if ((suspended.data?.length ?? 0) > 0) return null;
-    return <Navigate to="/organizacao/nova" replace />;
+    return <EnsureOrganization />;
   }
   return <Outlet />;
 }

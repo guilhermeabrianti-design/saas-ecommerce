@@ -6,6 +6,10 @@ import type { Membership } from './api';
 const suspendedState = vi.hoisted(() => ({
   value: { isPending: false, data: [] as { id: string; name: string }[] },
 }));
+vi.mock('./components/EnsureOrganization', () => ({
+  EnsureOrganization: () => <p>criando</p>,
+}));
+
 vi.mock('@/features/admin/api', () => ({
   useMySuspendedOrganizations: () => suspendedState.value,
 }));
@@ -107,9 +111,10 @@ describe('RequireOrganization', () => {
     expect(screen.queryByText('configurações')).not.toBeInTheDocument();
   });
 
-  it('manda quem não tem organização para o onboarding', async () => {
+  it('quem não tem organização ganha a sua na hora (sem formulário)', async () => {
     renderWith({});
-    expect(await screen.findByText('criar organização')).toBeInTheDocument();
+    expect(await screen.findByText('criando')).toBeInTheDocument();
+    expect(screen.queryByText('criar organização')).not.toBeInTheDocument();
   });
 
   it('libera a área com organização ativa', async () => {
