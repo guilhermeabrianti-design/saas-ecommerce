@@ -1,6 +1,6 @@
 // @vitest-environment node
 import type { PGlite } from '@electric-sql/pglite';
-import { asUser, createTestDatabase, signUpUser } from './supabase-sim';
+import { asUser, connectMercadoLivre, createTestDatabase, signUpUser } from './supabase-sim';
 
 let db: PGlite;
 let seller: string;
@@ -12,8 +12,6 @@ let outsiderOrg: string;
 let itemA: string;
 let itemB: string;
 let connection: string;
-
-const SECRET = 'segredo-de-webhook-1234567890';
 
 async function scalar<T>(userId: string | null, sql: string, params: unknown[] = []): Promise<T> {
   return asUser(db, userId, async (tx) => {
@@ -134,75 +132,42 @@ beforeEach(async () => {
     else itemB = item;
   }
 
-  connection = await scalar<string>(
-    seller,
-    "select public.create_connection($1, 'shopify', 'Minha loja', 'Loja.MyShopify.com', $2)",
-    [sellerOrg, SECRET],
-  );
+  connection = await connectMercadoLivre(db, seller, sellerOrg);
 });
 
 afterEach(async () => {
   await db.close();
 });
 
-describe('conexões e segredo', () => {
-  it('cria a conexão normalizada e nunca expõe o segredo', async () => {
+describe('conexões', () => {
+  it('só Mercado Livre, Shopee e TikTok Shop; Shopify e WooCommerce não existem mais', async () => {
     const list = await rows<Record<string, unknown>>(
       seller,
       'select * from public.integration_connections',
     );
     expect(list).toHaveLength(1);
     expect(list[0]).toMatchObject({
-      provider: 'shopify',
-      external_account_id: 'loja.myshopify.com',
+      provider: 'mercadolivre',
+      external_account_id: '777',
       status: 'active',
     });
-    expect(JSON.stringify(list)).not.toContain(SECRET);
-    await expect(scalar(seller, 'select secret from public.integration_secrets')).rejects.toThrow(
-      /permission denied/,
-    );
-    const stored = await service<string>('select secret from public.integration_secrets');
-    expect(stored).toBe(SECRET);
-  });
-
-  it('só owner/admin de organização vendedora criam; provedor ainda indisponível é recusado', async () => {
-    const create = (userId: string, org: string, provider = 'woocommerce') =>
-      scalar(userId, 'select public.create_connection($1, $2, $3, $4, $5)', [
-        org,
-        provider,
-        'Outra',
-        'https://loja.com.br',
-        SECRET,
-      ]);
-    await expect(create(sellerMember, sellerOrg)).rejects.toThrow(/org.forbidden/);
-    await expect(create(outsider, sellerOrg)).rejects.toThrow(/org.forbidden/);
-    await expect(create(seller, sellerOrg, 'mercadolivre')).rejects.toThrow(
-      /integrations.provider_unavailable/,
-    );
-    await expect(create(seller, sellerOrg, 'woocommerce')).resolves.toBeTruthy();
-    // Fornecedor não tem organização vendedora.
-    const supplierOrg = await scalar<string>(
-      supplier,
-      "select id from public.organizations where kind = 'supplier'",
-    );
-    await expect(create(supplier, supplierOrg)).rejects.toThrow(/integrations.sellers_only/);
-  });
-
-  it('rejeita segredo curto e conexão duplicada', async () => {
-    await expect(
-      scalar(
-        seller,
-        "select public.create_connection($1, 'shopify', 'X1', 'a.myshopify.com', 'curto')",
-        [sellerOrg],
-      ),
-    ).rejects.toThrow(/check/);
-    await expect(
-      scalar(
-        seller,
-        "select public.create_connection($1, 'shopify', 'Dup', 'LOJA.myshopify.com', $2)",
-        [sellerOrg, SECRET],
-      ),
-    ).rejects.toThrow(/duplicate key/);
+    for (const provider of ['shopify', 'woocommerce']) {
+      await expect(
+        db.query(
+          `insert into public.integration_connections (organization_id, provider, name, external_account_id)
+           values ($1, $2, 'X', 'x')`,
+          [sellerOrg, provider],
+        ),
+      ).rejects.toThrow(/violates check constraint/);
+    }
+    // Conexão manual por webhook e credenciais de API saíram junto.
+    for (const fn of [
+      'create_connection',
+      'rotate_connection_secret',
+      'store_connection_credentials',
+    ]) {
+      expect((await db.query('select 1 from pg_proc where proname = $1', [fn])).rows).toEqual([]);
+    }
   });
 
   it('só owner/admin da organização leem conexões; outros tenants nada', async () => {
@@ -211,31 +176,27 @@ describe('conexões e segredo', () => {
     await expect(
       scalar(outsider, 'select public.set_connection_status($1, $2)', [connection, 'paused']),
     ).rejects.toThrow(/integrations.not_found/);
-    await expect(
-      scalar(outsider, "select public.rotate_connection_secret($1, 'novo-segredo-1234567')", [
-        connection,
-      ]),
-    ).rejects.toThrow(/integrations.not_found/);
   });
 
-  it('rotaciona o segredo; desconectar apaga o segredo e é definitivo', async () => {
-    await scalar(seller, "select public.rotate_connection_secret($1, 'novo-segredo-1234567')", [
+  it('credenciais: nenhum papel da API lê; desconectar apaga e é definitivo', async () => {
+    await service("select public.put_connection_credentials($1, $2, '{}'::jsonb)", [
       connection,
+      'cifrado-'.padEnd(40, 'x'),
     ]);
-    expect(await service<string>('select secret from public.integration_secrets')).toBe(
-      'novo-segredo-1234567',
+    await expect(
+      scalar(seller, 'select ciphertext from public.integration_credentials'),
+    ).rejects.toThrow(/permission denied/);
+    expect(await service<number>('select count(*)::int from public.integration_credentials')).toBe(
+      1,
     );
 
     await scalar(seller, "select public.set_connection_status($1, 'disconnected')", [connection]);
-    expect(await service<number>('select count(*) from public.integration_secrets')).toBe(0);
+    expect(await service<number>('select count(*)::int from public.integration_credentials')).toBe(
+      0,
+    );
     await expect(
       scalar(seller, "select public.set_connection_status($1, 'active')", [connection]),
     ).rejects.toThrow(/integrations.disconnected/);
-    await expect(
-      scalar(seller, "select public.rotate_connection_secret($1, 'outro-segredo-1234567')", [
-        connection,
-      ]),
-    ).rejects.toThrow(/integrations.not_found/);
   });
 });
 
@@ -507,7 +468,7 @@ describe('estoque de saída', () => {
     expect(claimed[0]).toMatchObject({
       external_id: 'CANECA-SHOP',
       available: 10,
-      provider: 'shopify',
+      provider: 'mercadolivre',
     });
     // Reivindicada: não sai de novo.
     expect(await service<number>('select count(*) from public.claim_stock_sync(10)')).toBe(0);

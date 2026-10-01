@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FunctionsHttpError } from '@supabase/supabase-js';
 import { z } from 'zod';
 import { orderKeys } from '@/features/orders/api';
 import { orgErrorMessage } from '@/features/organizations/errors';
@@ -8,7 +7,6 @@ import {
   connectionStatuses,
   eventStatuses,
   providers,
-  type ConnectionFormValues,
   type ConnectionStatus,
   type LinkFormValues,
 } from './schemas';
@@ -193,24 +191,6 @@ function useInvalidate(orgId: string) {
   return () => queryClient.invalidateQueries({ queryKey: integrationKeys.all(orgId) });
 }
 
-export function useCreateConnection(orgId: string) {
-  const invalidate = useInvalidate(orgId);
-  return useMutation({
-    mutationFn: async (v: ConnectionFormValues) => {
-      const { data, error } = await getSupabase().rpc('create_connection', {
-        p_org: orgId,
-        p_provider: v.provider,
-        p_name: v.name,
-        p_external_account_id: v.externalAccountId,
-        p_secret: v.secret,
-      });
-      if (error) throw error;
-      return z.uuid().parse(data);
-    },
-    onSuccess: invalidate,
-  });
-}
-
 export function useSetConnectionStatus(orgId: string, connectionId: string) {
   const invalidate = useInvalidate(orgId);
   return useMutation({
@@ -237,18 +217,6 @@ export function useSetAutoForward(orgId: string, connectionId: string) {
       if (error) throw error;
     },
     onSettled: invalidate,
-  });
-}
-
-export function useRotateSecret(connectionId: string) {
-  return useMutation({
-    mutationFn: async (secret: string) => {
-      const { error } = await getSupabase().rpc('rotate_connection_secret', {
-        p_connection: connectionId,
-        p_secret: secret,
-      });
-      if (error) throw error;
-    },
   });
 }
 
@@ -322,80 +290,6 @@ export function integrationErrorMessage(error: unknown): string {
   const { message, code } = (error ?? {}) as { message?: unknown; code?: unknown };
   if (typeof message === 'string' && messages[message]) return messages[message];
   if (code === '23505') return 'Já existe uma conexão ou vínculo com esse identificador.';
-  if (code === '23514')
-    return 'Dados inválidos. Revise os campos (o segredo precisa de 16+ caracteres).';
+  if (code === '23514') return 'Dados inválidos. Revise os campos.';
   return orgErrorMessage(error);
-}
-
-const credentialsStatusSchema = z.object({
-  configured: z.boolean(),
-  updated_at: z.string().nullable(),
-});
-
-export function useCredentialsStatus(connectionId: string) {
-  return useQuery({
-    queryKey: ['integrations', 'credentials', connectionId] as const,
-    queryFn: async () => {
-      const { data, error } = await getSupabase().rpc('connection_credentials_status', {
-        p_connection: connectionId,
-      });
-      if (error) throw error;
-      return z.array(credentialsStatusSchema).parse(data)[0] ?? null;
-    },
-  });
-}
-
-export class CredentialsError extends Error {
-  constructor(readonly code: string | undefined) {
-    super(credentialsErrorMessage(code));
-  }
-}
-
-/** Envia as credenciais à Edge Function, que criptografa e guarda; nada volta ao navegador. */
-export function useSaveCredentials(connectionId: string) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (fields: Record<string, string>) => {
-      const { error } = await getSupabase().functions.invoke('credentials', {
-        body: { connection_id: connectionId, ...fields },
-      });
-      if (error) {
-        let code: string | undefined;
-        if (error instanceof FunctionsHttpError) {
-          try {
-            const body: unknown = await error.context.json();
-            const value = (body as { error?: unknown } | null)?.error;
-            code = typeof value === 'string' ? value : undefined;
-          } catch {
-            code = undefined;
-          }
-        }
-        throw new CredentialsError(code);
-      }
-    },
-    onSettled: () =>
-      queryClient.invalidateQueries({ queryKey: ['integrations', 'credentials', connectionId] }),
-  });
-}
-
-const credentialMessages: Record<string, string> = {
-  invalid_credentials: 'Credenciais inválidas. Confira os valores copiados.',
-  invalid_location: 'ID do local de estoque inválido (use só o número).',
-  invalid_shop_address:
-    'O endereço cadastrado nesta conexão não é válido para a API. Crie a conexão de novo com o endereço correto.',
-  not_configured:
-    'A criptografia de credenciais não está configurada neste ambiente. Contate o suporte.',
-  not_found: 'Conexão não encontrada ou sem permissão.',
-  disconnected: 'A conexão foi encerrada e não pode mais ser alterada.',
-  provider_unavailable: 'Este marketplace ainda não aceita credenciais.',
-  unauthorized: 'Sua sessão expirou. Entre novamente.',
-};
-
-export function credentialsErrorMessage(error: unknown): string {
-  const code =
-    error instanceof CredentialsError ? error.code : typeof error === 'string' ? error : undefined;
-  return (
-    (code && credentialMessages[code]) ||
-    'Não foi possível guardar as credenciais. Tente novamente.'
-  );
 }

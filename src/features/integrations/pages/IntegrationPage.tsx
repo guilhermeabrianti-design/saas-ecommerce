@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useParams, useSearchParams } from 'react-router';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -6,7 +5,6 @@ import { ArrowLeft } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { ConfirmButton } from '@/components/ui/ConfirmButton';
-import { CopyField } from '@/components/ui/CopyField';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { Section } from '@/components/ui/Section';
 import { Select } from '@/components/ui/Select';
@@ -14,7 +12,6 @@ import { TextField } from '@/components/ui/TextField';
 import { useOrganization } from '@/features/organizations/organization-context';
 import { orgPermissions } from '@/features/organizations/roles';
 import { describeAttributes } from '@/features/products/variants';
-import { env } from '@/lib/env';
 import { cn } from '@/utils/cn';
 import {
   integrationErrorMessage,
@@ -24,7 +21,6 @@ import {
   useLinkListing,
   useListingLinks,
   useRetryEvent,
-  useRotateSecret,
   useSellableItems,
   useSetConnectionStatus,
   useSetAutoForward,
@@ -33,25 +29,11 @@ import {
   type IntegrationEvent,
 } from '../api';
 import { ConnectionStatusBadge } from '../components/ConnectionStatusBadge';
-import { CredentialsSection } from '../components/CredentialsSection';
 import { MercadoLivreConnect } from '../components/MercadoLivreConnect';
 import { mercadoLivreReturnMessages } from '../mercadolivre';
-import {
-  connectableProviders,
-  generateSecret,
-  linkFormSchema,
-  providerLabels,
-  webhookInstructions,
-  webhookUrl,
-  type ConnectableProvider,
-  type LinkFormValues,
-} from '../schemas';
+import { linkFormSchema, providerLabels, type LinkFormValues } from '../schemas';
 
 const when = (iso: string) => new Date(iso).toLocaleString('pt-BR');
-
-function isConnectable(p: string): p is ConnectableProvider {
-  return (connectableProviders as readonly string[]).includes(p);
-}
 
 /** Liga/desliga o envio automático do pedido pago ao fornecedor. */
 function AutoForwardToggle({ connection }: { connection: Connection }) {
@@ -115,45 +97,6 @@ function Status({ connection }: { connection: Connection }) {
         </p>
       )}
     </div>
-  );
-}
-
-function RotateSecret({ connection }: { connection: Connection }) {
-  const rotate = useRotateSecret(connection.id);
-  const [secret, setSecret] = useState('');
-  const valid = secret.trim().length >= 16;
-
-  return (
-    <form
-      noValidate
-      className="space-y-3"
-      onSubmit={(e) => {
-        e.preventDefault();
-        if (valid) rotate.mutate(secret.trim(), { onSuccess: () => setSecret('') });
-      }}
-    >
-      <TextField
-        label="Trocar segredo do webhook"
-        className="font-mono"
-        autoComplete="off"
-        value={secret}
-        onChange={(e) => setSecret(e.target.value)}
-        error={secret && !valid ? 'Ao menos 16 caracteres' : undefined}
-        hint="O segredo atual nunca é exibido. Atualize o mesmo valor no marketplace."
-      />
-      <div className="flex flex-wrap items-center gap-2">
-        <Button type="submit" variant="secondary" loading={rotate.isPending} disabled={!valid}>
-          Salvar segredo
-        </Button>
-        {connection.provider === 'woocommerce' && (
-          <Button variant="ghost" onClick={() => setSecret(generateSecret())}>
-            Gerar aleatório
-          </Button>
-        )}
-      </div>
-      {rotate.isError && <Alert tone="error">{integrationErrorMessage(rotate.error)}</Alert>}
-      {rotate.isSuccess && <Alert tone="success">Segredo atualizado.</Alert>}
-    </form>
   );
 }
 
@@ -420,35 +363,6 @@ export function IntegrationPage() {
                   />
                 )}
               </div>
-            </Section>
-          )}
-
-          {c.status !== 'disconnected' && isConnectable(c.provider) && (
-            <Section
-              title="Webhook de pedidos"
-              description="Configure no marketplace para que cada pedido chegue aqui."
-            >
-              <div className="space-y-5">
-                <ol className="text-muted list-decimal space-y-1 pl-5 text-sm">
-                  {webhookInstructions[c.provider].map((step) => (
-                    <li key={step}>{step}</li>
-                  ))}
-                </ol>
-                <CopyField
-                  value={webhookUrl(env.supabase?.url, c.provider, c.id)}
-                  label="URL do webhook"
-                />
-                <RotateSecret connection={c} />
-              </div>
-            </Section>
-          )}
-
-          {c.status !== 'disconnected' && isConnectable(c.provider) && (
-            <Section
-              title="Credenciais de API"
-              description="Necessárias para enviar o estoque ao marketplace. Ficam criptografadas e nunca são exibidas."
-            >
-              <CredentialsSection connection={c} />
             </Section>
           )}
 

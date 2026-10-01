@@ -67,7 +67,7 @@ export const sellerFeatures: Feature[] = [
   {
     icon: Plug,
     title: 'Sua loja conectada',
-    text: 'Integração com Shopify e WooCommerce para pedidos e estoque. Mercado Livre, Shopee e TikTok Shop em preparação.',
+    text: 'Integração com o Mercado Livre para pedidos, estoque, etiqueta e nota fiscal. Shopee e TikTok Shop em preparação.',
   },
 ];
 
@@ -131,7 +131,7 @@ export const faqs: Faq[] = [
   {
     question: 'Posso vender nos marketplaces?',
     answer:
-      'Hoje há integração com Shopify e WooCommerce. As integrações com Mercado Livre, Shopee e TikTok Shop estão em preparação e dependem da aprovação de cada plataforma.',
+      'Hoje há integração com o Mercado Livre. As integrações com Shopee e TikTok Shop estão em preparação e dependem da aprovação de cada plataforma.',
   },
   {
     question: 'Quem pode ser fornecedor?',

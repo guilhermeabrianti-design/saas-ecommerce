@@ -1,6 +1,12 @@
 // @vitest-environment node
 import type { PGlite } from '@electric-sql/pglite';
-import { approveCatalog, asUser, createTestDatabase, signUpUser } from './supabase-sim';
+import {
+  approveCatalog,
+  asUser,
+  connectMercadoLivre,
+  createTestDatabase,
+  signUpUser,
+} from './supabase-sim';
 
 let db: PGlite;
 let seller: string;
@@ -275,11 +281,7 @@ describe('admin: suspensão', () => {
   });
 
   it('vendedor suspenso não recebe pedidos de marketplace', async () => {
-    const conn = await scalar<string>(
-      seller,
-      "select public.create_connection($1, 'shopify', 'Loja', 'a.myshopify.com', 'segredo-1234567890ab')",
-      [sellerOrg],
-    );
+    const conn = await connectMercadoLivre(db, seller, sellerOrg);
     await suspend(sellerOrg);
     const res = await db.transaction(async (tx) => {
       await tx.exec('set local role service_role');

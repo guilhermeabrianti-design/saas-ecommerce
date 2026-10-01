@@ -1,105 +1,15 @@
-import { useForm, useWatch } from 'react-hook-form';
-import { Link, useNavigate, useSearchParams } from 'react-router';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { Link, useSearchParams } from 'react-router';
 import { ChevronRight } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
-import { Button } from '@/components/ui/Button';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { Section } from '@/components/ui/Section';
-import { Select } from '@/components/ui/Select';
-import { TextField } from '@/components/ui/TextField';
 import { useOrganization } from '@/features/organizations/organization-context';
 import { orgPermissions } from '@/features/organizations/roles';
-import { integrationErrorMessage, useConnections, useCreateConnection } from '../api';
+import { integrationErrorMessage, useConnections } from '../api';
 import { ConnectionStatusBadge } from '../components/ConnectionStatusBadge';
 import { MercadoLivreConnect } from '../components/MercadoLivreConnect';
 import { mercadoLivreReturnMessages } from '../mercadolivre';
-import {
-  accountHints,
-  connectableProviders,
-  connectionFormSchema,
-  emptyConnectionForm,
-  generateSecret,
-  providerLabels,
-  providers,
-  type ConnectionFormValues,
-} from '../schemas';
-
-function NewConnectionForm({ orgId }: { orgId: string }) {
-  const navigate = useNavigate();
-  const create = useCreateConnection(orgId);
-  const {
-    register,
-    handleSubmit,
-    control,
-    setValue,
-    formState: { errors },
-  } = useForm<ConnectionFormValues>({
-    resolver: zodResolver(connectionFormSchema),
-    defaultValues: emptyConnectionForm,
-  });
-  const provider = useWatch({ control, name: 'provider' });
-  const hint = accountHints[provider];
-
-  return (
-    <form
-      noValidate
-      className="space-y-4"
-      onSubmit={handleSubmit((v) =>
-        create.mutate(v, { onSuccess: (id) => navigate(`/integracoes/${id}`) }),
-      )}
-    >
-      {create.isError && <Alert tone="error">{integrationErrorMessage(create.error)}</Alert>}
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Select label="Marketplace" {...register('provider')}>
-          {connectableProviders.map((p) => (
-            <option key={p} value={p}>
-              {providerLabels[p]}
-            </option>
-          ))}
-        </Select>
-        <TextField
-          label="Nome da conexão"
-          placeholder="Ex.: Loja principal"
-          error={errors.name?.message}
-          {...register('name')}
-        />
-      </div>
-      <TextField
-        label={hint.label}
-        placeholder={hint.placeholder}
-        autoComplete="off"
-        error={errors.externalAccountId?.message}
-        {...register('externalAccountId')}
-      />
-      <div className="space-y-2">
-        <TextField
-          label="Segredo do webhook"
-          className="font-mono"
-          autoComplete="off"
-          error={errors.secret?.message}
-          hint={
-            provider === 'shopify'
-              ? 'Copie o segredo de assinatura que a Shopify mostra na página de webhooks.'
-              : 'Você define o segredo; use o mesmo valor no WooCommerce.'
-          }
-          {...register('secret')}
-        />
-        {provider === 'woocommerce' && (
-          <Button
-            variant="ghost"
-            onClick={() => setValue('secret', generateSecret(), { shouldValidate: true })}
-          >
-            Gerar segredo aleatório
-          </Button>
-        )}
-      </div>
-      <Button type="submit" loading={create.isPending}>
-        Criar conexão
-      </Button>
-    </form>
-  );
-}
+import { providerLabels } from '../schemas';
 
 export function IntegrationsPage() {
   const { active } = useOrganization();
@@ -118,23 +28,16 @@ export function IntegrationsPage() {
     );
   }
 
-  const soon = providers.filter(
-    (p) => !(connectableProviders as readonly string[]).includes(p) && p !== 'mercadolivre',
-  );
-
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Integrações</h1>
         <p className="text-muted text-sm">
-          Receba pedidos dos seus marketplaces como pedidos pendentes e mantenha o estoque em dia.
+          Mercado Livre, Shopee e TikTok Shop: pedidos entram sozinhos e o estoque fica em dia.
         </p>
       </div>
 
-      <Section
-        title="Conexões"
-        description="Cada conexão tem sua própria URL de webhook e segredo."
-      >
+      <Section title="Conexões" description="Contas de marketplace ligadas à sua loja.">
         {connections.isPending ? (
           <PageLoader />
         ) : connections.isError ? (
@@ -173,13 +76,14 @@ export function IntegrationsPage() {
         <MercadoLivreConnect orgId={orgId} />
       </Section>
 
-      <Section title="Nova conexão" description="Shopify e WooCommerce, via webhook de pedidos.">
-        <NewConnectionForm orgId={orgId} />
+      <Section
+        title="Shopee e TikTok Shop"
+        description="Em preparação: dependem da aprovação do app de cada plataforma."
+      >
+        <p className="text-muted text-sm">
+          Assim que liberadas, a conexão será feita por autorização, como no Mercado Livre.
+        </p>
       </Section>
-
-      <p className="text-muted text-sm">
-        Em breve: {soon.map((p) => providerLabels[p]).join(', ')}.
-      </p>
     </div>
   );
 }

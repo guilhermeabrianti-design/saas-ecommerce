@@ -3,27 +3,23 @@
  *
  * Autenticação: cabeçalho `x-sync-secret` = segredo STOCK_SYNC_SECRET (função
  * implantada com --no-verify-jwt; sem o segredo, 401). Usa o service role para
- * `claim_stock_sync` / `complete_stock_sync` e para ler o texto cifrado das
- * credenciais, que é decifrado só em memória.
+ * `claim_stock_sync` / `complete_stock_sync` e para o token do Mercado Livre
+ * (cifrado; decifrado só em memória).
  *
- * Fluxo: reivindica lotes de 5 → decifra as credenciais (uma vez por conexão) →
- * envia o disponível ao marketplace em paralelo → conclui ou registra a falha
- * (backoff e desistência após 5 tentativas são do banco). Para em 90 s.
+ * Fluxo: reivindica lotes de 5 → token da conexão (um por conexão, renovado
+ * quando preciso) → envia o disponível em paralelo → conclui ou registra a
+ * falha (backoff e desistência após 5 tentativas são do banco). Para em 90 s.
  *
  * Agendamento (pg_cron + pg_net, a cada minuto) — ver DATABASE.md.
  *
+ * Canais: Mercado Livre. Shopee e TikTok Shop entram nas próximas fases.
+ *
  * ATENÇÃO: roda em Deno e não foi executada nos testes do projeto; as chamadas
- * às APIs (Shopify/WooCommerce) não foram exercitadas contra lojas reais.
+ * à API não foram exercitadas contra contas reais.
  */
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { decryptCredentials, timingSafeEqualText } from '../_shared/integrations/crypto.ts';
-import {
-  StockPushError,
-  pushShopifyStock,
-  pushWooStock,
-  type ShopifyCredentials,
-  type WooCredentials,
-} from '../_shared/integrations/stock.ts';
+import { timingSafeEqualText } from '../_shared/integrations/crypto.ts';
+import { StockPushError } from '../_shared/integrations/stock.ts';
 import { pushMercadoLivreStock } from '../_shared/integrations/mercadolivre.ts';
 import { mlAccessToken } from '../_shared/integrations/mltoken.ts';
 
@@ -46,8 +42,7 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return json(405, { error: 'method_not_allowed' });
 
   const expected = Deno.env.get('STOCK_SYNC_SECRET');
-  const key = Deno.env.get('CREDENTIALS_ENCRYPTION_KEY');
-  if (!expected || !key) {
+  if (!expected || !Deno.env.get('CREDENTIALS_ENCRYPTION_KEY')) {
     console.error('stock-sync: STOCK_SYNC_SECRET/CREDENTIALS_ENCRYPTION_KEY não configurados');
     return json(503, { error: 'not_configured' });
   }
@@ -60,31 +55,6 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     { auth: { persistSession: false, autoRefreshToken: false } },
   );
-
-  type Loaded = { secret: Record<string, unknown>; config: Record<string, unknown> } | Error;
-  const cache = new Map<string, Promise<Loaded>>();
-  const load = (connectionId: string): Promise<Loaded> => {
-    let entry = cache.get(connectionId);
-    if (!entry) {
-      entry = (async (): Promise<Loaded> => {
-        const { data, error } = await supabase
-          .from('integration_credentials')
-          .select('ciphertext, config')
-          .eq('connection_id', connectionId)
-          .maybeSingle();
-        if (error) return new Error('falha ao ler as credenciais');
-        if (!data) return new Error('credenciais de API não configuradas');
-        try {
-          const secret = JSON.parse(await decryptCredentials(key, data.ciphertext, connectionId));
-          return { secret, config: data.config ?? {} };
-        } catch {
-          return new Error('não foi possível decifrar as credenciais (chave trocada?)');
-        }
-      })();
-      cache.set(connectionId, entry);
-    }
-    return entry;
-  };
 
   // Mercado Livre (Fase 31): token OAuth renovado quando preciso, um por conexão.
   const mlTokens = new Map<string, Promise<string>>();
@@ -104,26 +74,7 @@ Deno.serve(async (req) => {
       });
       return;
     }
-    const creds = await load(row.connection_id);
-    if (creds instanceof Error) throw new StockPushError(creds.message);
-    if (row.provider === 'shopify') {
-      await pushShopifyStock(fetch, {
-        domain: row.external_account_id,
-        credentials: creds.secret as unknown as ShopifyCredentials,
-        locationId: String(creds.config.location_id ?? ''),
-        sku: row.external_id,
-        available: row.available,
-      });
-    } else if (row.provider === 'woocommerce') {
-      await pushWooStock(fetch, {
-        baseUrl: row.external_account_id,
-        credentials: creds.secret as unknown as WooCredentials,
-        sku: row.external_id,
-        available: row.available,
-      });
-    } else {
-      throw new StockPushError('marketplace sem suporte a envio de estoque');
-    }
+    throw new StockPushError('marketplace sem suporte a envio de estoque');
   };
 
   const started = Date.now();

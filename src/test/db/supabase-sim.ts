@@ -128,3 +128,36 @@ export async function approveCatalog(db: PGlite): Promise<void> {
     update public.catalog_listings set moderation_status = 'approved' where moderation_status <> 'approved';
   `);
 }
+
+/**
+ * Conexão do Mercado Livre pelo fluxo real de OAuth (começa como o
+ * usuário, conclui como a Edge Function). `account` = id do usuário lá.
+ */
+export async function connectMercadoLivre(
+  db: PGlite,
+  userId: string,
+  orgId: string,
+  account = '777',
+  name = 'Minha conta ML',
+): Promise<string> {
+  const state = await asUser(db, userId, async (tx) => {
+    const res = await tx.query<{ s: string }>(
+      "select public.oauth_begin($1, 'mercadolivre', $2, $3) as s",
+      [orgId, name, 'a'.repeat(43)],
+    );
+    return res.rows[0]!.s;
+  });
+  return db.transaction(async (tx) => {
+    await tx.exec('set local role service_role');
+    const c = await tx.query<{ c: { organization_id: string; user_id: string; name: string } }>(
+      'select public.oauth_consume($1) as c',
+      [state],
+    );
+    const { organization_id, user_id, name: n } = c.rows[0]!.c;
+    const res = await tx.query<{ id: string }>(
+      "select public.oauth_complete($1, $2, 'mercadolivre', $3, $4, null, null) as id",
+      [organization_id, user_id, n, account],
+    );
+    return res.rows[0]!.id;
+  });
+}

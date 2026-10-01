@@ -325,9 +325,6 @@ export function LandingPage() {
             <Link to="/cadastro" className="hover:text-fg">
               Criar conta
             </Link>
-            <Link to="/status" className="hover:text-fg">
-              Status do sistema
-            </Link>
           </nav>
         </div>
       </footer>

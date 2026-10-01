@@ -94,12 +94,17 @@ export function HomePage() {
         ]
       : []),
     { to: '/conta', label: 'Minha conta', detail: 'Perfil, senha e sessão', icon: UserRound },
-    {
-      to: '/status',
-      label: 'Status do sistema',
-      detail: 'Diagnóstico do ambiente',
-      icon: Activity,
-    },
+    // Diagnóstico do ambiente: só a equipe.
+    ...(profile.data.role === 'admin'
+      ? [
+          {
+            to: '/status',
+            label: 'Status do sistema',
+            detail: 'Diagnóstico do ambiente',
+            icon: Activity,
+          },
+        ]
+      : []),
   ];
 
   return (

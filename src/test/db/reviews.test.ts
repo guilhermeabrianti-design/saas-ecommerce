@@ -264,7 +264,7 @@ describe('vendedor avalia fornecedor', () => {
       .rows[0]!.id;
     expect(
       await scalar(otherSeller, 'select public.listing_supplier_reputation($1)', [listingId]),
-    ).toMatchObject({ name: 'Fábrica X', rating_count: 1 });
+    ).toMatchObject({ name: expect.stringMatching(/^Fornecedor [0-9A-F]{6}$/), rating_count: 1 });
 
     // Loja de outro vendedor não é pública para contas conectadas.
     await expect(reputation(otherSeller, sellerOrg)).rejects.toThrow(/reviews.not_found/);

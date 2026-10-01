@@ -20,8 +20,9 @@ export function CreateOrganizationPage() {
   const profile = useProfile();
   const { memberships, selectOrganization } = useOrganization();
   const create = useCreateOrganization();
-  // Com o programa pausado o campo some e o código guardado não é enviado.
-  const referralEnabled = useReferralSettings().data?.enabled === true;
+  // Só vendedores; com o programa pausado o campo some e o código guardado não é enviado.
+  const referralEnabled =
+    useReferralSettings().data?.enabled === true && profile.data?.role === 'seller';
   const navigate = useNavigate();
   const {
     register,

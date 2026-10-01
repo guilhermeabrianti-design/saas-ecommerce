@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.33.0] — Fase 33: Ambientes separados e só Mercado Livre, Shopee e TikTok Shop
+
+### Alterado
+
+- **Vendedor e fornecedor não se identificam.** O vendedor vê cada fornecedor por um apelido
+  estável ("Fornecedor 3F9A1C") no catálogo, no painel, na Central de Vendas, nas lives e na
+  reputação: dá para comparar avaliações e produtos sem saber quem é. O fornecedor continua vendo
+  só "Vendedor verificado". O nome real fica para a própria organização e para a equipe, e a
+  busca do catálogo não procura mais pelo nome real. Feito no banco (as RPCs não devolvem o nome),
+  não só na tela.
+- **Fornecedor**: sem "Academia" e sem "Indique e ganhe" (menu, rotas e campo de código no
+  cadastro).
+- **Status do sistema**: só a equipe (menu, início, rodapés da landing e do login). Antes de
+  configurar o Supabase continua aberto para o diagnóstico.
+
+### Removido
+
+- **Shopify e WooCommerce**: conexão manual por webhook, segredos, credenciais de API, envio de
+  estoque e as Edge Functions `webhooks`, `credentials` e `listings`. Os canais agora são só
+  **Mercado Livre, Shopee e TikTok Shop** (o banco recusa os demais).
+- **Gerenciador de anúncios** ("Anúncios"), que só publicava em Shopify/WooCommerce. A
+  configuração por canal volta na Fase 34, dentro do cadastro do produto.
+
+### Testes
+
+- Testes de banco migrados para uma conexão real do Mercado Livre (OAuth); testes de apelido do
+  fornecedor e dos canais permitidos.
+
 ## [0.32.0] — Fase 32: Envio automático ao fornecedor com etiqueta e nota fiscal (Mercado Livre)
 
 ### Adicionado

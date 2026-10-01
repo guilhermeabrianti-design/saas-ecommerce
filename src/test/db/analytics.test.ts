@@ -1,6 +1,12 @@
 // @vitest-environment node
 import type { PGlite } from '@electric-sql/pglite';
-import { approveCatalog, asUser, createTestDatabase, signUpUser } from './supabase-sim';
+import {
+  approveCatalog,
+  asUser,
+  connectMercadoLivre,
+  createTestDatabase,
+  signUpUser,
+} from './supabase-sim';
 
 let db: PGlite;
 let seller: string;
@@ -187,11 +193,7 @@ describe('analytics: vendedor', () => {
 
   it('marca pedidos vindos de marketplace', async () => {
     const order = await createOrder([{ inventory_item_id: ownItem, quantity: 1 }]);
-    const conn = await scalar<string>(
-      seller,
-      "select public.create_connection($1, 'shopify', 'Loja', 'a.myshopify.com', 'segredo-1234567890ab')",
-      [sellerOrg],
-    );
+    const conn = await connectMercadoLivre(db, seller, sellerOrg);
     await db.query(
       "insert into public.external_orders (organization_id, connection_id, external_id, order_id) values ($1, $2, '1', $3)",
       [sellerOrg, conn, order],

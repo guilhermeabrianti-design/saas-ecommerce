@@ -1,6 +1,12 @@
 // @vitest-environment node
 import type { PGlite } from '@electric-sql/pglite';
-import { approveCatalog, asUser, createTestDatabase, signUpUser } from './supabase-sim';
+import {
+  approveCatalog,
+  asUser,
+  connectMercadoLivre,
+  createTestDatabase,
+  signUpUser,
+} from './supabase-sim';
 
 let db: PGlite;
 let seller: string;
@@ -212,11 +218,7 @@ describe('checklist do vendedor', () => {
     await scalar(seller, "update public.products set status = 'active' where id = $1", [
       ownProduct,
     ]);
-    await scalar(
-      seller,
-      "select public.create_connection($1, 'shopify', 'Minha loja', 'loja.myshopify.com', $2)",
-      [sellerOrg, 'segredo-muito-longo-123'],
-    );
+    await connectMercadoLivre(db, seller, sellerOrg);
     const order = await createOrder();
     expect(await doneKeys(seller)).toEqual([
       'profile',
@@ -408,11 +410,7 @@ describe('séries e canais', () => {
   it('canais: manual e provedor da conexão que trouxe o pedido', async () => {
     await createOrder(1);
     const fromShop = await createOrder(2);
-    const connection = await scalar<string>(
-      seller,
-      "select public.create_connection($1, 'shopify', 'Minha loja', 'loja.myshopify.com', $2)",
-      [sellerOrg, 'segredo-muito-longo-123'],
-    );
+    const connection = await connectMercadoLivre(db, seller, sellerOrg);
     await db.query(
       "insert into public.external_orders (organization_id, connection_id, external_id, order_id) values ($1, $2, '1001', $3)",
       [sellerOrg, connection, fromShop],
@@ -424,7 +422,7 @@ describe('séries e canais', () => {
       [sellerOrg],
     );
     expect(channels).toEqual([
-      { channel: 'shopify', orders: 1, amount_cents: 6000 },
+      { channel: 'mercadolivre', orders: 1, amount_cents: 6000 },
       { channel: 'manual', orders: 1, amount_cents: 3000 },
     ]);
     await expect(

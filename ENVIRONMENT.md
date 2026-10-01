@@ -12,19 +12,19 @@
 
 ## Onde cada variável vive
 
-| Variável                                                               | Onde                     | Pública?                |
-| ---------------------------------------------------------------------- | ------------------------ | ----------------------- |
-| `VITE_APP_ENV`                                                         | `.env.local` / build env | sim                     |
-| `VITE_SUPABASE_URL`                                                    | `.env.local` / build env | sim                     |
-| `VITE_SUPABASE_ANON_KEY`                                               | `.env.local` / build env | sim (protegida por RLS) |
-| `SUPABASE_SERVICE_ROLE_KEY`                                            | Supabase Secrets         | **não**                 |
-| `CREDENTIALS_ENCRYPTION_KEY`                                           | Supabase Secrets         | **não**                 |
-| `OPENAI_API_KEY`                                                       | Supabase Secrets         | **não**                 |
-| `ANTHROPIC_API_KEY` (Fase 13), `AI_MODEL` (opcional)                   | Supabase Secrets         | **não**                 |
-| `STOCK_SYNC_SECRET` (Fase 14)                                          | Supabase Secrets + cron  | **não**                 |
-| `MERCADOLIVRE_*`, `SHOPEE_*`, `TIKTOK_*`, `SHOPIFY_*`, `WOOCOMMERCE_*` | Supabase Secrets         | **não**                 |
-| `MERCADOPAGO_ACCESS_TOKEN`, `MERCADOPAGO_WEBHOOK_SECRET` (Fase 21)     | Supabase Secrets         | **não**                 |
-| `MERCADOPAGO_PUBLIC_KEY` (Fase 21; entregue ao navegador pela função)  | Supabase Secrets         | sim (chave pública)     |
+| Variável                                                              | Onde                     | Pública?                |
+| --------------------------------------------------------------------- | ------------------------ | ----------------------- |
+| `VITE_APP_ENV`                                                        | `.env.local` / build env | sim                     |
+| `VITE_SUPABASE_URL`                                                   | `.env.local` / build env | sim                     |
+| `VITE_SUPABASE_ANON_KEY`                                              | `.env.local` / build env | sim (protegida por RLS) |
+| `SUPABASE_SERVICE_ROLE_KEY`                                           | Supabase Secrets         | **não**                 |
+| `CREDENTIALS_ENCRYPTION_KEY`                                          | Supabase Secrets         | **não**                 |
+| `OPENAI_API_KEY`                                                      | Supabase Secrets         | **não**                 |
+| `ANTHROPIC_API_KEY` (Fase 13), `AI_MODEL` (opcional)                  | Supabase Secrets         | **não**                 |
+| `STOCK_SYNC_SECRET` (Fase 14)                                         | Supabase Secrets + cron  | **não**                 |
+| `MERCADOLIVRE_*`, `SHOPEE_*`, `TIKTOK_*`                              | Supabase Secrets         | **não**                 |
+| `MERCADOPAGO_ACCESS_TOKEN`, `MERCADOPAGO_WEBHOOK_SECRET` (Fase 21)    | Supabase Secrets         | **não**                 |
+| `MERCADOPAGO_PUBLIC_KEY` (Fase 21; entregue ao navegador pela função) | Supabase Secrets         | sim (chave pública)     |
 
 Definir segredos das Edge Functions:
 

@@ -115,9 +115,12 @@ Documento vivo — cada fase acrescenta os controles que implementa. Status atua
   `rls-baseline.test.ts`).
 - Limite: o segredo do webhook está em texto no banco (só verificação de assinatura). Tokens OAuth
   dos demais marketplaces exigirão criptografia com `CREDENTIALS_ENCRYPTION_KEY` antes de existirem.
-- A Edge Function `webhooks` **não foi executada** neste ambiente (sem Deno/Supabase CLI): a
-  normalização e a assinatura são testadas; o roteamento deve ser exercitado com
-  `supabase functions serve` antes de produção.
+- Fase 33: a Edge Function `webhooks` (Shopify/WooCommerce), os segredos de webhook e as
+  credenciais de API desses canais foram removidos. Pedidos chegam só pelas notificações do
+  Mercado Livre (relidas na API com o token cifrado).
+- Fase 33: vendedor e fornecedor não se identificam. O vendedor vê o fornecedor por apelido
+  estável (`private.supplier_alias`) em todas as RPCs do catálogo, da Central de Vendas e da
+  reputação; o fornecedor vê "Vendedor verificado". Só a própria organização e a equipe veem o nome.
 
 ## Implementado (Fase 12)
 
@@ -143,7 +146,7 @@ Documento vivo — cada fase acrescenta os controles que implementa. Status atua
   id da conexão; nunca devolvidas, exibidas ou registradas em log; apagadas ao desconectar.
 - Worker autenticado por segredo compartilhado (comparação em tempo constante); credenciais só
   decifradas em memória.
-- Anti-SSRF nas chamadas de saída (https público por nome, domínio Shopify fixo, sem redirecionamento).
+- Anti-SSRF nas chamadas de saída (só a API do Mercado Livre, caminhos validados, sem redirecionamento).
 - Pendente: rotação de chave em lote; restrição de rede de saída; teste de conexão.
 
 ### Configuração obrigatória no projeto Supabase cloud

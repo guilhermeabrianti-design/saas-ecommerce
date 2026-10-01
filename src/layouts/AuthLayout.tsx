@@ -20,11 +20,6 @@ export function AuthLayout() {
           <Outlet />
         </div>
       </main>
-      <footer className="text-muted pb-6 text-center text-xs">
-        <Link to="/status" className="hover:text-fg">
-          Status do sistema
-        </Link>
-      </footer>
     </div>
   );
 }

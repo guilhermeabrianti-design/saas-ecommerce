@@ -49,8 +49,6 @@ import { FinancePage } from '@/features/finance/pages/FinancePage';
 import { WalletPage } from '@/features/wallet/pages/WalletPage';
 import { WithdrawalsAdminPage } from '@/features/wallet/pages/WithdrawalsAdminPage';
 import { IntegrationPage } from '@/features/integrations/pages/IntegrationPage';
-import { ListingPage } from '@/features/listings/pages/ListingPage';
-import { ListingsPage } from '@/features/listings/pages/ListingsPage';
 import { IntegrationsPage } from '@/features/integrations/pages/IntegrationsPage';
 import { NewOrderPage } from '@/features/orders/pages/NewOrderPage';
 import { OrderPage } from '@/features/orders/pages/OrderPage';
@@ -64,6 +62,7 @@ import { HomePage } from '@/pages/HomePage';
 import { RootRoute } from '@/pages/landing/RootRoute';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { SystemStatusPage } from '@/pages/SystemStatusPage';
+import { env } from '@/lib/env';
 
 // Routes are added per phase. Only routes with working pages are registered
 // (no placeholder screens or dead links).
@@ -106,8 +105,8 @@ export const router = createBrowserRouter([
   {
     element: <AppShell />,
     children: [
-      // Public diagnostic page: must work before Supabase is configured.
-      { path: 'status', element: <SystemStatusPage /> },
+      // Diagnóstico: aberto só antes de configurar o Supabase; depois, só a equipe.
+      ...(env.supabase ? [] : [{ path: 'status', element: <SystemStatusPage /> }]),
       {
         element: <RequireAuth />,
         children: [
@@ -116,15 +115,21 @@ export const router = createBrowserRouter([
           { path: 'suporte', element: <SupportPage /> },
           { path: 'suporte/:ticketId', element: <TicketPage /> },
           { path: 'organizacao/nova', element: <CreateOrganizationPage /> },
-          // Academia: qualquer conta (não depende de organização).
-          { path: 'academia', element: <AcademyPage /> },
-          { path: 'academia/:courseId', element: <CoursePage /> },
-          { path: 'academia/aula/:lessonId', element: <LessonPage /> },
-          { path: 'academia/certificado/:certificateId', element: <CertificatePage /> },
+          {
+            // Academia: só contas de vendedor (não depende de organização).
+            element: <RequireRole allowed={['seller']} />,
+            children: [
+              { path: 'academia', element: <AcademyPage /> },
+              { path: 'academia/:courseId', element: <CoursePage /> },
+              { path: 'academia/aula/:lessonId', element: <LessonPage /> },
+              { path: 'academia/certificado/:certificateId', element: <CertificatePage /> },
+            ],
+          },
           {
             element: <RequireRole allowed={['admin']} />,
             children: [
               { path: 'admin', element: <AdminPage /> },
+              ...(env.supabase ? [{ path: 'status', element: <SystemStatusPage /> }] : []),
               { path: 'admin/taxas', element: <FeesAdminPage /> },
               { path: 'admin/pagamentos', element: <CheckoutAdminPage /> },
               { path: 'admin/saques', element: <WithdrawalsAdminPage /> },
@@ -151,11 +156,11 @@ export const router = createBrowserRouter([
               { path: 'analises', element: <AnalyticsPage /> },
               { path: 'financeiro', element: <FinancePage /> },
               { path: 'carteira', element: <WalletPage /> },
-              { path: 'indicacoes', element: <ReferralsPage /> },
               { path: 'reputacao', element: <ReputationPage /> },
               {
                 element: <RequireOrgKind kind="seller" />,
                 children: [
+                  { path: 'indicacoes', element: <ReferralsPage /> },
                   { path: 'catalogo', element: <CatalogPage /> },
                   { path: 'catalogo/:listingId', element: <CatalogListingPage /> },
                   { path: 'central', element: <SalesCenterPage /> },
@@ -164,8 +169,6 @@ export const router = createBrowserRouter([
                   { path: 'central/:listingId', element: <SalesListingPage /> },
                   { path: 'ferramentas', element: <ToolsPage /> },
                   { path: 'divulgacao', element: <AffiliatesPage /> },
-                  { path: 'anuncios', element: <ListingsPage /> },
-                  { path: 'anuncios/:listingId', element: <ListingPage /> },
                   { path: 'integracoes', element: <IntegrationsPage /> },
                   { path: 'integracoes/:connectionId', element: <IntegrationPage /> },
                   { path: 'pedidos', element: <OrdersPage /> },

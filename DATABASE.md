@@ -223,7 +223,7 @@ traduzidos em `src/features/finance/api.ts`. Mesma ordem de travas (pedido → f
 
 ### Integrações de marketplace (Fase 10)
 
-`integration_connections` (conexão por organização vendedora; Shopify e WooCommerce liberados),
+`integration_connections` (conexão por organização vendedora; só Mercado Livre, Shopee e TikTok Shop — Fase 33),
 `integration_secrets` (segredo do webhook: **sem privilégio algum** para a API),
 `listing_links` (SKU do marketplace ↔ item de estoque próprio, sem dropshipping),
 `external_orders` (pedido externo → pedido; único por conexão), `integration_events` (log; o

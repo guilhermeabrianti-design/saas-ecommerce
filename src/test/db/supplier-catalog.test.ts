@@ -113,7 +113,12 @@ describe('catálogo: consulta', () => {
     await publish(supplier, supplierOrg, await newProduct(supplier, supplierOrg, 'OCULTO'), false);
     const found = await search(seller);
     expect(found.map((r) => r.listing_id)).toEqual([listing]);
-    expect(found[0]).toMatchObject({ supplier_name: 'Fábrica X', name: 'Camiseta Premium' });
+    // Vendedor não sabe quem é o fornecedor: apelido estável no lugar do nome.
+    expect(found[0]).toMatchObject({
+      supplier_name: expect.stringMatching(/^Fornecedor [0-9A-F]{6}$/),
+      name: 'Camiseta Premium',
+    });
+    expect(JSON.stringify(found)).not.toContain('Fábrica X');
   });
 
   it('membro comum do vendedor também consulta; fornecedores e anon não', async () => {

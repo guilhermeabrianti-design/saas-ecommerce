@@ -13,7 +13,6 @@ import {
   Building2,
   GraduationCap,
   Gift,
-  Tags,
   Star,
   LifeBuoy,
   Link2,
@@ -61,7 +60,14 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { to: '/', label: 'Início', icon: House, requiresAuth: true },
-  { to: '/academia', label: 'Academia', icon: GraduationCap, requiresAuth: true, tenantOnly: true },
+  {
+    to: '/academia',
+    label: 'Academia',
+    icon: GraduationCap,
+    requiresAuth: true,
+    tenantOnly: true,
+    orgKind: 'seller',
+  },
   { to: '/admin', label: 'Administração', icon: ShieldCheck, requiresAuth: true, staffOnly: true },
   {
     to: '/admin/moderacao',
@@ -169,14 +175,6 @@ const navItems: NavItem[] = [
     orgKind: 'seller',
   },
   {
-    to: '/anuncios',
-    label: 'Anúncios',
-    icon: Tags,
-    requiresAuth: true,
-    tenantOnly: true,
-    orgKind: 'seller',
-  },
-  {
     to: '/integracoes',
     label: 'Integrações',
     icon: Plug,
@@ -196,7 +194,14 @@ const navItems: NavItem[] = [
   { to: '/financeiro', label: 'Financeiro', icon: Wallet, requiresAuth: true, tenantOnly: true },
   { to: '/carteira', label: 'Carteira', icon: PiggyBank, requiresAuth: true, tenantOnly: true },
   { to: '/reputacao', label: 'Reputação', icon: Star, requiresAuth: true, tenantOnly: true },
-  { to: '/indicacoes', label: 'Indique e ganhe', icon: Gift, requiresAuth: true, tenantOnly: true },
+  {
+    to: '/indicacoes',
+    label: 'Indique e ganhe',
+    icon: Gift,
+    requiresAuth: true,
+    tenantOnly: true,
+    orgKind: 'seller',
+  },
   {
     to: '/organizacao',
     label: 'Organização',
@@ -206,7 +211,13 @@ const navItems: NavItem[] = [
   },
   { to: '/suporte', label: 'Suporte', icon: LifeBuoy, requiresAuth: true, tenantOnly: true },
   { to: '/conta', label: 'Minha conta', icon: UserRound, requiresAuth: true },
-  { to: '/status', label: 'Status do sistema', icon: Activity, requiresAuth: false },
+  {
+    to: '/status',
+    label: 'Status do sistema',
+    icon: Activity,
+    requiresAuth: true,
+    staffOnly: true,
+  },
 ];
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
