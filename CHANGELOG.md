@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.36.0] — Fase 36: Estoque sincronizado (planilha, Bling e Tiny)
+
+### Adicionado
+
+- **Estoque › Sincronizar estoque** (vendedor e fornecedor, owner/admin): vendeu em outro lugar, o
+  estoque daqui acompanha sem ajuste manual — e segue para o Mercado Livre pela fila de estoque.
+- **Planilha (CSV)**: SKU e quantidade, com ou sem cabeçalho, separador ; , ou tab (o que o Excel e
+  os ERPs exportam). Prévia antes de aplicar, resumo do que mudou, SKUs não encontrados e itens que
+  ficaram no mínimo reservado por pedidos em aberto. Botão **Baixar modelo com meu estoque**.
+- **Bling** (OAuth): o saldo do Bling (`saldoVirtualTotal`) dos mesmos SKUs passa a valer aqui.
+- **Tiny / Olist ERP** (token da API): lê as atualizações de estoque desde a última leitura.
+- Sincronização automática a cada 15 min (agendamento) e botão **Sincronizar agora**; cada rodada
+  fica no histórico do item como contagem ("Sincronizado do Bling/Tiny").
+- **Testes**: 4 de banco, 7 do módulo de ERP e 5 de frontend.
+
+### Para ativar
+
+- Bling: criar o app em developer.bling.com.br com a URL de retorno
+  `<SUPABASE_URL>/functions/v1/erp/callback` e cadastrar `BLING_CLIENT_ID`/`BLING_CLIENT_SECRET`.
+- Agendar `erp/cron` (ver DATABASE.md). Tiny: o vendedor instala a extensão "API para estoque em
+  tempo real" e cola o token.
+
+### Limitações conhecidas
+
+- **Não exercitado contra contas reais** (respostas simuladas). Só estoque próprio (dropshipping usa
+  o estoque do fornecedor). O ERP manda no saldo: ajuste manual aqui é sobrescrito na próxima
+  sincronização.
+
 ## [0.35.0] — Fase 35: Catálogo aberto, lojas de fornecedores e exportar com ferramentas
 
 ### Alterado

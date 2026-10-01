@@ -287,6 +287,24 @@ $);
 
 Implantar `stock-sync` com `--no-verify-jwt` (a autenticação é o segredo do cabeçalho).
 
+### Estoque por planilha e ERP (Fase 36)
+
+`bulk_set_stock(org, [{sku, quantity}])` (owner/admin, até 5000 linhas, 20 por hora): cada SKU de
+estoque próprio vira contagem (`count`); nunca abaixo do reservado. ERPs (Bling por OAuth, Tiny por
+token) usam `integration_connections` (`provider` `bling`/`tiny`, `sync_cursor`, `last_sync_*`) e
+a Edge Function `erp`. Agendar a cada 15 minutos (mesmo segredo do worker de estoque):
+
+```sql
+select cron.schedule('erp-sync', '*/15 * * * *', $
+  select net.http_post(
+    url := 'https://<projeto>.supabase.co/functions/v1/erp/cron',
+    headers := jsonb_build_object('x-sync-secret', '<STOCK_SYNC_SECRET>')
+  )
+$);
+```
+
+Implantar `erp` com `--no-verify-jwt` (callback do Bling e cron; as demais rotas conferem o JWT).
+
 ### Taxas, comissões e categorias (Fase 15)
 
 Divisão da venda: **venda − taxa do marketplace − valor do fornecedor − comissão do vendedor =

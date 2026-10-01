@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
-import { AlertTriangle, Boxes, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { AlertTriangle, Boxes, ChevronLeft, ChevronRight, Search, RefreshCw } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { PageLoader } from '@/components/ui/PageLoader';
@@ -56,12 +56,21 @@ export function InventoryPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Estoque</h1>
-        <p className="text-muted mt-1 text-sm">
-          Saldo por unidade vendável (produto ou variação). Toda alteração fica registrada no
-          histórico.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Estoque</h1>
+          <p className="text-muted mt-1 text-sm">
+            Saldo por unidade vendável (produto ou variação). Toda alteração fica registrada no
+            histórico.
+          </p>
+        </div>
+        <Link
+          to="/estoque/sincronizar"
+          className="border-border hover:bg-surface-2 inline-flex h-10 items-center gap-2 rounded-lg border px-3 text-sm font-medium"
+        >
+          <RefreshCw className="size-4" aria-hidden />
+          Sincronizar estoque
+        </Link>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">

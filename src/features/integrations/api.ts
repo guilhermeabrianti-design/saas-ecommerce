@@ -85,6 +85,8 @@ export function useConnections(orgId: string) {
         .from('integration_connections')
         .select(CONNECTION_COLUMNS)
         .eq('organization_id', orgId)
+        // ERPs (Bling/Tiny) ficam em Estoque › Sincronizar.
+        .in('provider', providers)
         .order('created_at', { ascending: false });
       if (error) throw error;
       return z.array(connectionSchema).parse(data);
@@ -101,6 +103,7 @@ export function useConnection(orgId: string, id: string) {
         .from('integration_connections')
         .select(CONNECTION_COLUMNS)
         .eq('organization_id', orgId)
+        .in('provider', providers)
         .eq('id', id)
         .maybeSingle();
       if (error) throw error;

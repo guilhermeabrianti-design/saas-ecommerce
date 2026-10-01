@@ -31,26 +31,25 @@ integração fictícia** ("Não configurado" / "Não suportado pela API atual").
 | Ferramentas com IA                                      | Reaproveita a Edge Function `ai` (cota por organização, saída revisável, nada salvo sem revisão).                                                                                                                                                                        |
 | Dados de exemplo                                        | Seed só em desenvolvimento, marcado como tal. Depoimentos/produtos da landing não podem ser inventados.                                                                                                                                                                  |
 
-## Entregue (v0.1 – v0.35)
+## Entregue (v0.1 – v0.36)
 
 1 Setup · 2 Auth/sessão/RBAC · 3 Organizações + RLS · 4 Produtos · 5 Variações/imagens · 6 Estoque
 (ledger) · 7 Catálogo de fornecedores · 8 Pedidos + roteamento ao fornecedor · 9 Financeiro (ledger)
 · 10 Integrações (núcleo, webhooks Shopify/Woo) · 11 Analytics · 12 Admin da plataforma · 13 IA
 (descrição) · 14 Credenciais criptografadas + envio de estoque · **15 Taxas de marketplace, comissão
-do vendedor, categorias e calculadora da divisão** · **16 Moderação de fornecedores e anúncios** · **17 Academia (YouTube)** · **18 Onboarding e painel do vendedor** · **19 Central de Vendas e campanhas para lives** · **20 Ferramentas (preço-alvo, simulador de lucro, textos com IA)** · **21 Checkout próprio + Mercado Pago** · **22 Carteira e saques** · **23 Afiliados e indicação (links, vitrine, QR Code, atribuição e indique e ganhe)** · **24 Notificações em tempo real e alertas** · **25 Landing page** · **26 Rate limiting, endurecimento e MFA da equipe** · **27 Suporte e denúncias** · **28 Avaliações e reputação** · **29 Gerenciador de anúncios e publicação (Shopify/WooCommerce)** · **30 Etiquetas de envio (upload e vínculo)** · **31 Mercado Livre (OAuth, pedidos e estoque)** · **32 Envio automático ao fornecedor com etiqueta e nota fiscal do Mercado Livre** · **33 Ambientes separados (vendedor, fornecedor e equipe) e só Mercado Livre, Shopee e TikTok Shop** · **34 Configuração por canal no cadastro do produto** · **35 Catálogo aberto (sem aprovação), lojas de fornecedores, exportar com ferramentas no produto**.
+do vendedor, categorias e calculadora da divisão** · **16 Moderação de fornecedores e anúncios** · **17 Academia (YouTube)** · **18 Onboarding e painel do vendedor** · **19 Central de Vendas e campanhas para lives** · **20 Ferramentas (preço-alvo, simulador de lucro, textos com IA)** · **21 Checkout próprio + Mercado Pago** · **22 Carteira e saques** · **23 Afiliados e indicação (links, vitrine, QR Code, atribuição e indique e ganhe)** · **24 Notificações em tempo real e alertas** · **25 Landing page** · **26 Rate limiting, endurecimento e MFA da equipe** · **27 Suporte e denúncias** · **28 Avaliações e reputação** · **29 Gerenciador de anúncios e publicação (Shopify/WooCommerce)** · **30 Etiquetas de envio (upload e vínculo)** · **31 Mercado Livre (OAuth, pedidos e estoque)** · **32 Envio automático ao fornecedor com etiqueta e nota fiscal do Mercado Livre** · **33 Ambientes separados (vendedor, fornecedor e equipe) e só Mercado Livre, Shopee e TikTok Shop** · **34 Configuração por canal no cadastro do produto** · **35 Catálogo aberto (sem aprovação), lojas de fornecedores, exportar com ferramentas no produto** · **36 Estoque por planilha e integração com Bling/Tiny**.
 
 ## Próximas fases
 
 Ordem pensada para fechar primeiro o **MVP da seção 26** e depois o ecossistema.
 
-| Fase  | Entrega                                                                                                                                           | Seções |
-| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| 36    | **Estoque por planilha e integração com Bling/Tiny (ERP)**: o vendedor sincroniza o estoque com o que vende em outros lugares, sem ajuste manual. | 11     |
-| 37    | **Publicar no Mercado Livre** a partir da configuração do canal (categoria e atributos obrigatórios pela API, fotos, variações).                  | 11     |
-| 38–39 | **Shopee e TikTok Shop** — uma fase por marketplace, cada uma dependente de app de desenvolvedor aprovado.                                        | 11, 38 |
-| 40    | **Mentoria e Comunidade** (fora do MVP): mentores, comissão de mentor, aulas ao vivo, grupos, desafios.                                           | 8, 44  |
-| 41    | **Gamificação**: pontos por eventos reais, níveis, conquistas, ranking — configurável.                                                            | 45     |
-| 42    | **Planos e monetização**: assinaturas de fornecedor/vendedor, destaque de produto, campanhas patrocinadas.                                        | 25     |
+| Fase  | Entrega                                                                                                                          | Seções |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| 37    | **Publicar no Mercado Livre** a partir da configuração do canal (categoria e atributos obrigatórios pela API, fotos, variações). | 11     |
+| 38–39 | **Shopee e TikTok Shop** — uma fase por marketplace, cada uma dependente de app de desenvolvedor aprovado.                       | 11, 38 |
+| 40    | **Mentoria e Comunidade** (fora do MVP): mentores, comissão de mentor, aulas ao vivo, grupos, desafios.                          | 8, 44  |
+| 41    | **Gamificação**: pontos por eventos reais, níveis, conquistas, ranking — configurável.                                           | 45     |
+| 42    | **Planos e monetização**: assinaturas de fornecedor/vendedor, destaque de produto, campanhas patrocinadas.                       | 25     |
 
 Cada fase segue o mesmo fechamento: migração com RLS, testes de banco e frontend, `npm run check`
 verde, revisão de segurança e entrada no [CHANGELOG.md](CHANGELOG.md).
@@ -82,3 +81,7 @@ verde, revisão de segurança e entrada no [CHANGELOG.md](CHANGELOG.md).
     (`MERCADOLIVRE_CLIENT_ID`, `MERCADOLIVRE_CLIENT_SECRET`, `APP_URL`) e assinar os tópicos `orders_v2` e
     `shipments` (Fase 32: etiqueta e nota fiscal ao fornecedor); publicar anúncio no Mercado
     Livre e trazer perguntas/mensagens ficam para depois.
+12. **ERP (Fase 36)**: criar o app no Bling (URL de retorno `<SUPABASE_URL>/functions/v1/erp/callback`)
+    e cadastrar `BLING_CLIENT_ID`/`BLING_CLIENT_SECRET`; agendar `erp/cron`. No Tiny, o vendedor
+    instala a extensão "API para estoque em tempo real". Variações do Bling dependem de o SKU da
+    variação ser o mesmo daqui. Validar com contas de teste dos dois ERPs.

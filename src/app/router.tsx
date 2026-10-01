@@ -60,6 +60,7 @@ import { HomePage } from '@/pages/HomePage';
 import { RootRoute } from '@/pages/landing/RootRoute';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { SystemStatusPage } from '@/pages/SystemStatusPage';
+import { StockSyncPage } from '@/features/inventory/pages/StockSyncPage';
 import { env } from '@/lib/env';
 
 // Routes are added per phase. Only routes with working pages are registered
@@ -153,6 +154,7 @@ export const router = createBrowserRouter([
               { path: 'produtos/novo', element: <NewProductPage /> },
               { path: 'produtos/:productId', element: <EditProductPage /> },
               { path: 'estoque', element: <InventoryPage /> },
+              { path: 'estoque/sincronizar', element: <StockSyncPage /> },
               { path: 'estoque/:itemId', element: <InventoryItemPage /> },
               { path: 'analises', element: <AnalyticsPage /> },
               // Financeiro foi unido à Carteira.
