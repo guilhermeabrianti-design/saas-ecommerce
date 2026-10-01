@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router';
+import { createBrowserRouter, Navigate } from 'react-router';
 import { AppShell } from '@/layouts/AppShell';
 import { AuthLayout } from '@/layouts/AuthLayout';
 import { PublicLayout } from '@/layouts/PublicLayout';
@@ -12,7 +12,7 @@ import { SignUpPage } from '@/features/auth/pages/SignUpPage';
 import { InventoryItemPage } from '@/features/inventory/pages/InventoryItemPage';
 import { InventoryPage } from '@/features/inventory/pages/InventoryPage';
 import { RequireOrganization, RequireOrgKind } from '@/features/organizations/guards';
-import { CreateOrganizationPage } from '@/features/organizations/pages/CreateOrganizationPage';
+import { InvitePage } from '@/features/organizations/pages/InvitePage';
 import { OrganizationSettingsPage } from '@/features/organizations/pages/OrganizationSettingsPage';
 import { EditProductPage, NewProductPage } from '@/features/products/pages/ProductFormPage';
 import { AcademyAdminPage } from '@/features/academy/pages/AcademyAdminPage';
@@ -98,6 +98,8 @@ export const router = createBrowserRouter([
       },
       // Needs the recovery session, so it is not behind RedirectIfAuthenticated.
       { path: 'redefinir-senha', element: <ResetPasswordPage /> },
+      // Link de convite: funciona com ou sem login.
+      { path: 'convite/:token', element: <InvitePage /> },
       // Segundo passo do login (Fase 26): precisa da sessão aal1.
       { path: 'verificacao', element: <MfaVerifyPage /> },
     ],
@@ -114,7 +116,8 @@ export const router = createBrowserRouter([
           { path: 'notificacoes', element: <NotificationsPage /> },
           { path: 'suporte', element: <SupportPage /> },
           { path: 'suporte/:ticketId', element: <TicketPage /> },
-          { path: 'organizacao/nova', element: <CreateOrganizationPage /> },
+          // Não existe mais "criar organização": a empresa nasce com a conta.
+          { path: 'organizacao/nova', element: <Navigate to="/" replace /> },
           {
             // Academia: só contas de vendedor (não depende de organização).
             element: <RequireRole allowed={['seller']} />,

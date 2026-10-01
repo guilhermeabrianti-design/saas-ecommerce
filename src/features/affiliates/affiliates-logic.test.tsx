@@ -169,7 +169,7 @@ describe('regras de indicação (equipe)', () => {
         formatBRL,
       ).replace(/\s/g, ' '),
     ).toBe(
-      'Você ganha R$ 50,00 quando a organização indicada fizer a primeira venda paga pelo checkout de pelo menos R$ 100,00 em até 60 dias.',
+      'Você ganha R$ 50,00 quando a empresa indicada fizer a primeira venda paga pelo checkout de pelo menos R$ 100,00 em até 60 dias.',
     );
     expect(affiliateErrorMessage({ message: 'affiliates.code_taken' })).toMatch(/em uso/);
     expect(affiliateErrorMessage({ message: 'referral.self' })).toMatch(/si mesmo/);

@@ -247,7 +247,7 @@ export function InventoryItemPage() {
       ) : item.isError ? (
         <Alert tone="error">{inventoryErrorMessage(item.error)}</Alert>
       ) : item.data === null ? (
-        <Alert tone="info">Item de estoque não encontrado nesta organização.</Alert>
+        <Alert tone="info">Item de estoque não encontrado nesta empresa.</Alert>
       ) : (
         <div key={`${orgId}:${item.data.id}`} className="space-y-6">
           <Totals item={item.data} />

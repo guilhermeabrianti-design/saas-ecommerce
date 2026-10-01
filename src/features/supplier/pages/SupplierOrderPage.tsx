@@ -103,7 +103,7 @@ export function SupplierOrderPage() {
       ) : order.isError ? (
         <Alert tone="error">{supplierOrderErrorMessage(order.error)}</Alert>
       ) : !o ? (
-        <Alert tone="info">Pedido de fornecimento não encontrado nesta organização.</Alert>
+        <Alert tone="info">Pedido de fornecimento não encontrado nesta empresa.</Alert>
       ) : (
         <div key={o.id} className="space-y-6">
           <div className="flex flex-wrap items-center gap-3">

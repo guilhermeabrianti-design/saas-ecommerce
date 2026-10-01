@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus } from 'lucide-react';
@@ -8,11 +7,12 @@ import { Button } from '@/components/ui/Button';
 import { ConfirmButton } from '@/components/ui/ConfirmButton';
 import { PageLoader } from '@/components/ui/PageLoader';
 import { Section } from '@/components/ui/Section';
+import { CopyField } from '@/components/ui/CopyField';
 import { Select } from '@/components/ui/Select';
 import { TextField } from '@/components/ui/TextField';
 import { useAuth } from '@/features/auth/auth-context';
 import {
-  useInviteMember,
+  useCreateInviteLink,
   useOrganizationInvitations,
   useOrganizationMembers,
   useRemoveMember,
@@ -24,12 +24,8 @@ import {
 import { orgErrorMessage } from '../errors';
 import { useOrganization } from '../organization-context';
 import { orgKindLabels, orgPermissions, orgRoleLabels, orgRoles, type OrgRole } from '../roles';
-import {
-  inviteFormSchema,
-  organizationFormSchema,
-  type InviteFormValues,
-  type OrganizationFormValues,
-} from '../schemas';
+import { inviteUrl } from '../invite';
+import { organizationFormSchema, type OrganizationFormValues } from '../schemas';
 
 const formatDate = (iso: string) => new Date(iso).toLocaleDateString('pt-BR');
 
@@ -52,7 +48,7 @@ function DetailsSection({ membership }: { membership: Membership }) {
   });
 
   return (
-    <Section title="Dados" description="Identificação da organização na TheSigns.">
+    <Section title="Dados" description="Identificação da empresa na TheSigns.">
       <form onSubmit={onSubmit} noValidate className="space-y-4">
         {rename.isError && <Alert tone="error">{orgErrorMessage(rename.error)}</Alert>}
         {rename.isSuccess && !isDirty && <Alert tone="success">Nome atualizado.</Alert>}
@@ -91,7 +87,7 @@ function MembersSection({ membership }: { membership: Membership }) {
   const error = updateRole.error ?? remove.error;
 
   return (
-    <Section title="Membros" description="Pessoas com acesso aos dados desta organização.">
+    <Section title="Membros" description="Pessoas com acesso aos dados desta empresa.">
       {error && (
         <Alert tone="error" className="mb-4">
           {orgErrorMessage(error)}
@@ -155,43 +151,43 @@ function MembersSection({ membership }: { membership: Membership }) {
 function InvitationsSection({ membership }: { membership: Membership }) {
   const { organization, role } = membership;
   const invitations = useOrganizationInvitations(organization.id);
-  const inviteMember = useInviteMember(organization.id);
+  const create = useCreateInviteLink(organization.id);
   const revoke = useRevokeInvitation(organization.id);
   const invitable = orgPermissions.invitableRoles(role);
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<InviteFormValues>({
-    resolver: zodResolver(inviteFormSchema),
-    defaultValues: { email: '', role: 'member' },
-  });
-
-  const onSubmit = handleSubmit((values) => {
-    inviteMember.mutate(values, { onSuccess: () => reset({ email: '', role: values.role }) });
-  });
-
-  // Captured once per mount: enough to flag invitations that already expired.
+  const [newRole, setNewRole] = useState<OrgRole>('member');
+  const [label, setLabel] = useState('');
+  // Captured once per mount: enough to flag links that already expired.
   const [now] = useState(() => Date.now());
+  const origin = window.location.origin;
+  const links = (invitations.data ?? []).filter((i) => i.token);
 
   return (
     <Section
-      title="Convites"
-      description="O convidado vê o convite ao entrar na TheSigns com este e-mail. Convites valem por 7 dias."
+      title="Convidar para a equipe"
+      description="Gere um link com o nível de acesso e envie para a pessoa. Quem abrir o link cria a conta e já entra na sua empresa. Cada link vale para uma pessoa, por 7 dias."
     >
-      <form onSubmit={onSubmit} noValidate className="space-y-4">
-        {inviteMember.isError && <Alert tone="error">{orgErrorMessage(inviteMember.error)}</Alert>}
-        {inviteMember.isSuccess && <Alert tone="success">Convite registrado.</Alert>}
+      <form
+        noValidate
+        className="space-y-4"
+        onSubmit={(e) => {
+          e.preventDefault();
+          create.mutate({ role: newRole, label }, { onSuccess: () => setLabel('') });
+        }}
+      >
+        {create.isError && <Alert tone="error">{orgErrorMessage(create.error)}</Alert>}
         <div className="grid gap-4 sm:grid-cols-[1fr_12rem]">
           <TextField
-            label="E-mail"
-            type="email"
-            autoComplete="off"
-            error={errors.email?.message}
-            {...register('email')}
+            label="Para quem (opcional)"
+            placeholder="Ex.: Ana do estoque"
+            maxLength={60}
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
           />
-          <Select label="Papel" {...register('role')}>
+          <Select
+            label="Acesso"
+            value={newRole}
+            onChange={(e) => setNewRole(e.target.value as OrgRole)}
+          >
             {invitable.map((r) => (
               <option key={r} value={r}>
                 {orgRoleLabels[r]}
@@ -199,14 +195,16 @@ function InvitationsSection({ membership }: { membership: Membership }) {
             ))}
           </Select>
         </div>
-        <Alert tone="info">
-          O envio automático de e-mail de convite ainda não está disponível. Avise a pessoa para
-          entrar (ou criar a conta) com o e-mail convidado.
-        </Alert>
-        <Button type="submit" loading={inviteMember.isPending}>
+        <Button type="submit" loading={create.isPending}>
           <Plus className="size-4" aria-hidden />
-          Convidar
+          Gerar link de convite
         </Button>
+        {create.data && (
+          <div className="space-y-2">
+            <Alert tone="success">Link pronto. Copie e envie para a pessoa.</Alert>
+            <CopyField value={inviteUrl(origin, create.data)} label="Link de convite" />
+          </div>
+        )}
       </form>
 
       <div className="border-border mt-6 border-t pt-4">
@@ -219,28 +217,33 @@ function InvitationsSection({ membership }: { membership: Membership }) {
           <PageLoader />
         ) : invitations.isError ? (
           <Alert tone="error">Não foi possível carregar os convites.</Alert>
-        ) : invitations.data.length === 0 ? (
-          <p className="text-muted text-sm">Nenhum convite pendente.</p>
+        ) : links.length === 0 ? (
+          <p className="text-muted text-sm">Nenhum link de convite em aberto.</p>
         ) : (
           <ul className="divide-border divide-y">
-            {invitations.data.map((inv) => {
+            {links.map((inv) => {
               const expired = new Date(inv.expires_at).getTime() <= now;
               return (
-                <li key={inv.id} className="flex flex-wrap items-center gap-3 py-3">
-                  <div className="min-w-0 flex-1 text-sm">
-                    <p className="truncate font-medium">{inv.email}</p>
-                    <p className={expired ? 'text-danger' : 'text-muted'}>
-                      {orgRoleLabels[inv.role]} ·{' '}
-                      {expired ? 'expirado' : `expira em ${formatDate(inv.expires_at)}`}
-                    </p>
+                <li key={inv.id} className="space-y-2 py-3">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="min-w-0 flex-1 text-sm">
+                      <p className="truncate font-medium">{inv.label ?? 'Convite sem nome'}</p>
+                      <p className={expired ? 'text-danger' : 'text-muted'}>
+                        {orgRoleLabels[inv.role]} ·{' '}
+                        {expired ? 'vencido' : `vale até ${formatDate(inv.expires_at)}`}
+                      </p>
+                    </div>
+                    <ConfirmButton
+                      confirmLabel="Cancelar link"
+                      loading={revoke.isPending && revoke.variables === inv.id}
+                      onConfirm={() => revoke.mutate(inv.id)}
+                    >
+                      Cancelar
+                    </ConfirmButton>
                   </div>
-                  <ConfirmButton
-                    confirmLabel="Revogar"
-                    loading={revoke.isPending && revoke.variables === inv.id}
-                    onConfirm={() => revoke.mutate(inv.id)}
-                  >
-                    Revogar
-                  </ConfirmButton>
+                  {!expired && (
+                    <CopyField value={inviteUrl(origin, inv.token!)} label="Link de convite" />
+                  )}
                 </li>
               );
             })}
@@ -257,8 +260,8 @@ function LeaveSection({ membership }: { membership: Membership }) {
 
   return (
     <Section
-      title="Sair da organização"
-      description="Você perde o acesso aos dados desta organização imediatamente."
+      title="Sair da empresa"
+      description="Você perde o acesso aos dados desta empresa imediatamente."
     >
       {leave.isError && (
         <Alert tone="error" className="mb-4">
@@ -270,7 +273,7 @@ function LeaveSection({ membership }: { membership: Membership }) {
         loading={leave.isPending}
         onConfirm={() => user && leave.mutate(user.id)}
       >
-        Sair da organização
+        Sair da empresa
       </ConfirmButton>
     </Section>
   );
@@ -285,12 +288,9 @@ export function OrganizationSettingsPage() {
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Organização</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Empresa</h1>
           <p className="text-muted mt-1 text-sm">{active.organization.name}</p>
         </div>
-        <Link to="/organizacao/nova" className="text-brand text-sm font-medium hover:underline">
-          Criar ou entrar em outra
-        </Link>
       </div>
 
       {/* Keyed so switching organizations never shows the previous one's form state. */}

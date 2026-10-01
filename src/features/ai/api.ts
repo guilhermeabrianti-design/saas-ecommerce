@@ -13,7 +13,7 @@ export const aiKeys = {
 const messages: Record<string, string> = {
   forbidden: 'Somente proprietários e administradores usam a IA.',
   product_not_found: 'Produto não encontrado. Recarregue a página.',
-  quota_exceeded: 'O limite diário de gerações da organização foi atingido. Tente amanhã.',
+  quota_exceeded: 'O limite diário de gerações da empresa foi atingido. Tente amanhã.',
   not_configured: 'A IA não está configurada neste ambiente. Contate o suporte.',
   ai_busy: 'A IA está ocupada no momento. Tente novamente em instantes.',
   refused: 'A IA não pôde gerar este texto para o produto. Escreva manualmente.',

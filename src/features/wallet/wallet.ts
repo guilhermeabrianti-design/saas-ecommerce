@@ -134,7 +134,7 @@ export function maskPixKey(type: PixKeyType, key: string): string {
 }
 
 const messages: Partial<Record<string, string>> = {
-  'wallet.forbidden': 'Só o proprietário da organização pode solicitar saques.',
+  'wallet.forbidden': 'Só o proprietário da empresa pode solicitar saques.',
   'wallet.invalid': 'Requisição inválida.',
   'wallet.invalid_pix_key': 'Chave PIX inválida para o tipo escolhido.',
   'wallet.invalid_holder': 'Informe nome e CPF/CNPJ válidos do titular.',
@@ -144,7 +144,7 @@ const messages: Partial<Record<string, string>> = {
   'wallet.invalid_status': 'O saque mudou de situação. Atualize a página.',
   'wallet.reason_required': 'Informe o motivo (ao menos 3 caracteres).',
   'wallet.reference_required': 'Informe o identificador da transferência (ao menos 3 caracteres).',
-  'wallet.organization_suspended': 'A organização está suspensa: o saque não pode ser aprovado.',
+  'wallet.organization_suspended': 'A empresa está suspensa: o saque não pode ser aprovado.',
   'admin.forbidden': 'Acesso restrito à equipe da plataforma.',
 };
 

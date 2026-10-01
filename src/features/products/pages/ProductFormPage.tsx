@@ -152,7 +152,7 @@ function ProductForm({ product }: { product: Product | null }) {
 
       <Section
         title="Preço"
-        description="Valores em reais. O custo é visível só para a sua organização."
+        description="Valores em reais. O custo é visível só para a sua empresa."
       >
         <div className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
@@ -296,7 +296,7 @@ export function EditProductPage() {
       ) : product.isError ? (
         <Alert tone="error">{productErrorMessage(product.error)}</Alert>
       ) : product.data === null ? (
-        <Alert tone="info">Produto não encontrado nesta organização.</Alert>
+        <Alert tone="info">Produto não encontrado nesta empresa.</Alert>
       ) : (
         // Keyed so switching products (or organizations) resets all local state.
         <div key={`${orgId}:${product.data.id}`} className="space-y-6">

@@ -141,14 +141,14 @@ export const faqs: Faq[] = [
   {
     question: 'Meus dados e os dos compradores estão seguros?',
     answer:
-      'Cada organização só acessa os próprios dados (regras no banco de dados), os dados do cartão ficam só com o Mercado Pago e as credenciais de integração são guardadas criptografadas.',
+      'Cada empresa só acessa os próprios dados (regras no banco de dados), os dados do cartão ficam só com o Mercado Pago e as credenciais de integração são guardadas criptografadas.',
   },
 ];
 
 export const trustPoints: Feature[] = [
   {
     icon: ShieldCheck,
-    title: 'Dados isolados por organização',
+    title: 'Dados isolados por empresa',
     text: 'Regras de acesso no próprio banco de dados.',
   },
   {

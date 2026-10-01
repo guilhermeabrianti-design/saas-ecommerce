@@ -21,6 +21,7 @@ const AUTHENTICATED_RPCS = [
   'academy_save_progress',
   'academy_set_completed',
   'accept_invitation',
+  'accept_invite_link',
   'adjust_stock',
   'admin_academy_questions',
   'admin_academy_students',
@@ -85,6 +86,7 @@ const AUTHENTICATED_RPCS = [
   'close_support_ticket',
   'confirm_order',
   'create_affiliate_link',
+  'create_invite_link',
   'create_order',
   'create_organization',
   'create_support_ticket',
@@ -95,6 +97,7 @@ const AUTHENTICATED_RPCS = [
   'finance_summary',
   'get_catalog_listing',
   'import_catalog_listing',
+  'invite_link_preview',
   'invite_member',
   'link_listing',
   'list_organization_members',
@@ -228,15 +231,20 @@ describe('RLS deny-by-default', () => {
     await db.exec('drop function public.future_fn();');
   });
 
-  // Única exceção: o comprador do checkout (sem conta) consulta o próprio pedido pelo token.
-  it('anon só executa a consulta do pedido do checkout', async () => {
+  // Exceções: o comprador do checkout (sem conta) consulta o próprio pedido pelo token, e quem
+  // recebeu um convite vê de qual empresa é antes de criar a conta.
+  it('anon só executa a consulta do pedido do checkout e a prévia do convite', async () => {
     const res = await db.query<{ proname: string }>(`
       select p.proname from pg_proc p
       join pg_namespace n on n.oid = p.pronamespace
       where n.nspname in ('public', 'private')
         and has_function_privilege('anon', p.oid, 'execute')
+      order by p.proname
     `);
-    expect(res.rows.map((r) => r.proname)).toEqual(['checkout_order_status']);
+    expect(res.rows.map((r) => r.proname)).toEqual([
+      'checkout_order_status',
+      'invite_link_preview',
+    ]);
   });
 
   it('authenticated executa apenas as RPCs previstas no schema public', async () => {

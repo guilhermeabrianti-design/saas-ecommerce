@@ -238,7 +238,7 @@ const messages: Partial<Record<string, string>> = {
     'Categorias têm só dois níveis: a categoria-mãe não pode ser uma subcategoria nem ter subcategorias movidas.',
   'fees.default_required': 'A comissão padrão não pode ser removida, apenas alterada.',
   'fees.category_inactive': 'Esta categoria está desativada. Escolha outra.',
-  'fees.forbidden': 'Disponível apenas para membros de organizações vendedoras.',
+  'fees.forbidden': 'Disponível apenas para membros de empresas vendedoras.',
   'fees.not_configured':
     'Taxa não configurada para este marketplace, tipo de anúncio e preço. Peça à equipe TheSigns para cadastrar.',
   'fees.campaign_not_configured': 'Campanha sem taxa configurada para este tipo e preço.',

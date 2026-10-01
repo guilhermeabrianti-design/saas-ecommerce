@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.34.2] — Empresa e convite por link
+
+### Alterado
+
+- **Não existe mais "organização" para criar, procurar ou entrar.** Cada conta já é a sua empresa
+  (criada no primeiro acesso). O menu mostra **Empresa**, com dados, equipe e convites; o seletor de
+  organização, a tela "Criar organização" e a lista de convites pendentes saíram.
+- **Convite por link**: o proprietário (ou admin) escolhe o acesso (Administrador ou Membro) e
+  copia o link. Quem abre cria a conta — o tipo (vendedor/fornecedor) vem da empresa — e já está
+  dentro. Quem já tem conta entra pelo mesmo link. Link de uso único, válido por 7 dias e
+  cancelável.
+- Uma conta, uma empresa: quem abre o link com uma empresa vazia (a criada automaticamente) troca
+  por esta; com dados, o link é recusado com explicação.
+- Textos das telas: "organização" virou "empresa".
+
 ## [0.34.1] — Organização automática no primeiro acesso
 
 ### Corrigido

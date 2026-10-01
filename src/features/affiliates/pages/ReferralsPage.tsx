@@ -49,7 +49,7 @@ function ApplyCode({ orgId }: { orgId: string }) {
           autoComplete="off"
           onChange={(e) => setCode(e.target.value)}
           error={apply.isError ? affiliateErrorMessage(apply.error) : undefined}
-          hint="Vale nos primeiros 30 dias da organização e antes da primeira venda."
+          hint="Vale nos primeiros 30 dias da empresa e antes da primeira venda."
         />
       </div>
       <Button type="submit" variant="secondary" disabled={!valid} loading={apply.isPending}>
@@ -138,7 +138,7 @@ function Content({ orgId, s }: { orgId: string; s: ReferralSummary }) {
         <Referrals s={s} />
       </Section>
 
-      <Section title="Quem indicou você" description="Código informado na criação da organização.">
+      <Section title="Quem indicou você" description="Código informado na criação da empresa.">
         <ReferredBy orgId={orgId} s={s} />
       </Section>
     </>

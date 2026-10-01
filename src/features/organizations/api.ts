@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { useAuth } from '@/features/auth/auth-context';
 import { getSupabase } from '@/lib/supabase';
 import { orgKinds, orgRoles, type OrgRole } from './roles';
+import { invitePreviewSchema, isInviteToken } from './invite';
 
 const orgRole = z.enum(orgRoles);
 const orgKind = z.enum(orgKinds);
@@ -22,31 +23,21 @@ const memberSchema = z.object({
 
 const invitationSchema = z.object({
   id: z.uuid(),
-  email: z.string(),
+  email: z.string().nullable(),
+  token: z.string().nullable(),
+  label: z.string().nullable(),
   role: orgRole,
-  expires_at: z.string(),
-});
-
-const myInvitationSchema = z.object({
-  id: z.uuid(),
-  organization_id: z.uuid(),
-  organization_name: z.string(),
-  organization_kind: orgKind,
-  role: orgRole,
-  invited_by_name: z.string().nullable(),
   expires_at: z.string(),
 });
 
 export type Membership = z.infer<typeof membershipSchema>;
 export type Member = z.infer<typeof memberSchema>;
 export type Invitation = z.infer<typeof invitationSchema>;
-export type MyInvitation = z.infer<typeof myInvitationSchema>;
 
 export const orgKeys = {
   memberships: (userId: string | undefined) => ['memberships', userId] as const,
   members: (orgId: string) => ['organization-members', orgId] as const,
   invitations: (orgId: string) => ['organization-invitations', orgId] as const,
-  myInvitations: (userId: string | undefined) => ['my-invitations', userId] as const,
 };
 
 /** Organizations the signed-in user belongs to, with their role in each. */
@@ -88,7 +79,7 @@ export function useOrganizationInvitations(orgId: string) {
     queryFn: async () => {
       const { data, error } = await getSupabase()
         .from('organization_invitations')
-        .select('id, email, role, expires_at')
+        .select('id, email, token, label, role, expires_at')
         .eq('organization_id', orgId)
         .order('created_at', { ascending: false });
       if (error) throw error;
@@ -97,39 +88,10 @@ export function useOrganizationInvitations(orgId: string) {
   });
 }
 
-/** Invitations addressed to the signed-in user's e-mail. */
-export function useMyInvitations() {
-  const { user } = useAuth();
-  const userId = user?.id;
-  return useQuery({
-    queryKey: orgKeys.myInvitations(userId),
-    enabled: userId !== undefined,
-    queryFn: async () => {
-      const { data, error } = await getSupabase().rpc('my_pending_invitations');
-      if (error) throw error;
-      return z.array(myInvitationSchema).parse(data);
-    },
-  });
-}
-
 async function rpc(fn: string, args: Record<string, unknown>) {
   const { data, error } = await getSupabase().rpc(fn, args);
   if (error) throw error;
   return data as unknown;
-}
-
-export function useCreateOrganization() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ name, referralCode }: { name: string; referralCode?: string | null }) =>
-      z.uuid().parse(
-        await rpc('create_organization', {
-          p_name: name,
-          p_referral_code: referralCode?.trim() || null,
-        }),
-      ),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['memberships'] }),
-  });
 }
 
 export function useRenameOrganization(orgId: string) {
@@ -143,12 +105,42 @@ export function useRenameOrganization(orgId: string) {
   });
 }
 
-export function useInviteMember(orgId: string) {
+/** Gera um link de convite com o nível de acesso; devolve o segredo do link. */
+export function useCreateInviteLink(orgId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ email, role }: { email: string; role: OrgRole }) =>
-      rpc('invite_member', { p_org: orgId, p_email: email, p_role: role }),
+    mutationFn: async ({ role, label }: { role: OrgRole; label: string }) =>
+      z
+        .string()
+        .regex(/^[0-9a-f]{64}$/)
+        .parse(
+          await rpc('create_invite_link', {
+            p_org: orgId,
+            p_role: role,
+            p_label: label.trim() || null,
+          }),
+        ),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: orgKeys.invitations(orgId) }),
+  });
+}
+
+/** Empresa e acesso que o link oferece (funciona sem login). */
+export function useInvitePreview(token: string) {
+  return useQuery({
+    queryKey: ['invite-preview', token] as const,
+    enabled: isInviteToken(token),
+    retry: false,
+    queryFn: async () =>
+      invitePreviewSchema.parse(await rpc('invite_link_preview', { p_token: token })),
+  });
+}
+
+export function useAcceptInviteLink() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (token: string) =>
+      z.uuid().parse(await rpc('accept_invite_link', { p_token: token })),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['memberships'] }),
   });
 }
 
@@ -157,27 +149,6 @@ export function useRevokeInvitation(orgId: string) {
   return useMutation({
     mutationFn: (invitationId: string) => rpc('revoke_invitation', { p_invitation: invitationId }),
     onSettled: () => queryClient.invalidateQueries({ queryKey: orgKeys.invitations(orgId) }),
-  });
-}
-
-export function useAcceptInvitation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (invitationId: string) =>
-      z.uuid().parse(await rpc('accept_invitation', { p_invitation: invitationId })),
-    onSettled: () =>
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['my-invitations'] }),
-        queryClient.invalidateQueries({ queryKey: ['memberships'] }),
-      ]),
-  });
-}
-
-export function useDeclineInvitation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (invitationId: string) => rpc('decline_invitation', { p_invitation: invitationId }),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ['my-invitations'] }),
   });
 }
 

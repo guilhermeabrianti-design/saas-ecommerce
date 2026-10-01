@@ -140,7 +140,7 @@ export function ticketPrefill(params: URLSearchParams) {
 
 const messages: Record<string, string> = {
   'support.invalid': 'Revise o assunto e a mensagem.',
-  'support.invalid_order': 'Pedido não encontrado nesta organização.',
+  'support.invalid_order': 'Pedido não encontrado nesta empresa.',
   'support.invalid_reported': 'Loja, fornecedor ou anúncio denunciado não encontrado.',
   'support.report_target_required': 'Informe quem ou o que está sendo denunciado.',
   'support.not_found': 'Chamado não encontrado.',

@@ -203,7 +203,7 @@ export function useOrderAction(orgId: string, orderId: string) {
 
 const messages: Partial<Record<string, string>> = {
   'orders.not_found': 'Pedido não encontrado ou sem permissão para esta ação.',
-  'orders.sellers_only': 'Pedidos são criados por organizações vendedoras.',
+  'orders.sellers_only': 'Pedidos são criados por empresas vendedoras.',
   'orders.invalid': 'Pedido inválido. Revise os dados.',
   'orders.invalid_items':
     'Itens inválidos: verifique quantidades e não repita o mesmo item. Produtos com variações são vendidos pela variação.',

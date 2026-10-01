@@ -1,4 +1,5 @@
-import { Link } from 'react-router';
+import { Link, Navigate } from 'react-router';
+import { pendingInviteToken } from '@/features/organizations/invite';
 import { EnsureOrganization } from '@/features/organizations/components/EnsureOrganization';
 import {
   Activity,
@@ -20,7 +21,6 @@ import { useAuth } from '@/features/auth/auth-context';
 import { mfaRequirement } from '@/features/auth/mfa';
 import { useProfile } from '@/features/auth/profile';
 import { roleLabels } from '@/features/auth/roles';
-import { PendingInvitations } from '@/features/organizations/components/PendingInvitations';
 import { useOrganization } from '@/features/organizations/organization-context';
 import { orgRoleLabels } from '@/features/organizations/roles';
 import { cn } from '@/utils/cn';
@@ -37,6 +37,9 @@ export function HomePage() {
 
   const { active } = organization;
   const isStaff = profile.data.role === 'admin';
+  // Abriu um link de convite antes de entrar: confirma o convite primeiro.
+  const invite = active && !isStaff ? pendingInviteToken() : null;
+  if (invite) return <Navigate to={`/convite/${invite}`} replace />;
   // Clientes sempre trabalham numa organização: sem nenhuma, a deles é criada na hora.
   if (!active && !isStaff) return <EnsureOrganization />;
 
@@ -48,7 +51,7 @@ export function HomePage() {
           {
             to: '/produtos',
             label: 'Produtos',
-            detail: 'Catálogo interno da organização',
+            detail: 'Catálogo interno da empresa',
             icon: Package,
           },
           {
@@ -89,7 +92,7 @@ export function HomePage() {
           {
             to: '/organizacao',
             label: active.organization.name,
-            detail: `Organização · ${orgRoleLabels[active.role]}`,
+            detail: `Empresa · ${orgRoleLabels[active.role]}`,
             icon: Building2,
           },
         ]
@@ -121,8 +124,6 @@ export function HomePage() {
             : 'Atalhos para o dia a dia.'}
         </p>
       </div>
-
-      {!isStaff && <PendingInvitations />}
 
       {isStaff && mfaRequirement({ session, user, isStaff: true }) === 'enroll' && (
         <Alert tone="info">

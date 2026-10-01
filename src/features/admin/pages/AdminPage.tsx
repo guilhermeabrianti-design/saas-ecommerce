@@ -162,7 +162,7 @@ function Organizations() {
         }}
       >
         <input
-          aria-label="Buscar organização"
+          aria-label="Buscar empresa"
           placeholder="Buscar pelo nome"
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -178,7 +178,7 @@ function Organizations() {
       ) : orgs.isError ? (
         <Alert tone="error">{adminErrorMessage(orgs.error)}</Alert>
       ) : orgs.data.items.length === 0 ? (
-        <p className="text-muted text-sm">Nenhuma organização encontrada.</p>
+        <p className="text-muted text-sm">Nenhuma empresa encontrada.</p>
       ) : (
         <ul className="divide-border -my-3 divide-y text-sm">
           {orgs.data.items.map((o) => (
@@ -205,9 +205,7 @@ function Organizations() {
           ))}
         </ul>
       )}
-      {orgs.data && (
-        <Pager page={page} total={orgs.data.total} onPage={setPage} noun="organizações" />
-      )}
+      {orgs.data && <Pager page={page} total={orgs.data.total} onPage={setPage} noun="empresas" />}
     </div>
   );
 }
@@ -269,8 +267,8 @@ export function AdminPage() {
         </span>
       </Link>
       <Section
-        title="Organizações"
-        description="Suspender bloqueia todo o acesso da organização até a reativação. O motivo aparece para os membros."
+        title="Empresas"
+        description="Suspender bloqueia todo o acesso da empresa até a reativação. O motivo aparece para os membros."
       >
         <Organizations />
       </Section>

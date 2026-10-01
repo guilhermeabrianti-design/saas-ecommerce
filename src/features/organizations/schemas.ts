@@ -5,7 +5,7 @@ import { isValidCode } from '@/features/affiliates/affiliates';
 export const organizationNameSchema = z
   .string()
   .trim()
-  .min(2, 'Informe o nome da organização')
+  .min(2, 'Informe o nome da empresa')
   .max(80, 'Use no máximo 80 caracteres');
 
 export const organizationFormSchema = z.object({ name: organizationNameSchema });
@@ -20,15 +20,5 @@ export const createOrganizationFormSchema = organizationFormSchema.extend({
     ),
 });
 
-export const inviteFormSchema = z.object({
-  email: z
-    .string()
-    .trim()
-    .min(1, 'Informe o e-mail')
-    .pipe(z.email({ error: 'E-mail inválido' })),
-  role: z.enum(['member', 'admin']),
-});
-
 export type OrganizationFormValues = z.infer<typeof organizationFormSchema>;
 export type CreateOrganizationFormValues = z.infer<typeof createOrganizationFormSchema>;
-export type InviteFormValues = z.infer<typeof inviteFormSchema>;

@@ -152,8 +152,8 @@ export function useMySuspendedOrganizations() {
 }
 
 export const auditActionLabels: Record<string, string> = {
-  'organization.suspended': 'Organização suspensa',
-  'organization.reactivated': 'Organização reativada',
+  'organization.suspended': 'Empresa suspensa',
+  'organization.reactivated': 'Empresa reativada',
   ...feesAuditLabels,
   ...moderationAuditLabels,
   ...salesAuditLabels,
@@ -164,8 +164,8 @@ export const auditActionLabels: Record<string, string> = {
 
 const messages: Partial<Record<string, string>> = {
   'admin.forbidden': 'Acesso restrito à equipe da plataforma.',
-  'admin.not_found': 'Organização não encontrada.',
-  'admin.no_change': 'A organização já está neste estado. Atualize a página.',
+  'admin.not_found': 'Empresa não encontrada.',
+  'admin.no_change': 'A empresa já está neste estado. Atualize a página.',
   'admin.reason_required': 'Informe o motivo da suspensão (ao menos 3 caracteres).',
   'admin.invalid': 'Requisição inválida.',
 };

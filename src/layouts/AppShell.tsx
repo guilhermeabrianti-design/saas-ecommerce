@@ -40,7 +40,6 @@ import { SupplierApprovalNotice } from '@/features/moderation/components/Supplie
 import { useProfile } from '@/features/auth/profile';
 import { roleLabels } from '@/features/auth/roles';
 import { NotificationBell } from '@/features/notifications/components/NotificationBell';
-import { OrganizationSwitcher } from '@/features/organizations/components/OrganizationSwitcher';
 import { useOrganization } from '@/features/organizations/organization-context';
 import type { OrgKind } from '@/features/organizations/roles';
 import { cn } from '@/utils/cn';
@@ -204,7 +203,7 @@ const navItems: NavItem[] = [
   },
   {
     to: '/organizacao',
-    label: 'Organização',
+    label: 'Empresa',
     icon: Building2,
     requiresAuth: true,
     tenantOnly: true,
@@ -301,7 +300,11 @@ export function AppShell() {
               <Logo />
             </div>
             <div className="ml-auto flex min-w-0 items-center gap-3">
-              {authenticated && <OrganizationSwitcher />}
+              {authenticated && active && (
+                <span className="text-muted hidden max-w-48 truncate text-sm font-medium lg:block">
+                  {active.organization.name}
+                </span>
+              )}
               {authenticated && <NotificationBell />}
               <EnvBadge />
               <ThemeToggle />

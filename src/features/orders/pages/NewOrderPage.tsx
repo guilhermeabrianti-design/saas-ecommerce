@@ -329,7 +329,7 @@ export function NewOrderPage() {
         </div>
       </Section>
 
-      <Section title="Observações" description="Visível só para a sua organização.">
+      <Section title="Observações" description="Visível só para a sua empresa.">
         <textarea
           rows={3}
           aria-label="Observações"

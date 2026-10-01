@@ -159,7 +159,7 @@ function WithdrawalRow({ w }: { w: AdminWithdrawal }) {
         )}
       </div>
       {open && w.organization_suspended && (
-        <Alert tone="error">Organização suspensa: não aprove nem pague este saque.</Alert>
+        <Alert tone="error">Empresa suspensa: não aprove nem pague este saque.</Alert>
       )}
       {open && (
         <div className="grid gap-3 sm:grid-cols-3">

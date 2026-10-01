@@ -304,7 +304,7 @@ export function IntegrationPage() {
       ) : connection.isError ? (
         <Alert tone="error">{integrationErrorMessage(connection.error)}</Alert>
       ) : !c ? (
-        <Alert tone="info">Conexão não encontrada nesta organização.</Alert>
+        <Alert tone="info">Conexão não encontrada nesta empresa.</Alert>
       ) : (
         <div key={c.id} className="space-y-6">
           <div className="space-y-1">

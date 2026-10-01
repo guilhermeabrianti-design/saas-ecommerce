@@ -7,6 +7,9 @@ import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
 import { isValidCode, normalizeCode, rememberReferralCode } from '@/features/affiliates/affiliates';
+import { useInvitePreview } from '@/features/organizations/api';
+import { isInviteToken, rememberInviteToken } from '@/features/organizations/invite';
+import { orgRoleLabels } from '@/features/organizations/roles';
 import { getSupabase } from '@/lib/supabase';
 import { onlyDigits } from '@/utils/br';
 import { cn } from '@/utils/cn';
@@ -32,11 +35,20 @@ export function SignUpPage() {
   useEffect(() => {
     if (referral) rememberReferralCode(referral);
   }, [referral]);
+  // Link de convite (/convite/<token> → /cadastro?convite=<token>): a conta nasce na empresa.
+  const rawInvite = params.get('convite');
+  const inviteToken = isInviteToken(rawInvite) ? rawInvite : '';
+  const invite = useInvitePreview(inviteToken);
+  const invited = invite.data ?? null;
+  useEffect(() => {
+    if (inviteToken) rememberInviteToken(inviteToken);
+  }, [inviteToken]);
 
   const {
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<SignUpValues>({
     resolver: zodResolver(signUpSchema),
@@ -53,6 +65,10 @@ export function SignUpPage() {
   });
   const password = useWatch({ control, name: 'password' });
   const accountType = useWatch({ control, name: 'accountType' });
+  // Convite: o tipo de conta é o da empresa.
+  useEffect(() => {
+    if (invited) setValue('accountType', invited.kind);
+  }, [invited, setValue]);
 
   const onSubmit = handleSubmit(async (values) => {
     setError(null);
@@ -105,13 +121,24 @@ export function SignUpPage() {
 
       <form onSubmit={onSubmit} noValidate className="space-y-4">
         {error && <Alert tone="error">{error}</Alert>}
-        {referral && (
+        {invited && (
           <Alert tone="info">
-            Você chegou por um convite (código {referral}). Ele será usado ao criar sua organização.
+            Convite para <strong>{invited.organization_name}</strong> como{' '}
+            {orgRoleLabels[invited.role]}. Ao entrar, você já estará na equipe.
+          </Alert>
+        )}
+        {inviteToken && invite.isSuccess && !invited && (
+          <Alert tone="error">
+            Este link de convite não vale mais. Peça um novo a quem convidou você.
+          </Alert>
+        )}
+        {referral && !invited && (
+          <Alert tone="info">
+            Você chegou por uma indicação (código {referral}). Ela será registrada na sua conta.
           </Alert>
         )}
 
-        <fieldset>
+        <fieldset hidden={!!invited}>
           <legend className="mb-1.5 text-sm font-medium">Tipo de conta</legend>
           <div className="grid grid-cols-2 gap-2">
             {signUpRoles.map((role) => (

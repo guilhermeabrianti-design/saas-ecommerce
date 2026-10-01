@@ -130,7 +130,7 @@ export function OrderPage() {
       ) : order.isError ? (
         <Alert tone="error">{orderErrorMessage(order.error)}</Alert>
       ) : !o ? (
-        <Alert tone="info">Pedido não encontrado nesta organização.</Alert>
+        <Alert tone="info">Pedido não encontrado nesta empresa.</Alert>
       ) : (
         <div key={o.id} className="space-y-6">
           <div className="flex flex-wrap items-center gap-3">

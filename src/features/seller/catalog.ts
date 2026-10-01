@@ -152,9 +152,9 @@ export function useImportListing(orgId: string) {
 }
 
 const messages: Partial<Record<string, string>> = {
-  'catalog.sellers_only': 'O catálogo de fornecedores é exclusivo para organizações vendedoras.',
+  'catalog.sellers_only': 'O catálogo de fornecedores é exclusivo para empresas vendedoras.',
   'catalog.listing_not_found': 'Este produto não está mais disponível no catálogo.',
-  'catalog.already_imported': 'Este produto já foi importado para esta organização.',
+  'catalog.already_imported': 'Este produto já foi importado para esta empresa.',
   'catalog.invalid_prefix':
     'Prefixo inválido: até 20 letras, números, ponto, hífen ou sublinhado, e o SKU final com até 60 caracteres.',
 };
@@ -163,7 +163,7 @@ export function catalogErrorMessage(error: unknown): string {
   const { message } = (error ?? {}) as { message?: unknown };
   if (typeof message === 'string' && messages[message]) return messages[message];
   if (message === 'products.sku_taken') {
-    return 'Um SKU deste produto já existe na sua organização. Use um prefixo, ex.: FORN-';
+    return 'Um SKU deste produto já existe na sua empresa. Use um prefixo, ex.: FORN-';
   }
   return productErrorMessage(error);
 }

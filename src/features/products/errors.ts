@@ -1,7 +1,7 @@
 import { orgErrorMessage } from '@/features/organizations/errors';
 
 const messages: Partial<Record<string, string>> = {
-  'products.sku_taken': 'Este SKU já está em uso por outro produto ou variação desta organização.',
+  'products.sku_taken': 'Este SKU já está em uso por outro produto ou variação desta empresa.',
   'products.delete_not_draft': 'Só rascunhos podem ser excluídos. Arquive o produto em vez disso.',
   'products.variant_delete_not_draft':
     'Variações só podem ser excluídas enquanto o produto é rascunho. Desative-a em vez disso.',

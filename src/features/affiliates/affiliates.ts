@@ -360,7 +360,7 @@ export const referralAuditLabels: Record<string, string> = {
 /** Resumo da regra, em uma frase. */
 export function describeProgram(p: ReferralProgram, formatBRL: (c: number) => string): string {
   const min = p.min_sale_cents > 0 ? ` de pelo menos ${formatBRL(p.min_sale_cents)}` : '';
-  return `Você ganha ${formatBRL(p.reward_cents)} quando a organização indicada fizer a primeira venda paga pelo checkout${min} em até ${p.window_days} dias.`;
+  return `Você ganha ${formatBRL(p.reward_cents)} quando a empresa indicada fizer a primeira venda paga pelo checkout${min} em até ${p.window_days} dias.`;
 }
 
 // ---------------------------------------------------------------------
@@ -377,8 +377,8 @@ const messages: Record<string, string> = {
   'affiliates.not_found': 'Link não encontrado ou sem permissão.',
   'referral.disabled': 'O programa de indicação está pausado.',
   'referral.invalid_code': 'Código de indicação não encontrado.',
-  'referral.self': 'Não vale indicar a si mesmo ou uma organização da mesma equipe.',
-  'referral.already_referred': 'Esta organização já informou quem a indicou.',
+  'referral.self': 'Não vale indicar a si mesmo ou uma empresa da mesma equipe.',
+  'referral.already_referred': 'Esta empresa já informou quem a indicou.',
   'referral.too_late':
     'O código só pode ser informado nos primeiros 30 dias e antes da primeira venda.',
   'referral.forbidden': 'Só o proprietário informa o código de indicação.',

@@ -14,7 +14,7 @@ export function RequireOrganization() {
   if (isPending) return <PageLoader />;
   if (isError) {
     return (
-      <Alert tone="error">Não foi possível carregar suas organizações. Recarregue a página.</Alert>
+      <Alert tone="error">Não foi possível carregar suas empresas. Recarregue a página.</Alert>
     );
   }
   if (!active) {

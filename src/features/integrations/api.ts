@@ -278,7 +278,7 @@ export const retryMessages: Record<RetryResult, string> = {
 
 const messages: Partial<Record<string, string>> = {
   'integrations.not_found': 'Conexão não encontrada ou sem permissão.',
-  'integrations.sellers_only': 'Integrações são exclusivas de organizações vendedoras.',
+  'integrations.sellers_only': 'Integrações são exclusivas de empresas vendedoras.',
   'integrations.provider_unavailable': 'Este marketplace ainda não pode ser conectado.',
   'integrations.disconnected': 'A conexão foi encerrada e não pode mais ser alterada.',
   'integrations.invalid_item':

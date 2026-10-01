@@ -158,7 +158,7 @@ function ContextPanel({ ticketId }: { ticketId: string }) {
   const rows: [string, string | null][] = [
     ['Pessoa', [c.requester_name, c.requester_email].filter(Boolean).join(' · ') || null],
     [
-      'Organização',
+      'Empresa',
       c.organization_name
         ? `${c.organization_name}${c.organization_kind ? ` (${orgKindLabels[c.organization_kind]})` : ''}`
         : null,
