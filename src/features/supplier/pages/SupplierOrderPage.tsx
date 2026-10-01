@@ -161,11 +161,14 @@ export function SupplierOrderPage() {
             </div>
           </Section>
 
-          <Section title="Etiqueta" description="Etiqueta anexada pelo vendedor ou por você.">
+          <Section
+            title="Etiqueta e nota fiscal"
+            description="Vendas do Mercado Livre chegam com a etiqueta e a nota fiscal emitidas lá. Imprima as duas e envie a nota junto com o pacote."
+          >
             <LabelsSection
               shipment={{ supplierOrderId: o.id, orderId: null }}
               canUpload={o.status !== 'cancelled' && orgPermissions.editCatalog(active!.role)}
-              emptyText="Nenhuma etiqueta anexada. Gere na transportadora e anexe, ou aguarde a do vendedor."
+              emptyText="Nenhum documento ainda. Em vendas do Mercado Livre, etiqueta e nota aparecem aqui quando ficam prontas lá; nas demais, aguarde o vendedor ou anexe a sua."
             />
           </Section>
 

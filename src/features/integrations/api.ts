@@ -20,6 +20,7 @@ const connectionSchema = z.object({
   external_account_id: z.string(),
   status: z.enum(connectionStatuses),
   last_event_at: z.string().nullable(),
+  auto_forward: z.boolean(),
   created_at: z.string(),
 });
 
@@ -76,7 +77,7 @@ export const integrationKeys = {
 };
 
 const CONNECTION_COLUMNS =
-  'id, provider, name, external_account_id, status, last_event_at, created_at';
+  'id, provider, name, external_account_id, status, last_event_at, created_at, auto_forward';
 
 export function useConnections(orgId: string) {
   return useQuery({
@@ -217,6 +218,21 @@ export function useSetConnectionStatus(orgId: string, connectionId: string) {
       const { error } = await getSupabase().rpc('set_connection_status', {
         p_connection: connectionId,
         p_status: status,
+      });
+      if (error) throw error;
+    },
+    onSettled: invalidate,
+  });
+}
+
+/** Pedido pago confirmado e enviado ao fornecedor sem passar pelo vendedor. */
+export function useSetAutoForward(orgId: string, connectionId: string) {
+  const invalidate = useInvalidate(orgId);
+  return useMutation({
+    mutationFn: async (enabled: boolean) => {
+      const { error } = await getSupabase().rpc('set_connection_auto_forward', {
+        p_connection: connectionId,
+        p_enabled: enabled,
       });
       if (error) throw error;
     },

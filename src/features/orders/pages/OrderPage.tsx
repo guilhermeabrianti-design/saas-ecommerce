@@ -1,5 +1,5 @@
 import { Link, useParams } from 'react-router';
-import { ArrowLeft, Truck } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Truck } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { ConfirmButton } from '@/components/ui/ConfirmButton';
@@ -7,6 +7,7 @@ import { PageLoader } from '@/components/ui/PageLoader';
 import { Section } from '@/components/ui/Section';
 import { CheckoutPaymentSection } from '@/features/checkout/components/CheckoutPaymentSection';
 import { financeErrorMessage, usePaySupplierOrder } from '@/features/finance/api';
+import { useFetchMlDocuments } from '@/features/labels/api';
 import { LabelsSection } from '@/features/labels/components/LabelsSection';
 import { useMySupplierReviews } from '@/features/reviews/api';
 import { SupplierReviewForm } from '@/features/reviews/components/SupplierReviewForm';
@@ -26,6 +27,23 @@ import {
 import { inTransit } from '../schemas';
 
 const when = (iso: string | null) => (iso ? new Date(iso).toLocaleString('pt-BR') : null);
+
+/** Relê o pedido no Mercado Livre e anexa etiqueta e nota que já estiverem prontas. */
+function MlDocumentsButton({ orderId }: { orderId: string }) {
+  const fetchDocs = useFetchMlDocuments(orderId);
+  return (
+    <div className="space-y-2">
+      {fetchDocs.isError && (
+        <Alert tone="error">{(fetchDocs.error as { message?: string }).message}</Alert>
+      )}
+      {fetchDocs.isSuccess && <Alert tone="info">{fetchDocs.data}</Alert>}
+      <Button variant="secondary" loading={fetchDocs.isPending} onClick={() => fetchDocs.mutate()}>
+        <RefreshCw className="size-4" aria-hidden />
+        Buscar etiqueta e nota no Mercado Livre
+      </Button>
+    </div>
+  );
+}
 
 function Actions({ order }: { order: OrderDetail }) {
   const { active } = useOrganization();
@@ -224,10 +242,15 @@ export function OrderPage() {
 
           {o.status !== 'pending' && (
             <Section
-              title="Etiquetas de envio"
-              description="Anexe a etiqueta gerada pelo marketplace (ou pela transportadora) para quem envia."
+              title="Etiquetas e notas fiscais"
+              description={
+                o.channel === 'marketplace'
+                  ? 'Pedidos do Mercado Livre: etiqueta e nota fiscal chegam sozinhas ao fornecedor quando ficam prontas lá. Você também pode anexar manualmente.'
+                  : 'Anexe a etiqueta e a nota fiscal para quem envia.'
+              }
             >
               <div className="space-y-6">
+                {o.channel === 'marketplace' && canEdit && <MlDocumentsButton orderId={o.id} />}
                 {o.supplier_orders.map((s) => (
                   <div key={s.id} className="space-y-2">
                     <p className="text-sm font-medium">Fornecimento #{s.number}</p>
@@ -238,9 +261,14 @@ export function OrderPage() {
                     />
                   </div>
                 ))}
-                {o.order_items.some((i) => i.fulfillment === 'own_stock') && (
+                {(o.order_items.some((i) => i.fulfillment === 'own_stock') ||
+                  o.supplier_orders.filter((s) => s.status !== 'cancelled').length > 1) && (
                   <div className="space-y-2">
-                    <p className="text-sm font-medium">Itens do seu estoque</p>
+                    <p className="text-sm font-medium">
+                      {o.order_items.some((i) => i.fulfillment === 'own_stock')
+                        ? 'Itens do seu estoque'
+                        : 'Documentos do pedido (repasse a cada fornecedor)'}
+                    </p>
                     <LabelsSection
                       shipment={{ supplierOrderId: null, orderId: o.id }}
                       canUpload={canEdit && o.status !== 'cancelled' && o.status !== 'delivered'}

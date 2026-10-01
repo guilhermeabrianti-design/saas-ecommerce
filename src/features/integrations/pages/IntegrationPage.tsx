@@ -27,6 +27,7 @@ import {
   useRotateSecret,
   useSellableItems,
   useSetConnectionStatus,
+  useSetAutoForward,
   useUnlinkListing,
   type Connection,
   type IntegrationEvent,
@@ -50,6 +51,33 @@ const when = (iso: string) => new Date(iso).toLocaleString('pt-BR');
 
 function isConnectable(p: string): p is ConnectableProvider {
   return (connectableProviders as readonly string[]).includes(p);
+}
+
+/** Liga/desliga o envio automático do pedido pago ao fornecedor. */
+function AutoForwardToggle({ connection }: { connection: Connection }) {
+  const { active } = useOrganization();
+  const set = useSetAutoForward(active!.organization.id, connection.id);
+  return (
+    <div className="space-y-2">
+      {set.isError && <Alert tone="error">{integrationErrorMessage(set.error)}</Alert>}
+      <label className="flex items-start gap-3">
+        <input
+          type="checkbox"
+          className="mt-0.5 size-4"
+          checked={set.isPending ? set.variables : connection.auto_forward}
+          disabled={set.isPending}
+          onChange={(e) => set.mutate(e.target.checked)}
+        />
+        <span>
+          <span className="font-medium">Enviar pedidos pagos direto ao fornecedor</span>
+          <span className="text-muted block">
+            Confirma o pedido sozinho e cria o pedido de fornecimento. Se faltar estoque, ele fica
+            pendente e você é avisado.
+          </span>
+        </span>
+      </label>
+    </div>
+  );
 }
 
 function Status({ connection }: { connection: Connection }) {
@@ -363,7 +391,15 @@ export function IntegrationPage() {
               <div className="space-y-4 text-sm">
                 <ul className="text-muted list-disc space-y-1 pl-5">
                   <li>
-                    Pedidos pagos entram como pedidos pendentes pelas notificações do Mercado Livre.
+                    Pedidos pagos entram pelas notificações do Mercado Livre
+                    {c.auto_forward
+                      ? ' e vão direto ao fornecedor (confirmados automaticamente).'
+                      : ' como pendentes, para você confirmar.'}
+                  </li>
+                  <li>
+                    Etiqueta e nota fiscal emitida pelo Faturador do Mercado Livre são anexadas ao
+                    envio do fornecedor quando ficam prontas lá. Nota emitida em outro sistema:
+                    anexe no pedido.
                   </li>
                   <li>
                     Envios Full ficam com o Mercado Livre e não entram; retirada/a combinar também
@@ -375,6 +411,7 @@ export function IntegrationPage() {
                   </li>
                   <li>Publicar anúncio no Mercado Livre pela TheSigns ainda não é suportado.</li>
                 </ul>
+                {canEdit && c.status !== 'disconnected' && <AutoForwardToggle connection={c} />}
                 {canEdit && c.status !== 'disconnected' && (
                   <MercadoLivreConnect
                     orgId={active!.organization.id}

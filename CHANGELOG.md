@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.32.0] — Fase 32: Envio automático ao fornecedor com etiqueta e nota fiscal (Mercado Livre)
+
+### Adicionado
+
+- **Pedido pago do Mercado Livre vai direto ao fornecedor**: é confirmado sozinho e vira pedido de
+  fornecimento (mesma regra da confirmação manual), e o fornecedor recebe o aviso. Ligado por
+  padrão; o vendedor desliga por conexão em Integrações. Sem estoque ou com o fornecedor
+  indisponível, o pedido fica pendente, o motivo vai para o log da conexão e o vendedor é avisado.
+- **Etiqueta e nota fiscal do Mercado Livre anexadas ao envio do fornecedor**: a etiqueta (PDF da
+  API oficial, quando o envio fica pronto para impressão, com o rastreio) e a nota fiscal emitida
+  pelo **Faturador do Mercado Livre** (DANFE em PDF e XML, quando autorizada). Chegam pelas
+  notificações de pedido e de envio (`shipments`); sem duplicar, com aviso ao fornecedor. Pedido
+  com estoque próprio ou mais de um fornecedor: os documentos ficam no pedido para o vendedor
+  repassar.
+- **Botão "Buscar etiqueta e nota no Mercado Livre"** no pedido (limite de 20 buscas a cada 10
+  minutos por pessoa).
+- **Upload manual de nota fiscal** (DANFE em PDF ou XML) além da etiqueta, para quem emite a nota
+  fora do Mercado Livre.
+- **Testes**: 7 de banco, 4 do módulo do Mercado Livre e 3 de frontend.
+
+### Para ativar
+
+- No app do Mercado Livre, assinar também o tópico **shipments** (além de `orders_v2`).
+
+### Limitações conhecidas
+
+- **Não exercitado contra contas reais** (só respostas simuladas): valide com usuários de teste.
+- Nota emitida em outro sistema e enviada ao Mercado Livre não é baixada de lá: anexe manualmente.
+
 ## [0.31.0] — Fase 31: Mercado Livre (pedidos e estoque)
 
 ### Adicionado

@@ -153,20 +153,28 @@ export async function getAccessToken(deps: {
 // ---------------------------------------------------------------------
 
 export interface MlNotification {
-  topic: string;
+  topic: 'orders_v2' | 'shipments';
   resourceId: string;
   userId: string;
 }
 
-/** Notificação do Mercado Livre (sem assinatura: o recurso é relido na API). */
+const TOPIC_RESOURCE = {
+  orders_v2: /^\/orders\/(\d{1,20})$/,
+  shipments: /^\/shipments\/(\d{1,20})$/,
+};
+
+/**
+ * Notificação do Mercado Livre (sem assinatura: o recurso é relido na API).
+ * Pedidos (orders_v2) e envios (shipments: etiqueta liberada, nota anexada).
+ */
 export function parseNotification(body: unknown, applicationId: string): MlNotification | null {
   const b = obj(body);
   if (String(b.application_id ?? '') !== applicationId) return null;
   const topic = str(b.topic);
-  const resource = str(b.resource);
   const userId = String(b.user_id ?? '');
-  const m = /^\/orders\/(\d{1,20})$/.exec(resource);
-  if (topic !== 'orders_v2' || !m || !/^\d{1,20}$/.test(userId)) return null;
+  if (topic !== 'orders_v2' && topic !== 'shipments') return null;
+  const m = TOPIC_RESOURCE[topic].exec(str(b.resource));
+  if (!m || !/^\d{1,20}$/.test(userId)) return null;
   return { topic, resourceId: m[1]!, userId };
 }
 
@@ -287,6 +295,154 @@ export const mlGet = (
     method: 'GET',
     headers: { authorization: `Bearer ${accessToken}`, ...extra },
   });
+
+// ---------------------------------------------------------------------
+// Documentos do envio: etiqueta e nota fiscal (Fase 32)
+// ---------------------------------------------------------------------
+
+export const DOCUMENT_MAX_BYTES = 5 * 1024 * 1024;
+
+export type MlDocumentKind = 'label' | 'invoice_pdf' | 'invoice_xml';
+
+export interface MlDocument {
+  kind: MlDocumentKind;
+  /** Identificador no Mercado Livre (envio ou nota): deduplica no banco. */
+  ref: string;
+  path: string;
+  accept: string;
+  extension: 'pdf' | 'xml';
+  fileName: string;
+  contentType: 'application/pdf' | 'application/xml';
+  tracking?: string;
+}
+
+/** Só caminhos de nota do próprio usuário na API (nada de URL arbitrária). */
+const INVOICE_PATH = /^\/users\/\d{1,20}\/invoices\/[A-Za-z0-9/_-]{1,200}$/;
+
+/** Etiqueta pode ser impressa: pronto para envio, aguardando impressão ou já impressa. */
+export function labelReady(shipment: unknown): boolean {
+  const s = obj(shipment);
+  return (
+    str(s.status) === 'ready_to_ship' && ['ready_to_print', 'printed'].includes(str(s.substatus))
+  );
+}
+
+const cleanTracking = (v: unknown) => {
+  const t = str(v).toUpperCase();
+  return /^[A-Z0-9-]{4,60}$/.test(t) ? t : undefined;
+};
+
+/**
+ * Documentos disponíveis para o envio:
+ *  - etiqueta (GET /shipment_labels, PDF) quando liberada para impressão;
+ *  - nota fiscal do Faturador (GET /users/:id/invoices/orders/:order) quando
+ *    autorizada: DANFE (PDF) e XML.
+ * `invoice` é a resposta da nota (ou nulo quando não há nota no Mercado Livre).
+ */
+export function availableDocuments(args: {
+  shipmentId: string | null;
+  shipment: unknown;
+  invoice: unknown;
+}): MlDocument[] {
+  const docs: MlDocument[] = [];
+  if (args.shipmentId && /^\d{1,20}$/.test(args.shipmentId) && labelReady(args.shipment)) {
+    docs.push({
+      kind: 'label',
+      ref: args.shipmentId,
+      path: `/shipment_labels?shipment_ids=${args.shipmentId}&response_type=pdf`,
+      accept: 'application/pdf',
+      extension: 'pdf',
+      fileName: `etiqueta-mercado-livre-${args.shipmentId}.pdf`,
+      contentType: 'application/pdf',
+      tracking: cleanTracking(obj(args.shipment).tracking_number),
+    });
+  }
+
+  const inv = obj(args.invoice);
+  const id = String(inv.id ?? '');
+  if (str(inv.status).toLowerCase() === 'authorized' && /^[A-Za-z0-9_-]{1,60}$/.test(id)) {
+    const attrs = obj(inv.attributes);
+    const number = String(inv.invoice_number ?? id).replace(/[^0-9A-Za-z-]/g, '') || id;
+    const danfe = str(attrs.danfe_location);
+    const xml = str(attrs.xml_location);
+    if (INVOICE_PATH.test(danfe)) {
+      docs.push({
+        kind: 'invoice_pdf',
+        ref: id,
+        path: danfe,
+        accept: 'application/pdf',
+        extension: 'pdf',
+        fileName: `nota-fiscal-${number}.pdf`,
+        contentType: 'application/pdf',
+      });
+    }
+    if (INVOICE_PATH.test(xml)) {
+      docs.push({
+        kind: 'invoice_xml',
+        ref: id,
+        path: xml,
+        accept: 'application/xml',
+        extension: 'xml',
+        fileName: `nota-fiscal-${number}.xml`,
+        contentType: 'application/xml',
+      });
+    }
+  }
+  return docs;
+}
+
+/** Nota da venda no Faturador; 404 = sem nota emitida pelo Mercado Livre. */
+export async function fetchOrderInvoice(
+  fetchFn: FetchFn,
+  accessToken: string,
+  userId: string,
+  orderId: string,
+): Promise<unknown> {
+  if (!/^\d{1,20}$/.test(userId) || !/^\d{1,20}$/.test(orderId)) return null;
+  let res: Response;
+  try {
+    res = await fetchFn(`${ML_API}/users/${userId}/invoices/orders/${orderId}`, {
+      method: 'GET',
+      headers: { authorization: `Bearer ${accessToken}`, accept: 'application/json' },
+      redirect: 'error',
+      signal: AbortSignal.timeout(15_000),
+    });
+  } catch {
+    throw new StockPushError('Mercado Livre: sem resposta (rede ou tempo esgotado)');
+  }
+  if (res.status === 404) return null;
+  if (res.status === 401 || res.status === 403)
+    throw new StockPushError('Mercado Livre: acesso recusado à nota fiscal');
+  if (!res.ok) throw new StockPushError(`Mercado Livre: nota fiscal HTTP ${res.status}`);
+  return res.json().catch(() => null);
+}
+
+/** Baixa um documento conferindo o formato (PDF começa com %PDF, XML com <) e o tamanho. */
+export async function downloadDocument(
+  fetchFn: FetchFn,
+  accessToken: string,
+  doc: MlDocument,
+): Promise<Uint8Array> {
+  let res: Response;
+  try {
+    res = await fetchFn(`${ML_API}${doc.path}`, {
+      method: 'GET',
+      headers: { authorization: `Bearer ${accessToken}`, accept: doc.accept },
+      redirect: 'error',
+      signal: AbortSignal.timeout(20_000),
+    });
+  } catch {
+    throw new StockPushError('Mercado Livre: sem resposta ao baixar o documento');
+  }
+  if (!res.ok) throw new StockPushError(`Mercado Livre: documento HTTP ${res.status}`);
+  const bytes = new Uint8Array(await res.arrayBuffer());
+  if (bytes.length === 0 || bytes.length > DOCUMENT_MAX_BYTES)
+    throw new StockPushError('Mercado Livre: documento vazio ou grande demais');
+  const head = new TextDecoder().decode(bytes.slice(0, 64)).trimStart();
+  const ok = doc.extension === 'pdf' ? head.startsWith('%PDF') : head.startsWith('<');
+  if (!ok) throw new StockPushError('Mercado Livre: documento em formato inesperado');
+  return bytes;
+}
 
 const skuOf = (v: Json) =>
   str(v.seller_custom_field) ||

@@ -4,6 +4,8 @@ import { LabelsSection } from './components/LabelsSection';
 import {
   checkLabelFile,
   labelErrorMessage,
+  mlDocumentsErrorMessage,
+  mlDocumentsMessage,
   labelPath,
   latestTracking,
   shipmentFolder,
@@ -32,6 +34,8 @@ const label = (over: Partial<ShippingLabel>): ShippingLabel => ({
   uploaded_org_id: null,
   voided_at: null,
   created_at: '2026-09-28T12:00:00Z',
+  kind: 'label',
+  source: 'upload',
   ...over,
 });
 
@@ -48,6 +52,26 @@ describe('regras', () => {
     expect(checkLabelFile({ type: 'application/pdf', size: 1000 })).toBeNull();
     expect(checkLabelFile({ type: 'image/gif', size: 1000 })).toMatch(/PDF, PNG ou JPG/);
     expect(checkLabelFile({ type: 'image/png', size: 6 * 1024 * 1024 })).toMatch(/5 MB/);
+    // Nota fiscal: DANFE só PDF; XML pelo tipo ou, sem tipo, pela extensão.
+    expect(checkLabelFile({ type: 'application/pdf', size: 10 }, 'invoice_pdf')).toBeNull();
+    expect(checkLabelFile({ type: 'image/png', size: 10 }, 'invoice_pdf')).toMatch(/DANFE/);
+    expect(checkLabelFile({ type: 'text/xml', size: 10 }, 'invoice_xml')).toBeNull();
+    expect(checkLabelFile({ type: '', size: 10, name: 'NF-123.XML' }, 'invoice_xml')).toBeNull();
+    expect(checkLabelFile({ type: 'application/pdf', size: 10 }, 'invoice_xml')).toMatch(/XML/);
+    expect(labelPath({ supplierOrderId: so, orderId: null }, 'text/xml', 'x')).toBe(
+      `so-${so}/x.xml`,
+    );
+  });
+
+  it('resumo da busca no Mercado Livre', () => {
+    expect(mlDocumentsMessage({ status: 'confirmed', attached: ['label', 'invoice_pdf'] })).toBe(
+      '2 documentos anexados.',
+    );
+    expect(mlDocumentsMessage({ status: 'confirmed', attached: [] })).toMatch(/Nenhum documento/);
+    expect(mlDocumentsMessage({ status: 'pending' })).toMatch(/pendente/);
+    expect(mlDocumentsMessage({ skipped: 'pedido cancelled' })).toMatch(/cancelled/);
+    expect(mlDocumentsErrorMessage('not_mercadolivre')).toMatch(/não veio do Mercado Livre/);
+    expect(mlDocumentsErrorMessage(null)).toMatch(/Tente de novo/);
   });
 
   it('rastreio mais recente ativo; erros legíveis', () => {
@@ -110,6 +134,27 @@ describe('seção de etiquetas', () => {
     expect(screen.getAllByRole('button', { name: /Baixar/ })).toHaveLength(1);
     expect(screen.getByText(/anulada/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Anexar etiqueta' })).toBeDisabled();
+  });
+
+  it('nota fiscal do Mercado Livre aparece com o tipo e a origem', () => {
+    mocks.labels = [
+      label({
+        kind: 'invoice_pdf',
+        source: 'mercadolivre',
+        file_name: 'nota-fiscal-28790.pdf',
+        carrier: null,
+        tracking_code: null,
+      }),
+    ];
+    render(
+      <LabelsSection
+        shipment={{ supplierOrderId: so, orderId: null }}
+        canUpload={false}
+        emptyText="vazio"
+      />,
+    );
+    expect(screen.getByText('nota-fiscal-28790.pdf')).toBeInTheDocument();
+    expect(screen.getByText(/Nota fiscal \(DANFE\) · Mercado Livre/)).toBeInTheDocument();
   });
 
   it('sem permissão de envio: só baixa; vazio mostra orientação', () => {

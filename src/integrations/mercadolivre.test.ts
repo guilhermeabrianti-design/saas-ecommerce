@@ -1,6 +1,10 @@
 // @vitest-environment node
 import {
   authorizationUrl,
+  availableDocuments,
+  downloadDocument,
+  fetchOrderInvoice,
+  labelReady,
   codeChallenge,
   generateCodeVerifier,
   getAccessToken,
@@ -177,7 +181,7 @@ describe('renovação do token', () => {
 });
 
 describe('notificações e pedidos', () => {
-  it('aceita só orders_v2 do nosso app', () => {
+  it('aceita só pedidos e envios do nosso app', () => {
     expect(
       parseNotification(
         { topic: 'orders_v2', resource: '/orders/2000001', user_id: 777, application_id: 123 },
@@ -320,5 +324,96 @@ describe('estoque', () => {
         available: 1,
       }),
     ).rejects.toThrow(/mais de um anúncio/);
+  });
+});
+
+describe('documentos do envio (Fase 32)', () => {
+  const invoice = {
+    id: 1704629,
+    status: 'authorized',
+    invoice_number: 28790,
+    attributes: {
+      danfe_location: '/users/777/invoices/sites/MLB/documents/danfe/1704629',
+      xml_location: '/users/777/invoices/documents/xml/1704629/authorized',
+    },
+  };
+  const ready = {
+    status: 'ready_to_ship',
+    substatus: 'ready_to_print',
+    tracking_number: 'ab12345',
+  };
+
+  it('notificação de envio também vale', () => {
+    expect(
+      parseNotification(
+        { topic: 'shipments', resource: '/shipments/44', user_id: 777, application_id: 123 },
+        '123',
+      ),
+    ).toEqual({ topic: 'shipments', resourceId: '44', userId: '777' });
+    expect(
+      parseNotification(
+        { topic: 'shipments', resource: '/orders/44', user_id: 777, application_id: 123 },
+        '123',
+      ),
+    ).toBeNull();
+  });
+
+  it('etiqueta só quando liberada; nota só autorizada, com DANFE e XML', () => {
+    expect(labelReady(ready)).toBe(true);
+    expect(labelReady({ ...ready, substatus: 'printed' })).toBe(true);
+    expect(labelReady({ status: 'ready_to_ship', substatus: 'invoice_pending' })).toBe(false);
+    expect(labelReady({ status: 'shipped' })).toBe(false);
+
+    const docs = availableDocuments({ shipmentId: '44', shipment: ready, invoice });
+    expect(docs.map((d) => [d.kind, d.ref, d.path])).toEqual([
+      ['label', '44', '/shipment_labels?shipment_ids=44&response_type=pdf'],
+      ['invoice_pdf', '1704629', '/users/777/invoices/sites/MLB/documents/danfe/1704629'],
+      ['invoice_xml', '1704629', '/users/777/invoices/documents/xml/1704629/authorized'],
+    ]);
+    expect(docs[0]!.tracking).toBe('AB12345');
+    expect(docs[1]!.fileName).toBe('nota-fiscal-28790.pdf');
+
+    expect(
+      availableDocuments({
+        shipmentId: '44',
+        shipment: { status: 'pending' },
+        invoice: { ...invoice, status: 'processing' },
+      }),
+    ).toEqual([]);
+  });
+
+  it('caminho da nota fora da API do usuário é ignorado (sem URL arbitrária)', () => {
+    const docs = availableDocuments({
+      shipmentId: null,
+      shipment: null,
+      invoice: {
+        ...invoice,
+        attributes: {
+          danfe_location: 'https://evil.example/x.pdf',
+          xml_location: '/users/777/../../admin',
+        },
+      },
+    });
+    expect(docs).toEqual([]);
+  });
+
+  it('nota inexistente = nulo; baixa confere formato e tamanho', async () => {
+    const notFound = vi.fn(async () => new Response('{}', { status: 404 }));
+    expect(await fetchOrderInvoice(notFound, 't', '777', '2000001')).toBeNull();
+    expect(notFound).toHaveBeenCalledWith(
+      'https://api.mercadolibre.com/users/777/invoices/orders/2000001',
+      expect.objectContaining({ method: 'GET' }),
+    );
+
+    const [label, , xml] = availableDocuments({ shipmentId: '44', shipment: ready, invoice });
+    const pdf = vi.fn(async () => new Response('%PDF-1.4 conteúdo', { status: 200 }));
+    expect((await downloadDocument(pdf, 't', label!)).length).toBeGreaterThan(4);
+
+    const html = vi.fn(async () => new Response('<html>erro</html>', { status: 200 }));
+    await expect(downloadDocument(html, 't', label!)).rejects.toThrow(/formato inesperado/);
+    const okXml = vi.fn(async () => new Response('<?xml version="1.0"?><nfeProc/>'));
+    expect((await downloadDocument(okXml, 't', xml!)).length).toBeGreaterThan(0);
+    const fail = vi.fn(async () => new Response('', { status: 400 }));
+    await expect(downloadDocument(fail, 't', label!)).rejects.toBeInstanceOf(StockPushError);
   });
 });

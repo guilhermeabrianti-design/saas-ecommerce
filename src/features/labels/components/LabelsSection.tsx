@@ -3,10 +3,19 @@ import { Download, FileText } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { ConfirmButton } from '@/components/ui/ConfirmButton';
+import { Select } from '@/components/ui/Select';
 import { TextField } from '@/components/ui/TextField';
 import { cn } from '@/utils/cn';
 import { labelDownloadUrl, useShippingLabels, useUploadLabel, useVoidLabel } from '../api';
-import { checkLabelFile, labelErrorMessage, type Shipment } from '../labels';
+import {
+  acceptFor,
+  checkLabelFile,
+  documentKindLabels,
+  documentKinds,
+  labelErrorMessage,
+  type DocumentKind,
+  type Shipment,
+} from '../labels';
 
 const when = (iso: string) =>
   new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
@@ -14,10 +23,17 @@ const when = (iso: string) =>
 function UploadForm({ shipment }: { shipment: Shipment }) {
   const upload = useUploadLabel(shipment);
   const input = useRef<HTMLInputElement>(null);
+  const [kind, setKind] = useState<DocumentKind>('label');
   const [file, setFile] = useState<File | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
   const [carrier, setCarrier] = useState('');
   const [tracking, setTracking] = useState('');
+
+  const resetFile = () => {
+    setFile(null);
+    setProblem(null);
+    if (input.current) input.current.value = '';
+  };
 
   return (
     <form
@@ -26,13 +42,12 @@ function UploadForm({ shipment }: { shipment: Shipment }) {
         e.preventDefault();
         if (!file) return;
         upload.mutate(
-          { file, carrier, trackingCode: tracking },
+          { file, kind, carrier, trackingCode: tracking },
           {
             onSuccess: () => {
-              setFile(null);
+              resetFile();
               setCarrier('');
               setTracking('');
-              if (input.current) input.current.value = '';
             },
           },
         );
@@ -41,36 +56,57 @@ function UploadForm({ shipment }: { shipment: Shipment }) {
       {(problem || upload.isError) && (
         <Alert tone="error">{problem ?? labelErrorMessage(upload.error)}</Alert>
       )}
-      <label className="block space-y-1.5">
-        <span className="text-sm font-medium">Arquivo da etiqueta (PDF, PNG ou JPG, até 5 MB)</span>
-        <input
-          ref={input}
-          type="file"
-          accept="application/pdf,image/png,image/jpeg"
-          className="block text-sm"
-          onChange={(e) => {
-            const f = e.target.files?.[0] ?? null;
-            const error = f ? checkLabelFile(f) : null;
-            setProblem(error);
-            setFile(error ? null : f);
-          }}
-        />
-      </label>
       <div className="grid gap-3 sm:grid-cols-2">
-        <TextField
-          label="Transportadora (opcional)"
-          value={carrier}
-          onChange={(e) => setCarrier(e.target.value)}
-        />
-        <TextField
-          label="Código de rastreio (opcional)"
-          className="font-mono"
-          value={tracking}
-          onChange={(e) => setTracking(e.target.value)}
-        />
+        <Select
+          label="Documento"
+          value={kind}
+          onChange={(e) => {
+            setKind(e.target.value as DocumentKind);
+            resetFile();
+          }}
+        >
+          {documentKinds.map((k) => (
+            <option key={k} value={k}>
+              {documentKindLabels[k]}
+            </option>
+          ))}
+        </Select>
+        <label className="block space-y-1.5">
+          <span className="text-sm font-medium">
+            Arquivo ({kind === 'label' ? 'PDF, PNG ou JPG' : kind === 'invoice_pdf' ? 'PDF' : 'XML'}
+            , até 5 MB)
+          </span>
+          <input
+            ref={input}
+            type="file"
+            accept={acceptFor(kind)}
+            className="block text-sm"
+            onChange={(e) => {
+              const f = e.target.files?.[0] ?? null;
+              const error = f ? checkLabelFile(f, kind) : null;
+              setProblem(error);
+              setFile(error ? null : f);
+            }}
+          />
+        </label>
       </div>
+      {kind === 'label' && (
+        <div className="grid gap-3 sm:grid-cols-2">
+          <TextField
+            label="Transportadora (opcional)"
+            value={carrier}
+            onChange={(e) => setCarrier(e.target.value)}
+          />
+          <TextField
+            label="Código de rastreio (opcional)"
+            className="font-mono"
+            value={tracking}
+            onChange={(e) => setTracking(e.target.value)}
+          />
+        </div>
+      )}
       <Button type="submit" variant="secondary" disabled={!file} loading={upload.isPending}>
-        Anexar etiqueta
+        Anexar {documentKindLabels[kind].toLowerCase()}
       </Button>
     </form>
   );
@@ -113,6 +149,9 @@ export function LabelsSection({
                   {l.file_name}
                 </p>
                 <p className="text-muted text-xs">
+                  {documentKindLabels[l.kind]}
+                  {l.source === 'mercadolivre' && ' · Mercado Livre'}
+                  {' · '}
                   {when(l.created_at)}
                   {l.carrier && ` · ${l.carrier}`}
                   {l.tracking_code && (
