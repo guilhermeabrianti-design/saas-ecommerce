@@ -7,6 +7,7 @@ import { PageLoader } from '@/components/ui/PageLoader';
 import { Section } from '@/components/ui/Section';
 import { TextField } from '@/components/ui/TextField';
 import { clearReferralCode, pendingReferralCode } from '@/features/affiliates/affiliates';
+import { useReferralSettings } from '@/features/affiliates/api';
 import { useProfile } from '@/features/auth/profile';
 import { useCreateOrganization } from '../api';
 import { PendingInvitations } from '../components/PendingInvitations';
@@ -19,6 +20,8 @@ export function CreateOrganizationPage() {
   const profile = useProfile();
   const { memberships, selectOrganization } = useOrganization();
   const create = useCreateOrganization();
+  // Com o programa pausado o campo some e o código guardado não é enviado.
+  const referralEnabled = useReferralSettings().data?.enabled === true;
   const navigate = useNavigate();
   const {
     register,
@@ -40,7 +43,7 @@ export function CreateOrganizationPage() {
 
   const onSubmit = handleSubmit(({ name, referral_code }) => {
     create.mutate(
-      { name, referralCode: referral_code },
+      { name, referralCode: referralEnabled ? referral_code : null },
       {
         onSuccess: (orgId) => {
           clearReferralCode();
@@ -81,13 +84,15 @@ export function CreateOrganizationPage() {
               error={errors.name?.message}
               {...register('name')}
             />
-            <TextField
-              label="Código de indicação (opcional)"
-              placeholder="Quem convidou você para a TheSigns"
-              autoComplete="off"
-              error={errors.referral_code?.message}
-              {...register('referral_code')}
-            />
+            {referralEnabled && (
+              <TextField
+                label="Código de indicação (opcional)"
+                placeholder="Quem convidou você para a TheSigns"
+                autoComplete="off"
+                error={errors.referral_code?.message}
+                {...register('referral_code')}
+              />
+            )}
             <Button type="submit" loading={create.isPending}>
               Criar organização
             </Button>

@@ -444,16 +444,26 @@ describe('indicação', () => {
     friend = await signUpUser(db, 'amiga@example.com', { full_name: 'Amiga' });
   });
 
-  it('programa desligado recusa o código; só a equipe altera as regras', async () => {
+  it('programa desligado ignora o código no cadastro; só a equipe altera as regras', async () => {
+    // Um código guardado não impede criar a organização: é ignorado.
+    const pausedOrg = await scalar<string>(
+      friend,
+      "select public.create_organization('Loja Amiga', $1)",
+      [await code(sellerOrg)],
+    );
+    expect(
+      await one(
+        'select count(*)::int as n from public.organization_referrals where referred_org_id = $1',
+        [pausedOrg],
+      ),
+    ).toEqual({ n: 0 });
+    // Aplicar depois continua recusado enquanto pausado.
     await expect(
-      scalar(friend, "select public.create_organization('Loja Amiga', $1)", [
+      scalar(friend, 'select public.apply_referral_code($1, $2)', [
+        pausedOrg,
         await code(sellerOrg),
       ]),
     ).rejects.toThrow(/referral.disabled/);
-    // Nada foi criado (atômico).
-    expect(
-      await one("select count(*)::int as n from public.organizations where name = 'Loja Amiga'"),
-    ).toEqual({ n: 0 });
 
     await expect(
       scalar(seller, 'select public.admin_save_referral_settings(true, 500, 0, 90)'),
