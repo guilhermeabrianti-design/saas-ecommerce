@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.37.1] — Produtos com estoque e Indique e ganhe
+
+### Alterado
+
+- **Produtos e Estoque viraram uma área só (Produtos).** A lista mostra o estoque disponível de cada
+  produto (soma das variações ativas; importado mostra "Fornecedor") e tem o filtro **Só estoque
+  baixo**. A página do produto ganhou a seção **Estoque**, com o saldo de cada variação e o atalho
+  para movimentar, definir o alerta e ver o histórico. **Sincronizar estoque** fica em Produtos.
+  O item "Estoque" saiu do menu; endereços antigos (e notificações) redirecionam.
+- **"Links e divulgação" saiu.** Fica só o **Indique e ganhe**. Links já criados continuam levando
+  o comprador ao produto ou à loja.
+
+### Adicionado
+
+- **Indique e ganhe**: o proprietário personaliza o próprio código na tela. O código do link de
+  indicação agora também é gravado na conta no cadastro: a indicação vale mesmo se a pessoa
+  confirmar o e-mail em outro aparelho.
+
 ## [0.37.0] — Fase 37: Publicar no Mercado Livre
 
 ### Adicionado

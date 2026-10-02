@@ -19,7 +19,7 @@ import {
   type ReferralStatus,
   type ReferralSummary,
 } from '../affiliates';
-import { useApplyReferralCode, useReferralSummary } from '../api';
+import { useApplyReferralCode, useReferralSummary, useSetPublicCode } from '../api';
 import { QrCode } from '../components/QrCode';
 
 const day = (iso: string) => new Date(iso).toLocaleDateString('pt-BR');
@@ -54,6 +54,43 @@ function ApplyCode({ orgId }: { orgId: string }) {
       </div>
       <Button type="submit" variant="secondary" disabled={!valid} loading={apply.isPending}>
         Informar código
+      </Button>
+    </form>
+  );
+}
+
+/** Só o proprietário troca o código (vale também para o endereço da loja). */
+function CustomCode({ orgId, current }: { orgId: string; current: string }) {
+  const save = useSetPublicCode(orgId);
+  const [code, setCode] = useState(current);
+  const normalized = normalizeCode(code);
+  const valid = isValidCode(code) && normalized !== current;
+  return (
+    <form
+      className="flex flex-wrap items-end gap-3"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (valid) save.mutate(normalized);
+      }}
+    >
+      <div className="min-w-56 flex-1">
+        <TextField
+          label="Personalizar seu código"
+          value={code}
+          autoComplete="off"
+          onChange={(e) => setCode(e.target.value)}
+          error={
+            save.isError
+              ? affiliateErrorMessage(save.error)
+              : code && !isValidCode(code)
+                ? affiliateErrorMessage({ message: 'affiliates.invalid_code' })
+                : undefined
+          }
+          hint="Ex.: o nome da sua loja. Links com o código antigo deixam de valer."
+        />
+      </div>
+      <Button type="submit" variant="secondary" disabled={!valid} loading={save.isPending}>
+        Salvar código
       </Button>
     </form>
   );
@@ -101,7 +138,7 @@ function Referrals({ s }: { s: ReferralSummary }) {
   );
 }
 
-function Content({ orgId, s }: { orgId: string; s: ReferralSummary }) {
+function Content({ orgId, s, isOwner }: { orgId: string; s: ReferralSummary; isOwner: boolean }) {
   const url = referralUrl(window.location.origin, s.code);
   return (
     <>
@@ -117,6 +154,7 @@ function Content({ orgId, s }: { orgId: string; s: ReferralSummary }) {
               Código: <span className="text-fg font-mono">{s.code}</span>
             </p>
             <QrCode value={url} fileName={`indicacao-${s.code}`} />
+            {isOwner && <CustomCode key={s.code} orgId={orgId} current={s.code} />}
             <p className="text-muted text-xs">
               A recompensa entra na Carteira como pendente e é liberada junto com a venda que a
               gerou. Se essa venda for estornada, a recompensa também é, e a próxima venda dentro do
@@ -125,8 +163,8 @@ function Content({ orgId, s }: { orgId: string; s: ReferralSummary }) {
           </div>
         ) : (
           <Alert tone="info">
-            O programa de indicação está pausado pela equipe. Indicações já registradas continuam
-            valendo.
+            O programa de indicação está pausado pela equipe TheSigns: o link volta a aparecer aqui
+            assim que a recompensa for definida. Indicações já registradas continuam valendo.
           </Alert>
         )}
       </Section>
@@ -174,7 +212,7 @@ export function ReferralsPage() {
       ) : summary.isError ? (
         <Alert tone="error">{affiliateErrorMessage(summary.error)}</Alert>
       ) : (
-        <Content orgId={orgId} s={summary.data} />
+        <Content orgId={orgId} s={summary.data} isOwner={active!.role === 'owner'} />
       )}
     </div>
   );

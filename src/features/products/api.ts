@@ -40,7 +40,39 @@ export type ProductListItem = z.infer<typeof listItemSchema>;
 export interface ProductFilters {
   search: string;
   status: ProductStatus | 'all';
+  /** Só produtos com algum item em estoque baixo. */
+  lowOnly: boolean;
   page: number;
+}
+
+const stockRowSchema = z.object({
+  product_id: z.uuid(),
+  available: z.number().int(),
+  is_low: z.boolean(),
+  is_active: z.boolean(),
+  is_dropship: z.boolean(),
+});
+type StockRow = z.infer<typeof stockRowSchema>;
+
+/** Estoque de um produto na lista: soma das variações ativas (ou o saldo do produto). */
+export interface ProductStock {
+  available: number;
+  low: boolean;
+  /** Importado do catálogo: quem tem o estoque é o fornecedor. */
+  dropship: boolean;
+}
+
+export function summarizeStock(rows: StockRow[]): Map<string, ProductStock> {
+  const out = new Map<string, ProductStock>();
+  for (const r of rows) {
+    const cur = out.get(r.product_id) ?? { available: 0, low: false, dropship: r.is_dropship };
+    if (r.is_active) {
+      cur.available += Math.max(0, r.available);
+      cur.low ||= r.is_low;
+    }
+    out.set(r.product_id, cur);
+  }
+  return out;
 }
 
 export const productKeys = {
@@ -66,8 +98,21 @@ export function useProducts(orgId: string, filters: ProductFilters) {
     queryKey: productKeys.list(orgId, filters),
     placeholderData: keepPreviousData,
     queryFn: async () => {
+      const supabase = getSupabase();
       const from = (filters.page - 1) * PRODUCTS_PAGE_SIZE;
-      let query = getSupabase()
+      let lowIds: string[] | null = null;
+      if (filters.lowOnly) {
+        const low = await supabase
+          .from('inventory_levels')
+          .select('product_id')
+          .eq('organization_id', orgId)
+          .eq('is_low', true)
+          .eq('is_active', true);
+        if (low.error) throw low.error;
+        lowIds = [...new Set(low.data.map((r) => r.product_id as string))];
+        if (lowIds.length === 0) return { items: [], total: 0 };
+      }
+      let query = supabase
         .from('products')
         .select('id, sku, name, brand, price_cents, status, updated_at', { count: 'exact' })
         // RLS already limits rows to the user's organizations; this picks the active one.
@@ -75,12 +120,30 @@ export function useProducts(orgId: string, filters: ProductFilters) {
         .order('updated_at', { ascending: false })
         .range(from, from + PRODUCTS_PAGE_SIZE - 1);
       if (filters.status !== 'all') query = query.eq('status', filters.status);
+      if (lowIds) query = query.in('id', lowIds);
       const term = sanitizeSearch(filters.search);
       if (term) query = query.or(`name.ilike.*${term}*,sku.ilike.*${term}*`);
 
       const { data, error, count } = await query;
       if (error) throw error;
-      return { items: z.array(listItemSchema).parse(data), total: count ?? 0 };
+      const items = z.array(listItemSchema).parse(data);
+      let stock = new Map<string, ProductStock>();
+      if (items.length) {
+        const levels = await supabase
+          .from('inventory_levels')
+          .select('product_id, available, is_low, is_active, is_dropship')
+          .eq('organization_id', orgId)
+          .in(
+            'product_id',
+            items.map((i) => i.id),
+          );
+        if (levels.error) throw levels.error;
+        stock = summarizeStock(z.array(stockRowSchema).parse(levels.data));
+      }
+      return {
+        items: items.map((i) => ({ ...i, stock: stock.get(i.id) ?? null })),
+        total: count ?? 0,
+      };
     },
   });
 }

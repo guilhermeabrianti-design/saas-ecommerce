@@ -48,7 +48,11 @@ export function useBulkSetStock(orgId: string) {
       if (error) throw error;
       return summarySchema.parse(data);
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['inventory'] }),
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['inventory'] }),
+        queryClient.invalidateQueries({ queryKey: ['products'] }),
+      ]),
   });
 }
 
@@ -148,6 +152,7 @@ export function useSyncErp(orgId: string) {
       Promise.all([
         queryClient.invalidateQueries({ queryKey: stockSyncKeys.erp(orgId) }),
         queryClient.invalidateQueries({ queryKey: ['inventory'] }),
+        queryClient.invalidateQueries({ queryKey: ['products'] }),
       ]),
   });
 }

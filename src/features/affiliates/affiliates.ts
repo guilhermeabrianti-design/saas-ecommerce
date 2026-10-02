@@ -20,19 +20,8 @@ const codeMessage = 'De 4 a 32 caracteres: letras minúsculas, números e hífen
 
 export const publicCodeSchema = z.string().refine(isValidCode, codeMessage);
 
-export const storeUrl = (origin: string, code: string) => `${origin}/loja/${code}`;
-export const linkUrl = (origin: string, code: string) => `${origin}/r/${code}`;
 export const referralUrl = (origin: string, code: string) =>
   `${origin}/cadastro?indicacao=${encodeURIComponent(code)}`;
-
-/** Visitas → vendas pagas, em %, com uma casa. Sem visitas: nulo. */
-export function conversionRate(paid: number, visits: number | null): number | null {
-  if (!visits) return null;
-  return Math.round((paid / visits) * 1000) / 10;
-}
-
-export const formatRate = (rate: number | null) =>
-  rate == null ? '—' : `${rate.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`;
 
 // ---------------------------------------------------------------------
 // Navegador do comprador: visitante, origem e código de indicação
@@ -168,71 +157,6 @@ export const targetPath = (t: LinkTarget) =>
 // ---------------------------------------------------------------------
 // Vendedor: links e desempenho
 // ---------------------------------------------------------------------
-
-export const affiliateLinkSchema = z.object({
-  id: z.uuid(),
-  code: z.string(),
-  name: z.string(),
-  product_id: z.uuid().nullable(),
-  is_active: z.boolean(),
-  created_at: z.string(),
-});
-
-export type AffiliateLink = z.infer<typeof affiliateLinkSchema>;
-
-export const statsRowSchema = z.object({
-  kind: z.enum(['store', 'link', 'direct']),
-  link_id: z.uuid().nullable(),
-  code: z.string().nullable(),
-  name: z.string(),
-  product_id: z.uuid().nullable(),
-  product_name: z.string().nullable(),
-  is_active: z.boolean(),
-  clicks: z.number().int().nullable(),
-  visits: z.number().int().nullable(),
-  orders: z.number().int(),
-  paid_orders: z.number().int(),
-  sales_cents: z.number().int(),
-  commission_cents: z.number().int(),
-});
-
-export type StatsRow = z.infer<typeof statsRowSchema>;
-
-/** Totais do período (todas as origens, inclusive acesso direto). */
-export function statsTotals(rows: StatsRow[]) {
-  const sum = (pick: (r: StatsRow) => number | null) =>
-    rows.reduce((acc, r) => acc + (pick(r) ?? 0), 0);
-  const visits = sum((r) => r.visits);
-  const attributedPaid = sum((r) => (r.kind === 'direct' ? 0 : r.paid_orders));
-  return {
-    clicks: sum((r) => r.clicks),
-    visits,
-    orders: sum((r) => r.orders),
-    paid_orders: sum((r) => r.paid_orders),
-    sales_cents: sum((r) => r.sales_cents),
-    commission_cents: sum((r) => r.commission_cents),
-    // Conversão só com o que tem visita medida (links e vitrine).
-    conversion: conversionRate(attributedPaid, visits),
-  };
-}
-
-export const statsPeriods = [
-  { value: 7, label: 'Últimos 7 dias' },
-  { value: 30, label: 'Últimos 30 dias' },
-  { value: 90, label: 'Últimos 90 dias' },
-] as const;
-
-export const linkFormSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(2, 'Dê um nome ao link (ex.: Bio do Instagram)')
-    .max(80, 'Máximo de 80 caracteres'),
-  code: z.string().refine((v) => v.trim() === '' || isValidCode(v), codeMessage),
-  target: z.string(),
-});
-
-export type LinkFormValues = z.infer<typeof linkFormSchema>;
 
 // ---------------------------------------------------------------------
 // Indicação

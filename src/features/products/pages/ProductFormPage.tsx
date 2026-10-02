@@ -12,6 +12,7 @@ import { TextField } from '@/components/ui/TextField';
 import { useOrganization } from '@/features/organizations/organization-context';
 import { GenerateDescriptionButton } from '@/features/ai/components/GenerateDescriptionButton';
 import { ChannelsSection } from '@/features/channels/components/ChannelsSection';
+import { ProductStockSection } from '@/features/inventory/components/ProductStockSection';
 import { ProductCheckoutSection } from '@/features/checkout/components/ProductCheckoutSection';
 import { orgPermissions } from '@/features/organizations/roles';
 import { CatalogListingSection } from '@/features/supplier/components/CatalogListingSection';
@@ -310,6 +311,11 @@ export function EditProductPage() {
           <VariantsSection
             product={product.data}
             canEdit={orgPermissions.editCatalog(active!.role)}
+          />
+          <ProductStockSection
+            orgId={orgId}
+            productId={product.data.id}
+            dropship={product.data.source_listing_id !== null}
           />
           <ImagesSection
             product={product.data}

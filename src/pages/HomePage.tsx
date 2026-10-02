@@ -3,7 +3,6 @@ import { pendingInviteToken } from '@/features/organizations/invite';
 import { EnsureOrganization } from '@/features/organizations/components/EnsureOrganization';
 import {
   Activity,
-  Boxes,
   Building2,
   ChevronRight,
   Megaphone,
@@ -51,14 +50,8 @@ export function HomePage() {
           {
             to: '/produtos',
             label: 'Produtos',
-            detail: 'Catálogo interno da empresa',
+            detail: 'Catálogo e estoque da empresa',
             icon: Package,
-          },
-          {
-            to: '/estoque',
-            label: 'Estoque',
-            detail: 'Saldos e movimentações',
-            icon: Boxes,
           },
           ...(active.organization.kind === 'seller'
             ? [

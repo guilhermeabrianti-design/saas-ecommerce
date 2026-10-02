@@ -4,13 +4,11 @@ import { z } from 'zod';
 import { getSupabase } from '@/lib/supabase';
 import {
   adminReferralSchema,
-  affiliateLinkSchema,
   linkTargetSchema,
   normalizeCode,
   programSchema,
   referralOverviewSchema,
   referralSummarySchema,
-  statsRowSchema,
   storeSchema,
   visitorId,
   type Attribution,
@@ -19,10 +17,6 @@ import {
 
 export const affiliateKeys = {
   all: (orgId: string) => ['affiliates', orgId] as const,
-  code: (orgId: string) => ['affiliates', orgId, 'code'] as const,
-  links: (orgId: string) => ['affiliates', orgId, 'links'] as const,
-  stats: (orgId: string, days: number) => ['affiliates', orgId, 'stats', days] as const,
-  products: (orgId: string) => ['affiliates', orgId, 'products'] as const,
   referral: (orgId: string) => ['referral', orgId] as const,
   store: (code: string) => ['public-store', code] as const,
   link: (code: string) => ['public-link', code] as const,
@@ -79,23 +73,8 @@ export async function recordVisit(attribution: Attribution) {
 }
 
 // ---------------------------------------------------------------------
-// Vendedor
+// Vendedor: código da empresa (endereço da loja e código de indicação)
 // ---------------------------------------------------------------------
-
-export function usePublicCode(orgId: string) {
-  return useQuery({
-    queryKey: affiliateKeys.code(orgId),
-    queryFn: async () => {
-      const { data, error } = await getSupabase()
-        .from('organizations')
-        .select('public_code')
-        .eq('id', orgId)
-        .single();
-      if (error) throw error;
-      return z.object({ public_code: z.string() }).parse(data).public_code;
-    },
-  });
-}
 
 export function useSetPublicCode(orgId: string) {
   const queryClient = useQueryClient();
@@ -113,86 +92,6 @@ export function useSetPublicCode(orgId: string) {
         queryClient.invalidateQueries({ queryKey: affiliateKeys.all(orgId) }),
         queryClient.invalidateQueries({ queryKey: affiliateKeys.referral(orgId) }),
       ]),
-  });
-}
-
-export function useAffiliateLinks(orgId: string) {
-  return useQuery({
-    queryKey: affiliateKeys.links(orgId),
-    queryFn: async () => {
-      const { data, error } = await getSupabase()
-        .from('affiliate_links')
-        .select('id, code, name, product_id, is_active, created_at')
-        .eq('organization_id', orgId)
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return z.array(affiliateLinkSchema).parse(data);
-    },
-  });
-}
-
-export function useAffiliateStats(orgId: string, days: number) {
-  return useQuery({
-    queryKey: affiliateKeys.stats(orgId, days),
-    placeholderData: keepPreviousData,
-    queryFn: async () => {
-      const { data, error } = await getSupabase().rpc('affiliate_stats', {
-        p_org: orgId,
-        p_days: days,
-      });
-      if (error) throw error;
-      return z.array(statsRowSchema).parse(data);
-    },
-  });
-}
-
-/** Produtos que podem ser destino de link (checkout ligado). */
-export function useCheckoutProducts(orgId: string) {
-  return useQuery({
-    queryKey: affiliateKeys.products(orgId),
-    queryFn: async () => {
-      const { data, error } = await getSupabase()
-        .from('products')
-        .select('id, name')
-        .eq('organization_id', orgId)
-        .eq('checkout_enabled', true)
-        .order('name')
-        .limit(200);
-      if (error) throw error;
-      return z.array(z.object({ id: z.uuid(), name: z.string() })).parse(data);
-    },
-  });
-}
-
-export function useCreateAffiliateLink(orgId: string) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (input: { name: string; code: string; productId: string | null }) => {
-      const { data, error } = await getSupabase().rpc('create_affiliate_link', {
-        p_org: orgId,
-        p_name: input.name.trim(),
-        p_code: input.code.trim() || null,
-        p_product: input.productId,
-      });
-      if (error) throw error;
-      return z.uuid().parse(data);
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: affiliateKeys.all(orgId) }),
-  });
-}
-
-export function useUpdateAffiliateLink(orgId: string) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (input: { id: string; name: string; active: boolean }) => {
-      const { error } = await getSupabase().rpc('update_affiliate_link', {
-        p_link: input.id,
-        p_name: input.name,
-        p_active: input.active,
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: affiliateKeys.all(orgId) }),
   });
 }
 

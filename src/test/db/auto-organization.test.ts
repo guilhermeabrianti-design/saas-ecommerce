@@ -81,4 +81,36 @@ describe('organização automática no primeiro acesso', () => {
       /permission denied/,
     );
   });
+
+  it('indicação gravada na conta vale sem o código no navegador (outro aparelho)', async () => {
+    const referrer = await signUpUser(db, 'quem@example.com', { full_name: 'Quem Indica' });
+    const referrerOrg = await ensure(referrer);
+    const code = await scalar<string>(
+      referrer,
+      'select public_code from public.organizations where id = $1',
+      [referrerOrg],
+    );
+    const staff = await signUpUser(db, 'staff@example.com', { full_name: 'Equipe' });
+    await db.query("update public.profiles set role = 'admin' where id = $1", [staff]);
+    await scalar(staff, 'select public.admin_save_referral_settings(true, 500, 0, 90)');
+
+    const friend = await signUpUser(db, 'amiga@example.com', {
+      full_name: 'Amiga Nova',
+      referral_code: code,
+    });
+    // Navegador sem código guardado (null), como no celular que confirmou o e-mail.
+    const friendOrg = await ensure(friend);
+    const rows = await db.query(
+      'select referrer_org_id, reward_cents from public.organization_referrals where referred_org_id = $1',
+      [friendOrg],
+    );
+    expect(rows.rows).toEqual([{ referrer_org_id: referrerOrg, reward_cents: 500 }]);
+
+    // Código da conta inválido não impede a criação.
+    const other = await signUpUser(db, 'outra@example.com', {
+      full_name: 'Outra',
+      referral_code: 'nao-existe',
+    });
+    await expect(ensure(other)).resolves.toBeTruthy();
+  });
 });

@@ -10,7 +10,6 @@ import { ResetPasswordPage } from '@/features/auth/pages/ResetPasswordPage';
 import { SignInPage } from '@/features/auth/pages/SignInPage';
 import { SignUpPage } from '@/features/auth/pages/SignUpPage';
 import { InventoryItemPage } from '@/features/inventory/pages/InventoryItemPage';
-import { InventoryPage } from '@/features/inventory/pages/InventoryPage';
 import { RequireOrganization, RequireOrgKind } from '@/features/organizations/guards';
 import { InvitePage } from '@/features/organizations/pages/InvitePage';
 import { OrganizationSettingsPage } from '@/features/organizations/pages/OrganizationSettingsPage';
@@ -22,7 +21,6 @@ import { CourseEditorPage } from '@/features/academy/pages/CourseEditorPage';
 import { CoursePage } from '@/features/academy/pages/CoursePage';
 import { LessonPage } from '@/features/academy/pages/LessonPage';
 import { AdminPage } from '@/features/admin/pages/AdminPage';
-import { AffiliatesPage } from '@/features/affiliates/pages/AffiliatesPage';
 import { LinkRedirectPage } from '@/features/affiliates/pages/LinkRedirectPage';
 import { ReferralsAdminPage } from '@/features/affiliates/pages/ReferralsAdminPage';
 import { ReferralsPage } from '@/features/affiliates/pages/ReferralsPage';
@@ -61,6 +59,7 @@ import { RootRoute } from '@/pages/landing/RootRoute';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { SystemStatusPage } from '@/pages/SystemStatusPage';
 import { StockSyncPage } from '@/features/inventory/pages/StockSyncPage';
+import { LegacyStockItemRedirect } from '@/features/inventory/pages/LegacyStockItemRedirect';
 import { env } from '@/lib/env';
 
 // Routes are added per phase. Only routes with working pages are registered
@@ -153,9 +152,15 @@ export const router = createBrowserRouter([
               { path: 'produtos', element: <ProductsPage /> },
               { path: 'produtos/novo', element: <NewProductPage /> },
               { path: 'produtos/:productId', element: <EditProductPage /> },
-              { path: 'estoque', element: <InventoryPage /> },
-              { path: 'estoque/sincronizar', element: <StockSyncPage /> },
-              { path: 'estoque/:itemId', element: <InventoryItemPage /> },
+              // Estoque fica dentro de Produtos; endereços antigos (e notificações) redirecionam.
+              { path: 'produtos/sincronizar-estoque', element: <StockSyncPage /> },
+              { path: 'produtos/estoque/:itemId', element: <InventoryItemPage /> },
+              { path: 'estoque', element: <Navigate to="/produtos" replace /> },
+              {
+                path: 'estoque/sincronizar',
+                element: <Navigate to="/produtos/sincronizar-estoque" replace />,
+              },
+              { path: 'estoque/:itemId', element: <LegacyStockItemRedirect /> },
               { path: 'analises', element: <AnalyticsPage /> },
               // Financeiro foi unido à Carteira.
               { path: 'financeiro', element: <Navigate to="/carteira" replace /> },
@@ -174,7 +179,7 @@ export const router = createBrowserRouter([
                   { path: 'central/:listingId', element: <SalesListingPage /> },
                   // Ferramentas ficam dentro do produto, ao exportar para um marketplace.
                   { path: 'ferramentas', element: <Navigate to="/produtos" replace /> },
-                  { path: 'divulgacao', element: <AffiliatesPage /> },
+                  { path: 'divulgacao', element: <Navigate to="/indicacoes" replace /> },
                   { path: 'integracoes', element: <IntegrationsPage /> },
                   { path: 'integracoes/:connectionId', element: <IntegrationPage /> },
                   { path: 'pedidos', element: <OrdersPage /> },

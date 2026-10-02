@@ -1,4 +1,10 @@
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type QueryClient,
+} from '@tanstack/react-query';
 import { z } from 'zod';
 import { sanitizeSearch } from '@/features/products/api';
 import { productStatuses } from '@/features/products/schemas';
@@ -52,6 +58,30 @@ export const inventoryKeys = {
   item: (orgId: string, id: string) => ['inventory', orgId, 'item', id] as const,
   movements: (orgId: string, id: string) => ['inventory', orgId, 'movements', id] as const,
 };
+
+/** Estoque aparece no estoque e na lista de produtos: atualiza os dois. */
+export const invalidateStock = (queryClient: QueryClient, orgId: string) =>
+  Promise.all([
+    queryClient.invalidateQueries({ queryKey: inventoryKeys.all(orgId) }),
+    queryClient.invalidateQueries({ queryKey: ['products', orgId] }),
+  ]);
+
+/** Itens de estoque de um produto (o produto ou cada variação). */
+export function useProductStock(orgId: string, productId: string) {
+  return useQuery({
+    queryKey: [...inventoryKeys.all(orgId), 'product', productId] as const,
+    queryFn: async () => {
+      const { data, error } = await getSupabase()
+        .from('inventory_levels')
+        .select(LEVEL_COLUMNS)
+        .eq('organization_id', orgId)
+        .eq('product_id', productId)
+        .order('sku');
+      if (error) throw error;
+      return z.array(levelSchema).parse(data);
+    },
+  });
+}
 
 export function useInventoryLevels(orgId: string, filters: InventoryFilters) {
   return useQuery({
@@ -140,7 +170,7 @@ export function useStockMovement(orgId: string, itemId: string) {
       if (error) throw error;
       return z.number().int().parse(data);
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: inventoryKeys.all(orgId) }),
+    onSettled: () => invalidateStock(queryClient, orgId),
   });
 }
 
@@ -157,6 +187,6 @@ export function useSetMinQuantity(orgId: string, itemId: string) {
       if (error) throw error;
       if (!data?.length) throw { message: 'org.forbidden' };
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey: inventoryKeys.all(orgId) }),
+    onSettled: () => invalidateStock(queryClient, orgId),
   });
 }

@@ -222,21 +222,18 @@ export function InventoryItemPage() {
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
         <Link
-          to="/estoque"
+          to={item.data ? `/produtos/${item.data.product_id}` : '/produtos'}
           className="text-muted hover:text-fg inline-flex items-center gap-1 text-sm"
         >
           <ArrowLeft className="size-4" aria-hidden />
-          Estoque
+          {item.data ? 'Voltar ao produto' : 'Produtos'}
         </Link>
         {item.data && (
           <>
             <h1 className="mt-2 text-2xl font-semibold tracking-tight">{item.data.product_name}</h1>
             <p className="text-muted mt-1 text-sm">
               <span className="font-mono">{item.data.sku}</span>
-              {item.data.attributes && ` · ${describeAttributes(item.data.attributes)}`} ·{' '}
-              <Link to={`/produtos/${item.data.product_id}`} className="text-brand hover:underline">
-                ver produto
-              </Link>
+              {item.data.attributes && ` · ${describeAttributes(item.data.attributes)}`}
             </p>
           </>
         )}

@@ -280,11 +280,11 @@ export function StockSyncPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <Link
-        to="/estoque"
+        to="/produtos"
         className="text-muted hover:text-fg inline-flex items-center gap-1 text-sm"
       >
         <ArrowLeft className="size-4" aria-hidden />
-        Estoque
+        Produtos
       </Link>
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Sincronizar estoque</h1>

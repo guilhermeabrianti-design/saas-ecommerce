@@ -1,4 +1,4 @@
-import { sanitizeSearch } from './api';
+import { sanitizeSearch, summarizeStock } from './api';
 import { productErrorMessage } from './errors';
 import {
   emptyProductForm,
@@ -95,5 +95,21 @@ describe('productErrorMessage', () => {
     expect(productErrorMessage({ code: '42501', message: 'new row violates…' })).toMatch(
       /permissão/,
     );
+  });
+});
+
+describe('estoque na lista de produtos', () => {
+  it('soma as variações ativas, marca estoque baixo e importado', () => {
+    const p1 = '5b7c2a53-6d4e-4c1b-9f53-0b3f6f0f7a11';
+    const p2 = '5b7c2a53-6d4e-4c1b-9f53-0b3f6f0f7a12';
+    const stock = summarizeStock([
+      { product_id: p1, available: 3, is_low: false, is_active: true, is_dropship: false },
+      { product_id: p1, available: 2, is_low: true, is_active: true, is_dropship: false },
+      // Variação inativa não conta.
+      { product_id: p1, available: 9, is_low: true, is_active: false, is_dropship: false },
+      { product_id: p2, available: -1, is_low: false, is_active: true, is_dropship: true },
+    ]);
+    expect(stock.get(p1)).toEqual({ available: 5, low: true, dropship: false });
+    expect(stock.get(p2)).toEqual({ available: 0, low: false, dropship: true });
   });
 });

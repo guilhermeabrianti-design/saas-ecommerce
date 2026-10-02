@@ -83,6 +83,8 @@ export function SignUpPage() {
           account_type: values.accountType,
           phone: onlyDigits(values.phone),
           document: onlyDigits(values.document),
+          // Indicação também na conta: vale mesmo se o e-mail for confirmado em outro aparelho.
+          ...(referral && !inviteToken ? { referral_code: referral } : {}),
         },
         emailRedirectTo: authRedirectUrl('/entrar'),
       },

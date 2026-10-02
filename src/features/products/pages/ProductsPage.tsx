@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
-import { ChevronLeft, ChevronRight, Package, Plus, Search } from 'lucide-react';
+import {
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
+  Package,
+  Plus,
+  RefreshCw,
+  Search,
+} from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { PageLoader } from '@/components/ui/PageLoader';
@@ -9,7 +17,7 @@ import { useOrganization } from '@/features/organizations/organization-context';
 import { orgPermissions } from '@/features/organizations/roles';
 import { cn } from '@/utils/cn';
 import { formatBRL } from '@/utils/money';
-import { PRODUCTS_PAGE_SIZE, useProducts, type ProductFilters } from '../api';
+import { PRODUCTS_PAGE_SIZE, useProducts, type ProductFilters, type ProductStock } from '../api';
 import { productErrorMessage } from '../errors';
 import { productStatuses, productStatusLabels, type ProductStatus } from '../schemas';
 
@@ -32,12 +40,27 @@ export function StatusBadge({ status }: { status: ProductStatus }) {
   );
 }
 
+/** Disponível na lista; importado mostra o estoque do fornecedor no produto. */
+function StockCell({ stock }: { stock: ProductStock | null }) {
+  if (!stock) return <span className="text-muted">—</span>;
+  if (stock.dropship) return <span className="text-muted text-xs">Fornecedor</span>;
+  return (
+    <span className={cn('tabular-nums', stock.low && 'text-danger font-medium')}>
+      {stock.low && (
+        <AlertTriangle className="mr-1 inline size-4 align-[-3px]" aria-label="Estoque baixo" />
+      )}
+      {stock.available.toLocaleString('pt-BR')}
+    </span>
+  );
+}
+
 function readFilters(params: URLSearchParams): ProductFilters {
   const status = params.get('status');
   const page = Number(params.get('pagina'));
   return {
     search: params.get('q') ?? '',
     status: productStatuses.includes(status as ProductStatus) ? (status as ProductStatus) : 'all',
+    lowOnly: params.get('baixo') === '1',
     page: Number.isInteger(page) && page > 0 ? page : 1,
   };
 }
@@ -75,7 +98,7 @@ export function ProductsPage() {
 
   const total = products.data?.total ?? 0;
   const pages = Math.max(1, Math.ceil(total / PRODUCTS_PAGE_SIZE));
-  const filtered = filters.search !== '' || filters.status !== 'all';
+  const filtered = filters.search !== '' || filters.status !== 'all' || filters.lowOnly;
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -83,18 +106,30 @@ export function ProductsPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Produtos</h1>
           <p className="text-muted mt-1 text-sm">
-            Catálogo interno de {active!.organization.name}. Anúncios em marketplaces partem daqui.
+            Seus produtos e o estoque de cada um. Abra o produto para ajustar o estoque, ver o
+            histórico e anunciar nos marketplaces.
           </p>
         </div>
-        {canEdit && (
-          <Link
-            to="/produtos/novo"
-            className="bg-brand text-brand-fg hover:bg-brand/90 inline-flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-medium"
-          >
-            <Plus className="size-4" aria-hidden />
-            Novo produto
-          </Link>
-        )}
+        <div className="flex flex-wrap gap-2">
+          {canEdit && (
+            <Link
+              to="/produtos/sincronizar-estoque"
+              className="border-border hover:bg-surface-2 inline-flex h-10 items-center gap-2 rounded-lg border px-3 text-sm font-medium"
+            >
+              <RefreshCw className="size-4" aria-hidden />
+              Sincronizar estoque
+            </Link>
+          )}
+          {canEdit && (
+            <Link
+              to="/produtos/novo"
+              className="bg-brand text-brand-fg hover:bg-brand/90 inline-flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-medium"
+            >
+              <Plus className="size-4" aria-hidden />
+              Novo produto
+            </Link>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-3">
@@ -126,6 +161,15 @@ export function ProductsPage() {
             </option>
           ))}
         </Select>
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={filters.lowOnly}
+            onChange={(e) => update({ baixo: e.target.checked ? '1' : null, pagina: null })}
+            className="accent-brand size-4"
+          />
+          Só estoque baixo
+        </label>
       </div>
 
       {products.isPending ? (
@@ -140,7 +184,7 @@ export function ProductsPage() {
           </p>
           <p className="text-muted mt-1 text-sm">
             {filtered
-              ? 'Ajuste a busca ou o filtro de status.'
+              ? 'Ajuste a busca ou os filtros.'
               : canEdit
                 ? 'Cadastre o primeiro produto do seu catálogo.'
                 : 'Proprietários e administradores podem cadastrar produtos.'}
@@ -164,6 +208,9 @@ export function ProductsPage() {
                 </th>
                 <th scope="col" className="px-4 py-3 text-right font-medium">
                   Preço
+                </th>
+                <th scope="col" className="px-4 py-3 text-right font-medium">
+                  Estoque
                 </th>
                 <th scope="col" className="hidden px-4 py-3 font-medium md:table-cell">
                   Status
@@ -190,6 +237,9 @@ export function ProductsPage() {
                   </td>
                   <td className="px-4 py-3 text-right whitespace-nowrap tabular-nums">
                     {formatBRL(p.price_cents)}
+                  </td>
+                  <td className="px-4 py-3 text-right whitespace-nowrap">
+                    <StockCell stock={p.stock} />
                   </td>
                   <td className="hidden px-4 py-3 md:table-cell">
                     <StatusBadge status={p.status} />
