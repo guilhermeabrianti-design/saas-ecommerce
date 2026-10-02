@@ -2,6 +2,7 @@ import { z } from 'zod';
 import type { FeeOptions } from '@/features/fees/fees';
 import { providers, type Provider } from '@/features/integrations/schemas';
 import { centsToInput, parseBRL } from '@/utils/money';
+import { publishStatuses, savedAttributeSchema } from './ml-publish';
 
 /** Limite de título de cada canal (o banco confere o mesmo). */
 export const TITLE_LIMITS: Record<Provider, number> = {
@@ -25,6 +26,14 @@ export const channelConfigSchema = z.object({
   marketplace_category: z.string().nullable(),
   free_shipping: z.boolean(),
   updated_at: z.string(),
+  // Publicação no Mercado Livre (Fase 37).
+  attributes: z.array(savedAttributeSchema),
+  variation_map: z.record(z.string(), z.string()),
+  external_id: z.string().nullable(),
+  external_url: z.string().nullable(),
+  publish_status: z.enum(publishStatuses).nullable(),
+  last_error: z.string().nullable(),
+  published_at: z.string().nullable(),
 });
 export type ChannelConfig = z.infer<typeof channelConfigSchema>;
 
@@ -117,6 +126,7 @@ const messages: Record<string, string> = {
   'channels.sellers_only': 'Configuração de canais é exclusiva de vendedores.',
   'channels.invalid': 'Dados inválidos. Revise os campos.',
   'channels.title_too_long': 'Título acima do limite do canal.',
+  'channels.save_first': 'Salve a configuração do Mercado Livre antes.',
   'channels.listing_type_unavailable':
     'Tipo de anúncio sem taxa cadastrada. A equipe TheSigns cadastra em Taxas e comissões.',
 };

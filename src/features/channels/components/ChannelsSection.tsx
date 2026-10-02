@@ -13,7 +13,12 @@ import { usePricingSimulation } from '@/features/tools/api';
 import { ProductToolsPanel } from '@/features/tools/components/ProductToolsPanel';
 import { cn } from '@/utils/cn';
 import { formatBRL, parseBRL } from '@/utils/money';
-import { useChannelConfigs, useSaveChannelConfig } from '../api';
+import {
+  MlRequestError,
+  useChannelConfigs,
+  useMlCategorySuggestions,
+  useSaveChannelConfig,
+} from '../api';
 import {
   TITLE_LIMITS,
   channelErrorMessage,
@@ -23,6 +28,58 @@ import {
   type ChannelConfig,
   type ChannelForm,
 } from '../channels';
+import { MercadoLivrePublish } from './MercadoLivrePublish';
+
+/** Sugestões de categoria do Mercado Livre pelo título. */
+function CategorySuggestions({
+  title,
+  disabled,
+  onPick,
+}: {
+  title: string;
+  disabled: boolean;
+  onPick: (categoryId: string) => void;
+}) {
+  const suggest = useMlCategorySuggestions();
+  const q = title.trim();
+  return (
+    <div className="space-y-2 sm:col-span-2">
+      <Button
+        variant="secondary"
+        disabled={disabled || q.length < 3}
+        loading={suggest.isPending}
+        onClick={() => suggest.mutate(q)}
+      >
+        Sugerir categoria pelo título
+      </Button>
+      {suggest.isError && (
+        <Alert tone="error">
+          {suggest.error instanceof MlRequestError
+            ? suggest.error.message
+            : 'Não foi possível buscar categorias.'}
+        </Alert>
+      )}
+      {suggest.data && suggest.data.length === 0 && (
+        <Alert tone="info">Nenhuma sugestão para este título. Tente palavras mais comuns.</Alert>
+      )}
+      {suggest.data && suggest.data.length > 0 && (
+        <ul className="divide-border border-border divide-y rounded-lg border text-sm">
+          {suggest.data.map((s) => (
+            <li key={s.category_id} className="flex items-center justify-between gap-3 px-3 py-2">
+              <span>
+                {s.category_name || s.domain_name}{' '}
+                <span className="text-muted font-mono text-xs">{s.category_id}</span>
+              </span>
+              <Button variant="ghost" onClick={() => onPick(s.category_id)}>
+                Usar
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 /** Taxa do marketplace e lucro com o preço do canal (custo do produto; sem impostos e frete). */
 function ProfitEstimate({
@@ -178,6 +235,13 @@ function ChannelTab({
           error={touched ? errors.marketplaceCategory : undefined}
           onChange={(e) => set({ marketplaceCategory: e.target.value })}
         />
+        {provider === 'mercadolivre' && canEdit && (
+          <CategorySuggestions
+            title={form.title}
+            disabled={!canEdit}
+            onPick={(id) => set({ marketplaceCategory: id })}
+          />
+        )}
       </div>
       <label className="flex items-center gap-3 text-sm">
         <input
@@ -256,13 +320,20 @@ export function ChannelsSection({ product, canEdit }: { product: Product; canEdi
                 options={options}
                 canEdit={canEdit}
               />
+              {open === 'mercadolivre' && current && (
+                <div className="border-border border-t pt-6">
+                  <MercadoLivrePublish product={product} saved={current} canEdit={canEdit} />
+                </div>
+              )}
               <div className="border-border border-t pt-6">
                 <ProductToolsPanel key={open} product={product} provider={open} />
               </div>
-              <p className="text-muted text-xs">
-                Publicar direto no marketplace a partir daqui chega nas próximas fases. Pedidos do
-                Mercado Livre já entram e vão sozinhos ao fornecedor.
-              </p>
+              {open !== 'mercadolivre' && (
+                <p className="text-muted text-xs">
+                  Publicar direto na {providerLabels[open]} depende do app de desenvolvedor aprovado
+                  (próximas fases). No Mercado Livre já dá para publicar daqui.
+                </p>
+              )}
             </>
           )}
         </div>

@@ -218,6 +218,16 @@ Documento vivo — cada fase acrescenta os controles que implementa. Status atua
 - Pendente: CSP e cabeçalhos de segurança (dependem da hospedagem do frontend), CAPTCHA no
   cadastro, CORS restrito por origem nas Edge Functions.
 
+## Implementado (Fase 37)
+
+- Publicar no Mercado Livre só por owner/admin do vendedor, com limite (30 execuções/10 min por
+  usuário). O navegador nunca recebe o token do Mercado Livre: a Edge Function confere o JWT pela RPC
+  `ml_publish_begin` e só depois usa o token cifrado da conexão.
+- Uma execução por anúncio (`publish_run`); só ela conclui, e só pelo service role. Vínculos de SKU
+  só para itens de estoque do próprio produto.
+- Fotos vão ao Mercado Livre por URL assinada de 1 hora (o bucket continua privado). Link do anúncio
+  gravado só se for `https://`. Chamadas de saída só para a API do Mercado Livre, sem redirecionamento.
+
 ## Planejado (por fase)
 
 | Controle                                                                    | Fase  |

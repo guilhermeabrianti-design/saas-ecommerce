@@ -60,6 +60,13 @@ describe('sugestão por canal', () => {
       marketplace_category: 'MLB1234',
       free_shipping: false,
       updated_at: '2026-10-01T12:00:00Z',
+      attributes: [],
+      variation_map: {},
+      external_id: null,
+      external_url: null,
+      publish_status: null,
+      last_error: null,
+      published_at: null,
     };
     expect(channelForm('mercadolivre', saved, product, options)).toEqual({
       enabled: false,

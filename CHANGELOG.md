@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.37.0] — Fase 37: Publicar no Mercado Livre
+
+### Adicionado
+
+- **Publicar direto no Mercado Livre** pelo produto: em **Exportar para Mercado Livre**, depois de
+  salvar o canal, aparece o painel **Publicar no Mercado Livre** com o estado do anúncio, o link
+  para ele e o último erro, se houver.
+- **Sugerir categoria pelo título**: busca no Mercado Livre e preenche o código (ex.: MLB31447).
+- **Atributos da categoria**: a tela carrega o que a categoria pede — obrigatórios primeiro, com as
+  opções do Mercado Livre em lista; marca e código de barras do cadastro entram sozinhos.
+- **Variações**: cada característica (Cor, Tamanho…) é associada a um atributo de variação do
+  Mercado Livre, com palpite automático pelo nome. Todas saem com o preço do canal (regra do
+  Mercado Livre); variação nova sem estoque fica de fora e o aviso diz quais.
+- **Publicar, Atualizar anúncio, Pausar e Reativar.** Antes de chamar a API, a TheSigns confere o
+  que o Mercado Livre recusaria (foto, estoque, categoria, obrigatórios, variações) e mostra a lista.
+  Fotos do produto (ou do fornecedor, no importado), descrição em texto e frete pelo Mercado Envios.
+- Ao publicar, cada SKU fica vinculado: **pedidos desse anúncio entram sozinhos** e o **estoque
+  sincroniza** (inclusive o do fornecedor no dropshipping).
+- **Testes**: 9 de banco, 11 do módulo de publicação e 4 de frontend.
+
+### Limitações conhecidas
+
+- **Não exercitado contra contas reais** (respostas simuladas). Depende do mesmo app do Mercado
+  Livre da Fase 31 (`MERCADOLIVRE_CLIENT_ID`/`MERCADOLIVRE_CLIENT_SECRET`/`APP_URL`).
+- Título só muda enquanto o anúncio não tem vendas; categoria e tipo de anúncio não mudam depois de
+  publicado (regra do Mercado Livre). Medidas do pacote não são enviadas.
+
 ## [0.36.0] — Fase 36: Estoque sincronizado (planilha, Bling e Tiny)
 
 ### Adicionado

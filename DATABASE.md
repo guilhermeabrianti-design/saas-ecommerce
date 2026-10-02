@@ -539,6 +539,20 @@ receita da TheSigns**. Nenhuma taxa fica no código; o cálculo é feito só no 
   esperada em `config.token_version`), `mercadolivre_connection` (conexão pelo id do usuário).
 - `link_listing` passou a aceitar itens de produto importado e enfileira `private.link_available`.
 
+### Publicar no Mercado Livre (Fase 37)
+
+- `product_channel_configs` ganhou `attributes` (atributos da categoria, `[{id, value_id?, value_name?}]`,
+  sem SELLER_SKU/ITEM_CONDITION, que a publicação preenche), `variation_map` ("Cor" → COLOR) e o
+  estado da publicação: `connection_id` (conta onde o anúncio vive), `external_id`, `external_url`,
+  `publish_status` (publishing, active, paused, closed, error), `publish_run`/`publish_action`/
+  `publish_started_at` (execução em andamento; libera após 10 min), `last_error`, `published_at`.
+- Vendedor (owner/admin): `save_ml_listing_attributes`, `ml_publish_begin` (confere canal, categoria,
+  conexão e estado; devolve título, preço, tipo, atributos, variações ativas com SKU e disponível,
+  fotos — as do fornecedor quando o importado não tem) e `ml_lookup_allowed` (consultas de
+  categoria, 120/10 min). Service role (Edge Function `mercadolivre`): `ml_publish_finish` (só a
+  execução em andamento; grava o anúncio e cria/atualiza os `listing_links` com o SKU; na falha volta
+  ao estado anterior ou "error").
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,
