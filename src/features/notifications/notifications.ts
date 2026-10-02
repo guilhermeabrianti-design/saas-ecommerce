@@ -4,12 +4,14 @@ import {
   Banknote,
   Bell,
   Gift,
+  Medal,
   PackageCheck,
   PackageX,
   ReceiptText,
   ShieldCheck,
   Tag,
   Truck,
+  Trophy,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -53,6 +55,8 @@ const styles: Record<string, KindStyle> = {
   'wallet.withdrawal': { icon: Banknote, tone: 'info' },
   'referral.new': { icon: Gift, tone: 'info' },
   'referral.rewarded': { icon: Gift, tone: 'success' },
+  'gamification.level': { icon: Trophy, tone: 'success' },
+  'gamification.achievement': { icon: Medal, tone: 'success' },
   'staff.supplier_review': { icon: ShieldCheck, tone: 'warning' },
   'staff.withdrawal_requested': { icon: Banknote, tone: 'warning' },
   'staff.refund_needed': { icon: AlertTriangle, tone: 'danger' },

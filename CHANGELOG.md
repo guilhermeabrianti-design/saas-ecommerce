@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.41.0] — Fase 41: Gamificação
+
+### Adicionado
+
+- **Conquistas** no menu (vendedor e fornecedor): nível, pontos totais e do mês, progresso até o
+  próximo nível, conquistas ganhas e a caminho, últimos pontos e as regras de pontuação.
+- **Pontos só por resultados reais**, lançados pelo banco: venda entregue (checkout ou marketplace),
+  pedido enviado pelo fornecedor, avaliação 5 estrelas, aula da Academia concluída, produto publicado
+  no catálogo ou no Mercado Livre e indicação que gerou venda. Venda cancelada, avaliação ocultada ou
+  recompensa estornada tiram os pontos de volta. Pedido manual não pontua.
+- **Níveis** (Iniciante, Bronze, Prata, Ouro, Diamante) e **conquistas** (primeira venda, 10 e 100
+  vendas, primeiro envio, bem avaliado…), com notificação ao subir de nível ou ganhar conquista.
+- **Ranking do mês** por tipo de conta (top 10 e a sua posição). O proprietário do vendedor escolhe
+  se a loja aparece com o nome; senão fica "Loja anônima". Fornecedores aparecem pelo apelido.
+- **Administração → Gamificação**: pontos e limite diário por evento, níveis e conquistas, com
+  auditoria.
+- **Testes**: 6 de banco e 3 de frontend.
+
+### Observações
+
+- Mentoria e comunidade (Fase 40) ficaram fora, conforme decisão do produto. Shopee e TikTok Shop
+  (Fases 38–39) aguardam os apps de desenvolvedor aprovados.
+
 ## [0.37.1] — Produtos com estoque e Indique e ganhe
 
 ### Alterado

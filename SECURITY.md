@@ -228,6 +228,14 @@ Documento vivo — cada fase acrescenta os controles que implementa. Status atua
 - Fotos vão ao Mercado Livre por URL assinada de 1 hora (o bucket continua privado). Link do anúncio
   gravado só se for `https://`. Chamadas de saída só para a API do Mercado Livre, sem redirecionamento.
 
+## Implementado (Fase 41)
+
+- Pontos só nascem de gatilhos no banco sobre eventos reais; o navegador não lança nem altera nada.
+  Pedido manual não pontua (evita inflar o ranking), cada origem pontua uma vez e cada evento tem
+  limite diário configurável. Livro de pontos imutável.
+- Ranking sem expor quem não quer: vendedor aparece pelo nome só se o proprietário escolher;
+  fornecedor sempre pelo apelido; cada tipo de conta só vê o próprio ranking.
+
 ## Planejado (por fase)
 
 | Controle                                                                    | Fase  |

@@ -12,6 +12,7 @@ import {
   GraduationCap,
   Gift,
   Star,
+  Trophy,
   LifeBuoy,
   House,
   ListChecks,
@@ -121,6 +122,13 @@ const navItems: NavItem[] = [
     staffOnly: true,
   },
   {
+    to: '/admin/gamificacao',
+    label: 'Gamificação',
+    icon: Trophy,
+    requiresAuth: true,
+    staffOnly: true,
+  },
+  {
     to: '/admin/taxas',
     label: 'Taxas e comissões',
     icon: Percent,
@@ -171,6 +179,7 @@ const navItems: NavItem[] = [
   { to: '/analises', label: 'Análises', icon: ChartColumn, requiresAuth: true, tenantOnly: true },
   { to: '/carteira', label: 'Carteira', icon: PiggyBank, requiresAuth: true, tenantOnly: true },
   { to: '/reputacao', label: 'Reputação', icon: Star, requiresAuth: true, tenantOnly: true },
+  { to: '/conquistas', label: 'Conquistas', icon: Trophy, requiresAuth: true, tenantOnly: true },
   {
     to: '/indicacoes',
     label: 'Indique e ganhe',

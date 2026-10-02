@@ -5,6 +5,7 @@ import { feesAuditLabels } from '@/features/fees/fees';
 import { moderationAuditLabels } from '@/features/moderation/moderation';
 import { salesAuditLabels } from '@/features/sales/sales';
 import { referralAuditLabels } from '@/features/affiliates/affiliates';
+import { gamificationAuditLabels } from '@/features/gamification/gamification';
 import { walletAuditLabels } from '@/features/wallet/wallet';
 import { orgErrorMessage } from '@/features/organizations/errors';
 import { orgKinds } from '@/features/organizations/roles';
@@ -159,6 +160,7 @@ export const auditActionLabels: Record<string, string> = {
   ...salesAuditLabels,
   ...walletAuditLabels,
   ...referralAuditLabels,
+  ...gamificationAuditLabels,
   'checkout.refund': 'Estorno do checkout',
 };
 

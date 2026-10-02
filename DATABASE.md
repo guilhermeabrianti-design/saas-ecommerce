@@ -553,6 +553,23 @@ receita da TheSigns**. Nenhuma taxa fica no código; o cálculo é feito só no 
   execução em andamento; grava o anúncio e cria/atualiza os `listing_links` com o SKU; na falha volta
   ao estado anterior ou "error").
 
+### Gamificação (Fase 41)
+
+- `gamification_rules` (evento, rótulo, tipo de conta, pontos, limite diário, ativa),
+  `gamification_levels` (nome e pontos mínimos), `gamification_achievements` (evento e quantidade).
+  `gamification_points`: livro imutável e idempotente (organização × evento × origem; estorno com
+  `rev:<origem>`). `organization_achievements`: quando cada conquista foi ganha.
+  `organizations.show_in_ranking`. Nada disso é lido direto pela API.
+- Gatilhos (`private.gami_award`/`gami_revoke`): venda entregue de checkout ou marketplace (manual
+  não conta; cancelada depois estorna), envio do fornecedor de venda real, avaliação 5 estrelas
+  (ocultada estorna), aula concluída, anúncio publicado no catálogo e no Mercado Livre (uma vez por
+  anúncio), indicação recompensada (estorno da recompensa estorna). Sobe de nível e conquista avisam
+  por notificação (`gamification.level`, `gamification.achievement`).
+- Membros: `gamification_summary`, `gamification_ranking` (mês, mesmo tipo de conta, top 10 + a
+  própria posição); proprietário: `set_ranking_visibility`. Equipe: `admin_gamification_config`,
+  `admin_save_gamification_rule`, `admin_save_gamification_levels`, `admin_save_achievement`
+  (auditadas).
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,
