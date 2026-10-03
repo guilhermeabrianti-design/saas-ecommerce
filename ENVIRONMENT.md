@@ -26,6 +26,7 @@
 | `BLING_CLIENT_ID`, `BLING_CLIENT_SECRET` (Fase 36)                    | Supabase Secrets         | **não**                 |
 | `MERCADOPAGO_ACCESS_TOKEN`, `MERCADOPAGO_WEBHOOK_SECRET` (Fase 21)    | Supabase Secrets         | **não**                 |
 | `MERCADOPAGO_PUBLIC_KEY` (Fase 21; entregue ao navegador pela função) | Supabase Secrets         | sim (chave pública)     |
+| `APP_URL` (Fases 31 e 42: volta do OAuth e da assinatura)             | Supabase Secrets         | **não**                 |
 
 Definir segredos das Edge Functions:
 

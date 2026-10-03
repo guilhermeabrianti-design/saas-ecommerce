@@ -6,6 +6,7 @@ import { moderationAuditLabels } from '@/features/moderation/moderation';
 import { salesAuditLabels } from '@/features/sales/sales';
 import { referralAuditLabels } from '@/features/affiliates/affiliates';
 import { gamificationAuditLabels } from '@/features/gamification/gamification';
+import { plansAuditLabels } from '@/features/plans/plans';
 import { walletAuditLabels } from '@/features/wallet/wallet';
 import { orgErrorMessage } from '@/features/organizations/errors';
 import { orgKinds } from '@/features/organizations/roles';
@@ -161,6 +162,7 @@ export const auditActionLabels: Record<string, string> = {
   ...walletAuditLabels,
   ...referralAuditLabels,
   ...gamificationAuditLabels,
+  ...plansAuditLabels,
   'checkout.refund': 'Estorno do checkout',
 };
 

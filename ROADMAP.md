@@ -31,23 +31,23 @@ integração fictícia** ("Não configurado" / "Não suportado pela API atual").
 | Ferramentas com IA                                      | Reaproveita a Edge Function `ai` (cota por organização, saída revisável, nada salvo sem revisão).                                                                                                                                                                        |
 | Dados de exemplo                                        | Seed só em desenvolvimento, marcado como tal. Depoimentos/produtos da landing não podem ser inventados.                                                                                                                                                                  |
 
-## Entregue (v0.1 – v0.41)
+## Entregue (v0.1 – v0.42)
 
 1 Setup · 2 Auth/sessão/RBAC · 3 Organizações + RLS · 4 Produtos · 5 Variações/imagens · 6 Estoque
 (ledger) · 7 Catálogo de fornecedores · 8 Pedidos + roteamento ao fornecedor · 9 Financeiro (ledger)
 · 10 Integrações (núcleo, webhooks Shopify/Woo) · 11 Analytics · 12 Admin da plataforma · 13 IA
 (descrição) · 14 Credenciais criptografadas + envio de estoque · **15 Taxas de marketplace, comissão
-do vendedor, categorias e calculadora da divisão** · **16 Moderação de fornecedores e anúncios** · **17 Academia (YouTube)** · **18 Onboarding e painel do vendedor** · **19 Central de Vendas e campanhas para lives** · **20 Ferramentas (preço-alvo, simulador de lucro, textos com IA)** · **21 Checkout próprio + Mercado Pago** · **22 Carteira e saques** · **23 Afiliados e indicação (links, vitrine, QR Code, atribuição e indique e ganhe)** · **24 Notificações em tempo real e alertas** · **25 Landing page** · **26 Rate limiting, endurecimento e MFA da equipe** · **27 Suporte e denúncias** · **28 Avaliações e reputação** · **29 Gerenciador de anúncios e publicação (Shopify/WooCommerce)** · **30 Etiquetas de envio (upload e vínculo)** · **31 Mercado Livre (OAuth, pedidos e estoque)** · **32 Envio automático ao fornecedor com etiqueta e nota fiscal do Mercado Livre** · **33 Ambientes separados (vendedor, fornecedor e equipe) e só Mercado Livre, Shopee e TikTok Shop** · **34 Configuração por canal no cadastro do produto** · **35 Catálogo aberto (sem aprovação), lojas de fornecedores, exportar com ferramentas no produto** · **36 Estoque por planilha e integração com Bling/Tiny** · **37 Publicar no Mercado Livre (categoria, atributos, fotos, variações, pausar/reativar)** · **41 Gamificação (pontos por eventos reais, níveis, conquistas, ranking)**.
+do vendedor, categorias e calculadora da divisão** · **16 Moderação de fornecedores e anúncios** · **17 Academia (YouTube)** · **18 Onboarding e painel do vendedor** · **19 Central de Vendas e campanhas para lives** · **20 Ferramentas (preço-alvo, simulador de lucro, textos com IA)** · **21 Checkout próprio + Mercado Pago** · **22 Carteira e saques** · **23 Afiliados e indicação (links, vitrine, QR Code, atribuição e indique e ganhe)** · **24 Notificações em tempo real e alertas** · **25 Landing page** · **26 Rate limiting, endurecimento e MFA da equipe** · **27 Suporte e denúncias** · **28 Avaliações e reputação** · **29 Gerenciador de anúncios e publicação (Shopify/WooCommerce)** · **30 Etiquetas de envio (upload e vínculo)** · **31 Mercado Livre (OAuth, pedidos e estoque)** · **32 Envio automático ao fornecedor com etiqueta e nota fiscal do Mercado Livre** · **33 Ambientes separados (vendedor, fornecedor e equipe) e só Mercado Livre, Shopee e TikTok Shop** · **34 Configuração por canal no cadastro do produto** · **35 Catálogo aberto (sem aprovação), lojas de fornecedores, exportar com ferramentas no produto** · **36 Estoque por planilha e integração com Bling/Tiny** · **37 Publicar no Mercado Livre (categoria, atributos, fotos, variações, pausar/reativar)** · **41 Gamificação (pontos por eventos reais, níveis, conquistas, ranking)** · **42 Planos e assinaturas (Mercado Pago), limites por plano e destaque no catálogo**.
 
 ## Próximas fases
 
 Ordem pensada para fechar primeiro o **MVP da seção 26** e depois o ecossistema.
 
-| Fase  | Entrega                                                                                                    | Seções |
-| ----- | ---------------------------------------------------------------------------------------------------------- | ------ |
-| 38–39 | **Shopee e TikTok Shop** — uma fase por marketplace, cada uma dependente de app de desenvolvedor aprovado. | 11, 38 |
-| 40    | **Mentoria e Comunidade** (fora do MVP): mentores, comissão de mentor, aulas ao vivo, grupos, desafios.    | 8, 44  |
-| 42    | **Planos e monetização**: assinaturas de fornecedor/vendedor, destaque de produto, campanhas patrocinadas. | 25     |
+| Fase  | Entrega                                                                                                                    | Seções |
+| ----- | -------------------------------------------------------------------------------------------------------------------------- | ------ |
+| 38–39 | **Shopee e TikTok Shop** — uma fase por marketplace, cada uma dependente de app de desenvolvedor aprovado.                 | 11, 38 |
+| 40    | **Mentoria e Comunidade** (fora do MVP): mentores, comissão de mentor, aulas ao vivo, grupos, desafios.                    | 8, 44  |
+| 43    | **Campanhas patrocinadas**: espaço pago no catálogo e na Central de Vendas (depende de regra de preço do dono do produto). | 25     |
 
 Cada fase segue o mesmo fechamento: migração com RLS, testes de banco e frontend, `npm run check`
 verde, revisão de segurança e entrada no [CHANGELOG.md](CHANGELOG.md).
@@ -91,3 +91,10 @@ verde, revisão de segurança e entrada no [CHANGELOG.md](CHANGELOG.md).
     (venda entregue 10, envio 10, avaliação 5 estrelas 5, aula 3, anúncio publicado 5, indicação
     50). A equipe ajusta em Administração → Gamificação. Conta a partir da implantação (sem
     pontos retroativos).
+15. **Planos (Fase 42)**: só os gratuitos existem; preços, limites e quais planos oferecer são
+    decisão do dono do produto — a equipe cria em Administração → Planos. No Mercado Pago, apontar
+    as notificações do tópico "Planos e assinaturas" para
+    `<SUPABASE_URL>/functions/v1/billing/webhook` (mesmo `MERCADOPAGO_WEBHOOK_SECRET`) e cadastrar
+    `APP_URL`. Sem notificação, a tela relê a assinatura ao voltar do pagamento. Produtos já acima do limite continuam; o limite vale para
+    novos. Campanhas patrocinadas ficaram para a Fase 43. Validar com usuários de teste do
+    Mercado Pago (o e-mail do pagador precisa ser de usuário de teste no ambiente de teste).

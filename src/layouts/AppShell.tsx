@@ -11,6 +11,7 @@ import {
   Building2,
   GraduationCap,
   Gift,
+  Gem,
   Star,
   Trophy,
   LifeBuoy,
@@ -129,6 +130,13 @@ const navItems: NavItem[] = [
     staffOnly: true,
   },
   {
+    to: '/admin/planos',
+    label: 'Planos',
+    icon: Gem,
+    requiresAuth: true,
+    staffOnly: true,
+  },
+  {
     to: '/admin/taxas',
     label: 'Taxas e comissões',
     icon: Percent,
@@ -188,6 +196,7 @@ const navItems: NavItem[] = [
     tenantOnly: true,
     orgKind: 'seller',
   },
+  { to: '/plano', label: 'Plano', icon: Gem, requiresAuth: true, tenantOnly: true },
   {
     to: '/organizacao',
     label: 'Empresa',

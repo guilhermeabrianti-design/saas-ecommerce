@@ -570,6 +570,26 @@ receita da TheSigns**. Nenhuma taxa fica no código; o cálculo é feito só no 
   `admin_save_gamification_rule`, `admin_save_gamification_levels`, `admin_save_achievement`
   (auditadas).
 
+### Planos e monetização (Fase 42)
+
+- `plans` (tipo de conta, preço mensal, gerações de IA por dia, máximo de produtos, vagas de
+  destaque, ativo). Um gratuito padrão por tipo (`is_default`, preço 0, sempre ativo); planos pagos
+  só pela equipe (`admin_save_plan`, auditada), a partir de R$ 1,00.
+- `organization_subscriptions`: assinatura no Mercado Pago (`external_id` = preapproval), preço
+  congelado na assinatura, estado (`pending`, `authorized`, `paused`, `cancelled`), próxima cobrança
+  e `access_until` (cancelada vale até a cobrança que não vai acontecer). No máximo uma em
+  andamento e uma vigente por empresa. `subscription_payments`: cobranças mensais.
+- `private.org_plan(org)`: plano vigente (assinatura autorizada ou cancelada no prazo; senão o
+  gratuito). Limites: IA em `private.ai_reserve`/`ai_usage_today`; produtos não arquivados no
+  gatilho `products_plan_limit` (`plans.product_limit`); destaque em `catalog_featured`
+  (`set_listing_featured`, `listing_featured_status`) — só os primeiros marcados até as vagas
+  contam, e `catalog_browse` devolve `featured` e os ordena primeiro.
+- Membros: `billing_overview`, `billing_refresh_targets`; proprietário: `billing_begin_subscription`,
+  `billing_cancel_begin`. Só service role (Edge Function `billing`): `billing_attach_checkout`,
+  `billing_sync_subscription` (valor divergente cancela; troca de plano devolve a anterior para
+  cancelar), `billing_record_payment`. Equipe: `admin_billing_overview`, `admin_save_plan`.
+  Notificações `billing.active`, `billing.cancelled`, `billing.payment_failed`.
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,

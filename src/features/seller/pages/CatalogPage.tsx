@@ -143,6 +143,11 @@ function ProductsGrid({ supplierId }: { supplierId: string | null }) {
                   ) : (
                     <ImageOff className="text-muted absolute inset-0 m-auto size-6" aria-hidden />
                   )}
+                  {item.featured && (
+                    <span className="bg-brand text-brand-fg absolute top-2 left-2 rounded-full px-2 py-0.5 text-xs font-medium">
+                      Destaque
+                    </span>
+                  )}
                 </div>
                 <div className="space-y-1 p-3 pb-1 text-sm">
                   <p className="line-clamp-2 font-medium">{item.name}</p>

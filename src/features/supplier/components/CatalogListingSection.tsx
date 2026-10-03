@@ -15,6 +15,7 @@ import {
   moderationLabels,
   moderationTones,
 } from '@/features/moderation/moderation';
+import { FeaturedToggle } from '@/features/plans/components/FeaturedToggle';
 import type { Product } from '@/features/products/api';
 import { cn } from '@/utils/cn';
 import { productErrorMessage } from '@/features/products/errors';
@@ -127,6 +128,7 @@ function ListingForm({
       )}
       {save.isSuccess && !isDirty && <Alert tone="success">Catálogo atualizado.</Alert>}
       {listing && <ModerationStatus product={product} listing={listing} canEdit={canEdit} />}
+      {listing && <FeaturedToggle listingId={listing.id} canEdit={canEdit} />}
       {listing?.is_published && product.status !== 'active' && (
         <Alert tone="info">
           Publicado, mas invisível: só produtos com status Ativo aparecem para vendedores.

@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.42.0] — Fase 42: Planos e monetização
+
+### Adicionado
+
+- **Plano** no menu (vendedor e fornecedor): plano atual, uso dos limites (produtos ativos,
+  gerações de IA do dia e, no fornecedor, destaques), planos disponíveis e cobranças. O
+  proprietário assina, continua um pagamento em andamento ou cancela; os demais só consultam.
+- **Assinatura mensal pelo Mercado Pago** (nova Edge Function `billing`): o proprietário é levado à
+  página do Mercado Pago para informar o cartão; o estado é sempre relido na API (notificação ou
+  volta para a tela). Valor diferente do combinado não libera o plano. Trocar de plano cancela o
+  anterior quando o novo é autorizado; cancelar mantém o plano até a próxima cobrança. Avisos de
+  plano ativo, cancelamento e cobrança recusada.
+- **Limites por plano**: gerações de IA por dia, máximo de produtos não arquivados e vagas de
+  destaque. Toda empresa começa no **Grátis** do seu tipo (sem limite de produtos, IA no padrão).
+- **Destaque no catálogo**: o fornecedor destaca anúncios na seção do catálogo do produto, até as
+  vagas do plano; destacados aparecem primeiro para os vendedores, com selo **Destaque**. Se o
+  plano diminuir, só os primeiros marcados continuam valendo.
+- **Administração → Planos**: criar e editar planos (preço, limites, disponível ou não), receita
+  mensal recorrente e as assinaturas recentes. Auditado. Preço novo vale para novas assinaturas.
+- **Testes**: 5 de banco, 6 do módulo de assinaturas e 4 de frontend.
+
+### Limitações conhecidas
+
+- **Não exercitado contra contas reais** (respostas simuladas). Precisa de
+  `MERCADOPAGO_ACCESS_TOKEN`, `MERCADOPAGO_WEBHOOK_SECRET`, `APP_URL` e das notificações de
+  "Planos e assinaturas" apontando para `billing/webhook`.
+- Nenhum plano pago vem cadastrado: preços e limites são decisão do dono do produto.
+- Campanhas patrocinadas ficam para a Fase 43.
+
 ## [0.41.0] — Fase 41: Gamificação
 
 ### Adicionado

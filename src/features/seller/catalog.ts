@@ -23,6 +23,7 @@ const searchRowSchema = z.object({
   variant_count: z.number().int(),
   available: z.number().int(),
   cover_path: z.string().nullable(),
+  featured: z.boolean(),
   total_count: z.coerce.number().int(),
 });
 

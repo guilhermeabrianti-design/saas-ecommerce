@@ -61,6 +61,8 @@ import { SystemStatusPage } from '@/pages/SystemStatusPage';
 import { StockSyncPage } from '@/features/inventory/pages/StockSyncPage';
 import { AchievementsPage } from '@/features/gamification/pages/AchievementsPage';
 import { GamificationAdminPage } from '@/features/gamification/pages/GamificationAdminPage';
+import { PlanPage } from '@/features/plans/pages/PlanPage';
+import { PlansAdminPage } from '@/features/plans/pages/PlansAdminPage';
 import { LegacyStockItemRedirect } from '@/features/inventory/pages/LegacyStockItemRedirect';
 import { env } from '@/lib/env';
 
@@ -138,6 +140,7 @@ export const router = createBrowserRouter([
               { path: 'admin/saques', element: <WithdrawalsAdminPage /> },
               { path: 'admin/indicacoes', element: <ReferralsAdminPage /> },
               { path: 'admin/gamificacao', element: <GamificationAdminPage /> },
+              { path: 'admin/planos', element: <PlansAdminPage /> },
               { path: 'admin/suporte', element: <SupportAdminPage /> },
               { path: 'admin/avaliacoes', element: <ReviewsAdminPage /> },
               { path: 'admin/suporte/:ticketId', element: <AdminTicketPage /> },
@@ -170,6 +173,7 @@ export const router = createBrowserRouter([
               { path: 'carteira', element: <WalletPage /> },
               { path: 'reputacao', element: <ReputationPage /> },
               { path: 'conquistas', element: <AchievementsPage /> },
+              { path: 'plano', element: <PlanPage /> },
               {
                 element: <RequireOrgKind kind="seller" />,
                 children: [

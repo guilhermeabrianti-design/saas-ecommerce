@@ -430,3 +430,8 @@ verify_jwt = false
 # /connect confere o JWT de quem chamou pela RPC oauth_begin.
 [functions.mercadolivre]
 verify_jwt = false
+
+# billing: notificações do Mercado Pago chegam sem JWT; as demais rotas
+# chamam o banco com o token de quem pediu.
+[functions.billing]
+verify_jwt = false

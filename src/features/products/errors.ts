@@ -6,6 +6,8 @@ const messages: Partial<Record<string, string>> = {
   'products.variant_delete_not_draft':
     'Variações só podem ser excluídas enquanto o produto é rascunho. Desative-a em vez disso.',
   'products.image_limit': 'Limite de 10 imagens por produto.',
+  'plans.product_limit':
+    'O plano da empresa chegou ao limite de produtos. Arquive algum ou mude de plano em Plano.',
   'products.invalid_image_order': 'A lista de imagens mudou. Atualize a página e tente de novo.',
   'inventory.product_has_stock':
     'Zere o estoque do produto antes de criar variações (o saldo passa a ser por variação).',
