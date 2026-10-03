@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router';
+import { useRecordSponsoredView } from '@/features/sponsorships/api';
 import { ArrowLeft, Flame, Radio, Store } from 'lucide-react';
 import { Alert } from '@/components/ui/Alert';
 import { PageLoader } from '@/components/ui/PageLoader';
@@ -21,6 +22,7 @@ import {
 export function SalesListingPage() {
   const { listingId = '' } = useParams();
   const listing = useSalesListing(listingId);
+  useRecordSponsoredView(listingId);
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">

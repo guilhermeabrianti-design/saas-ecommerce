@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.43.0] — Fase 43: Campanhas patrocinadas
+
+### Adicionado
+
+- **Patrocínios** no menu do fornecedor: escolhe um anúncio visível e um pacote e paga uma vez
+  pelo Mercado Pago (PIX, cartão ou boleto). A campanha entra no ar na aprovação do pagamento e
+  dura os dias do pacote. A tela mostra cada campanha com a situação e **resultados reais**:
+  quantas lojas abriram o anúncio e quantas importaram o produto durante a campanha.
+- **Patrocinados aparecem primeiro**, com selo **Patrocinado**, no espaço comprado: topo do
+  **Catálogo** ou da **Central de Vendas** (fora de Favoritos). No catálogo, ficam à frente dos
+  destaques do plano.
+- **Pagamento conferido no Mercado Pago** (Edge Function `billing`, rotas `/sponsor` e
+  `/sponsor-return`, notificação `payment`). Valor diferente, pagamento repetido, compra trocada
+  por outra ou vagas esgotadas na hora da aprovação: estorno automático. Estorno ou contestação
+  tiram a campanha do ar. Aviso ao fornecedor quando a campanha entra no ar.
+- **Administração → Patrocínios**: pacotes (onde aparece, dias, preço, quantas campanhas ao mesmo
+  tempo, à venda ou não), vendido nos últimos 30 dias e campanhas recentes. Auditado.
+- **Testes**: 3 de banco, 2 do módulo de pagamento e 4 de frontend.
+
+### Limitações conhecidas
+
+- **Não exercitado contra contas reais** (respostas simuladas). Usa os mesmos segredos da Fase 42.
+- Nenhum pacote vem cadastrado: preços e vagas são decisão do dono do produto.
+
 ## [0.42.0] — Fase 42: Planos e monetização
 
 ### Adicionado

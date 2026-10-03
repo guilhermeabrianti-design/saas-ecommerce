@@ -117,7 +117,7 @@ describe('ler assinatura', () => {
 });
 
 describe('notificações', () => {
-  it('reconhece os dois tópicos de assinatura e ignora o resto', () => {
+  it('reconhece assinatura, cobrança e pagamento único; ignora o resto', () => {
     expect(
       parseSubscriptionNotification(
         new URLSearchParams('type=subscription_preapproval&data.id=2c93'),
@@ -132,6 +132,9 @@ describe('notificações', () => {
     ).toEqual({ kind: 'authorized_payment', id: '6114264375' });
     expect(
       parseSubscriptionNotification(new URLSearchParams('type=payment&data.id=1'), {}),
+    ).toEqual({ kind: 'payment', id: '1' });
+    expect(
+      parseSubscriptionNotification(new URLSearchParams('type=merchant_order&data.id=1'), {}),
     ).toEqual({ kind: 'ignored' });
     expect(
       parseSubscriptionNotification(

@@ -38,6 +38,11 @@ function ItemCard({ item }: { item: CenterItem }) {
           name={item.name}
           className="absolute top-2 right-2"
         />
+        {item.sponsored && (
+          <span className="bg-surface/90 text-fg absolute top-2 left-2 rounded-full px-2 py-0.5 text-xs font-medium">
+            Patrocinado
+          </span>
+        )}
         {item.open_campaigns > 0 && (
           <span className="bg-brand text-brand-fg absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium">
             <Radio className="size-3" aria-hidden />

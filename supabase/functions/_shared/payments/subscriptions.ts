@@ -143,6 +143,8 @@ export function normalizeAuthorizedPayment(input: unknown): NormalizedAuthorized
 export type SubscriptionNotification =
   | { kind: 'preapproval'; id: string }
   | { kind: 'authorized_payment'; id: string }
+  // Pagamento único (patrocínio, Fase 43).
+  | { kind: 'payment'; id: string }
   | { kind: 'ignored' };
 
 /** Tipo e id de uma notificação (query string ou corpo). */
@@ -158,6 +160,7 @@ export function parseSubscriptionNotification(
   if (type === 'subscription_authorized_payment' && /^[0-9]{1,30}$/.test(id)) {
     return { kind: 'authorized_payment', id };
   }
+  if (type === 'payment' && /^[0-9]{1,30}$/.test(id)) return { kind: 'payment', id };
   return { kind: 'ignored' };
 }
 

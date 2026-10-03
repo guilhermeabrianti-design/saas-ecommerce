@@ -143,9 +143,18 @@ function ProductsGrid({ supplierId }: { supplierId: string | null }) {
                   ) : (
                     <ImageOff className="text-muted absolute inset-0 m-auto size-6" aria-hidden />
                   )}
-                  {item.featured && (
-                    <span className="bg-brand text-brand-fg absolute top-2 left-2 rounded-full px-2 py-0.5 text-xs font-medium">
-                      Destaque
+                  {(item.sponsored || item.featured) && (
+                    <span className="absolute top-2 left-2 flex flex-wrap gap-1">
+                      {item.sponsored && (
+                        <span className="bg-surface/90 text-fg rounded-full px-2 py-0.5 text-xs font-medium">
+                          Patrocinado
+                        </span>
+                      )}
+                      {item.featured && (
+                        <span className="bg-brand text-brand-fg rounded-full px-2 py-0.5 text-xs font-medium">
+                          Destaque
+                        </span>
+                      )}
                     </span>
                   )}
                 </div>

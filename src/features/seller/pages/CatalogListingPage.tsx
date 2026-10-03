@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useRecordSponsoredView } from '@/features/sponsorships/api';
 import { Link, useNavigate, useParams } from 'react-router';
 import { SupplierReputationSection } from '@/features/reviews/components/SupplierReputationSection';
 import { ArrowLeft, Download, ImageOff } from 'lucide-react';
@@ -75,6 +76,7 @@ function ImportBox({ detail }: { detail: CatalogDetail }) {
 export function CatalogListingPage() {
   const { listingId = '' } = useParams();
   const detail = useCatalogDetail(listingId);
+  useRecordSponsoredView(listingId);
   const d = detail.data;
 
   return (

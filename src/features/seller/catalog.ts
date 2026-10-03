@@ -24,6 +24,7 @@ const searchRowSchema = z.object({
   available: z.number().int(),
   cover_path: z.string().nullable(),
   featured: z.boolean(),
+  sponsored: z.boolean(),
   total_count: z.coerce.number().int(),
 });
 

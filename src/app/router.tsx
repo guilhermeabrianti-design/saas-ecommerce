@@ -63,6 +63,8 @@ import { AchievementsPage } from '@/features/gamification/pages/AchievementsPage
 import { GamificationAdminPage } from '@/features/gamification/pages/GamificationAdminPage';
 import { PlanPage } from '@/features/plans/pages/PlanPage';
 import { PlansAdminPage } from '@/features/plans/pages/PlansAdminPage';
+import { SponsorshipsAdminPage } from '@/features/sponsorships/pages/SponsorshipsAdminPage';
+import { SponsorshipsPage } from '@/features/sponsorships/pages/SponsorshipsPage';
 import { LegacyStockItemRedirect } from '@/features/inventory/pages/LegacyStockItemRedirect';
 import { env } from '@/lib/env';
 
@@ -141,6 +143,7 @@ export const router = createBrowserRouter([
               { path: 'admin/indicacoes', element: <ReferralsAdminPage /> },
               { path: 'admin/gamificacao', element: <GamificationAdminPage /> },
               { path: 'admin/planos', element: <PlansAdminPage /> },
+              { path: 'admin/patrocinios', element: <SponsorshipsAdminPage /> },
               { path: 'admin/suporte', element: <SupportAdminPage /> },
               { path: 'admin/avaliacoes', element: <ReviewsAdminPage /> },
               { path: 'admin/suporte/:ticketId', element: <AdminTicketPage /> },
@@ -199,6 +202,7 @@ export const router = createBrowserRouter([
                 element: <RequireOrgKind kind="supplier" />,
                 children: [
                   { path: 'fornecimentos', element: <SupplierOrdersPage /> },
+                  { path: 'patrocinios', element: <SponsorshipsPage /> },
                   {
                     path: 'fornecimentos/:supplierOrderId',
                     element: <SupplierOrderPage />,

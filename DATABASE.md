@@ -590,6 +590,22 @@ receita da TheSigns**. Nenhuma taxa fica no código; o cálculo é feito só no 
   cancelar), `billing_record_payment`. Equipe: `admin_billing_overview`, `admin_save_plan`.
   Notificações `billing.active`, `billing.cancelled`, `billing.payment_failed`.
 
+### Campanhas patrocinadas (Fase 43)
+
+- `sponsorship_packages` (espaço `catalog`/`sales_center`, dias, preço, `max_active` = campanhas
+  ao mesmo tempo, à venda): só a equipe (`admin_save_sponsorship_package`, auditada).
+- `sponsored_campaigns`: compra de um fornecedor para um anúncio, com as condições do pacote
+  congeladas; `pending` → `active` (`starts_at`/`ends_at`) na aprovação; `cancelled` (trocada) ou
+  `refunded` (estorno/contestação). Uma em andamento por anúncio e espaço.
+  `sponsorship_views`: lojas (empresas) que abriram o anúncio durante a campanha.
+- `private.live_sponsored(espaço)`: no ar agora. `catalog_browse` e `sales_center` devolvem
+  `sponsored` e os ordenam primeiro (fora de Favoritos).
+- Fornecedor: `sponsorship_overview` (pacotes com esgotado, anúncios visíveis, campanhas com
+  aberturas e importações), `sponsorship_begin` (owner/admin), `sponsorship_is_mine`. Vendedor:
+  `sponsorship_record_view`. Só service role: `sponsorship_attach_checkout`,
+  `sponsorship_sync_payment` (pede estorno se valor divergente, duplicado, compra trocada ou vagas
+  esgotadas). Equipe: `admin_sponsorship_overview`. Notificação `sponsorship.active`.
+
 ### RPCs (Fase 3)
 
 `create_organization`, `list_organization_members`, `invite_member`, `revoke_invitation`,

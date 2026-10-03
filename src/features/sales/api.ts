@@ -76,6 +76,7 @@ const centerRowSchema = z.object({
   materials: n,
   is_favorite: z.boolean(),
   open_campaigns: n,
+  sponsored: z.boolean(),
   total_count: n,
 });
 

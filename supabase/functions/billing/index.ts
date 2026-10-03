@@ -6,8 +6,12 @@
  *   POST /cancel     (JWT do proprietário) cancela a assinatura vigente
  *   POST /refresh    (JWT de membro) relê no Mercado Pago as assinaturas da
  *                    empresa (volta do pagamento sem esperar a notificação)
- *   POST /webhook    notificações `subscription_preapproval` e
- *                    `subscription_authorized_payment` (assinatura x-signature)
+ *   POST /sponsor    (JWT de owner/admin do fornecedor, Fase 43) cria o pagamento
+ *                    único de um patrocínio e devolve o link do Mercado Pago
+ *   POST /sponsor-return (JWT de membro) volta do pagamento: relê o pagamento
+ *   POST /webhook    notificações `subscription_preapproval`,
+ *                    `subscription_authorized_payment` e `payment` (patrocínio),
+ *                    com assinatura x-signature
  *
  * Implantada sem verificação de JWT por causa do webhook; as outras rotas
  * chamam o banco com o token de quem pediu (as RPCs conferem o papel).
@@ -19,11 +23,21 @@
  *
  * ATENÇÃO: roda em Deno e não foi executada nos testes do projeto. O corpo
  * da assinatura e a leitura das respostas são testados em
- * `src/integrations/subscriptions.test.ts`; as regras de banco em
- * `src/test/db/plans-billing.test.ts`.
+ * `src/integrations/subscriptions.test.ts` e `sponsorships.test.ts`; as regras de banco em
+ * `src/test/db/plans-billing.test.ts` e `sponsorships.test.ts`.
  */
 import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2';
-import { MP_API, verifyWebhookSignature } from '../_shared/payments/mercadopago.ts';
+import {
+  MP_API,
+  PaymentShapeError,
+  normalizePayment,
+  verifyWebhookSignature,
+} from '../_shared/payments/mercadopago.ts';
+import {
+  SponsorshipShapeError,
+  buildPreferenceBody,
+  preferenceCheckoutUrl,
+} from '../_shared/payments/sponsorships.ts';
 import {
   SubscriptionShapeError,
   buildPreapprovalBody,
@@ -72,6 +86,10 @@ const dbErrors: Record<string, [number, string]> = {
   'plans.already_subscribed': [409, 'already_subscribed'],
   'plans.no_subscription': [409, 'no_subscription'],
   'plans.invalid': [400, 'invalid_body'],
+  'sponsorship.unavailable': [409, 'unavailable'],
+  'sponsorship.listing_not_visible': [409, 'listing_not_visible'],
+  'sponsorship.already_live': [409, 'already_live'],
+  'sponsorship.sold_out': [409, 'sold_out'],
 };
 
 function dbError(where: string, error: { message: string }) {
@@ -263,6 +281,106 @@ async function refresh(req: Request, authorization: string) {
   return json(200, { ok: true, failed });
 }
 
+// ---------------------------------------------------------------------
+// Patrocínios (Fase 43): pagamento único
+// ---------------------------------------------------------------------
+
+/**
+ * Relê um pagamento e aplica no patrocínio. Se o banco pedir estorno
+ * (valor divergente, duplicado, compra trocada, espaço esgotado), estorna.
+ */
+async function syncSponsorPayment(db: SupabaseClient, accessToken: string, paymentId: string) {
+  const payment = normalizePayment(await mp(accessToken, 'GET', `/v1/payments/${paymentId}`));
+  // Pagamento do checkout de pedidos (a função `checkout` cuida dele).
+  if (!payment.external_reference) return 'unknown';
+  const { data, error } = await db.rpc('sponsorship_sync_payment', { p_payment: payment });
+  if (error) throw error;
+  if (data !== 'refund_required') return String(data);
+  await mp(accessToken, 'POST', `/v1/payments/${paymentId}/refunds`, {}, `refund-${paymentId}`);
+  return 'refunded';
+}
+
+async function sponsor(req: Request, authorization: string) {
+  const cfg = config();
+  if (!cfg) return json(503, { error: 'not_configured' });
+  const body = await readBody(req);
+  const listingId = String(body?.listing_id ?? '');
+  const packageId = String(body?.package_id ?? '');
+  if (!UUID.test(listingId) || !UUID.test(packageId)) return json(400, { error: 'invalid_body' });
+
+  const begun = await asCaller(authorization).rpc('sponsorship_begin', {
+    p_listing: listingId,
+    p_package: packageId,
+  });
+  if (begun.error) return dbError('sponsor', begun.error);
+  const c = begun.data as {
+    campaign_id: string;
+    checkout_url: string | null;
+    title?: string;
+    price_cents?: number;
+    payer_email?: string | null;
+  };
+  if (c.checkout_url) return json(200, { checkout_url: c.checkout_url });
+
+  let checkoutUrl: string;
+  try {
+    const payload = buildPreferenceBody({
+      campaignId: c.campaign_id,
+      title: c.title ?? '',
+      priceCents: Number(c.price_cents),
+      payerEmail: c.payer_email ?? null,
+      returnUrl: `${cfg.appUrl}/patrocinios`,
+      notificationUrl: `${Deno.env.get('SUPABASE_URL')}/functions/v1/billing/webhook`,
+    });
+    checkoutUrl = preferenceCheckoutUrl(
+      await mp(cfg.accessToken, 'POST', '/checkout/preferences', payload, c.campaign_id),
+    );
+  } catch (e) {
+    if (e instanceof SponsorshipShapeError) {
+      console.error('billing sponsor: dados inválidos', e.message);
+      return json(502, { error: 'provider_unavailable' });
+    }
+    if (e instanceof MpError && e.status >= 400 && e.status < 500) {
+      console.error('billing sponsor: Mercado Pago recusou', e.status, JSON.stringify(e.body));
+      return json(402, { error: 'payment_refused' });
+    }
+    console.error('billing sponsor: falha', e);
+    return json(502, { error: 'provider_unavailable' });
+  }
+
+  const attached = await service().rpc('sponsorship_attach_checkout', {
+    p_campaign: c.campaign_id,
+    p_checkout_url: checkoutUrl,
+  });
+  if (attached.error) return dbError('sponsor attach', attached.error);
+  return json(200, { checkout_url: checkoutUrl });
+}
+
+/** Volta do Checkout Pro (?payment_id=…): relê sem esperar a notificação. */
+async function sponsorReturn(req: Request, authorization: string) {
+  const cfg = config();
+  if (!cfg) return json(503, { error: 'not_configured' });
+  const body = await readBody(req);
+  const paymentId = String(body?.payment_id ?? '');
+  if (!/^[0-9]{1,30}$/.test(paymentId)) return json(400, { error: 'invalid_body' });
+  try {
+    const payment = normalizePayment(await mp(cfg.accessToken, 'GET', `/v1/payments/${paymentId}`));
+    if (!payment.external_reference) return json(404, { error: 'not_found' });
+    // Só quem é da empresa que comprou.
+    const mine = await asCaller(authorization).rpc('sponsorship_is_mine', {
+      p_campaign: payment.external_reference,
+    });
+    if (mine.error) return dbError('sponsor return', mine.error);
+    if (mine.data !== true) return json(404, { error: 'not_found' });
+    const result = await syncSponsorPayment(service(), cfg.accessToken, paymentId);
+    return json(200, { ok: true, result, status: payment.status });
+  } catch (e) {
+    if (e instanceof MpError && e.status === 404) return json(404, { error: 'not_found' });
+    console.error('billing sponsor return: falha', e);
+    return json(502, { error: 'provider_unavailable' });
+  }
+}
+
 async function webhook(req: Request) {
   const cfg = config();
   const secret = Deno.env.get('MERCADOPAGO_WEBHOOK_SECRET');
@@ -291,6 +409,12 @@ async function webhook(req: Request) {
       const result = await syncPreapproval(db, cfg.accessToken, note.id);
       return json(200, { ok: true, result: result.action });
     }
+    if (note.kind === 'payment') {
+      return json(200, {
+        ok: true,
+        result: await syncSponsorPayment(db, cfg.accessToken, note.id),
+      });
+    }
     const payment = normalizeAuthorizedPayment(
       await mp(cfg.accessToken, 'GET', `/authorized_payments/${note.id}`),
     );
@@ -302,7 +426,7 @@ async function webhook(req: Request) {
   } catch (e) {
     if (e instanceof MpError && e.status === 404)
       return json(200, { ok: true, ignored: 'unknown' });
-    if (e instanceof SubscriptionShapeError) {
+    if (e instanceof SubscriptionShapeError || e instanceof PaymentShapeError) {
       console.error('billing webhook: formato inesperado', e.message);
       return json(200, { ok: true, ignored: 'shape' });
     }
@@ -322,5 +446,7 @@ Deno.serve(async (req) => {
   if (path.endsWith('/subscribe')) return subscribe(req, authorization);
   if (path.endsWith('/cancel')) return cancel(req, authorization);
   if (path.endsWith('/refresh')) return refresh(req, authorization);
+  if (path.endsWith('/sponsor')) return sponsor(req, authorization);
+  if (path.endsWith('/sponsor-return')) return sponsorReturn(req, authorization);
   return json(404, { error: 'not_found' });
 });
