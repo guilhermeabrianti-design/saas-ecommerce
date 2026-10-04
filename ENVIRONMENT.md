@@ -23,6 +23,7 @@
 | `ANTHROPIC_API_KEY` (Fase 13), `AI_MODEL` (opcional)                  | Supabase Secrets         | **não**                 |
 | `STOCK_SYNC_SECRET` (Fase 14)                                         | Supabase Secrets + cron  | **não**                 |
 | `MERCADOLIVRE_*`, `SHOPEE_*`, `TIKTOK_*`                              | Supabase Secrets         | **não**                 |
+| `SHOPEE_PARTNER_ID`, `SHOPEE_PARTNER_KEY`, `SHOPEE_ENV` (Fase 38)     | Supabase Secrets         | **não**                 |
 | `BLING_CLIENT_ID`, `BLING_CLIENT_SECRET` (Fase 36)                    | Supabase Secrets         | **não**                 |
 | `MERCADOPAGO_ACCESS_TOKEN`, `MERCADOPAGO_WEBHOOK_SECRET` (Fase 21)    | Supabase Secrets         | **não**                 |
 | `MERCADOPAGO_PUBLIC_KEY` (Fase 21; entregue ao navegador pela função) | Supabase Secrets         | sim (chave pública)     |

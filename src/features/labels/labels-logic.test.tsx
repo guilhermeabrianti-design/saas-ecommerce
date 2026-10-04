@@ -4,8 +4,8 @@ import { LabelsSection } from './components/LabelsSection';
 import {
   checkLabelFile,
   labelErrorMessage,
-  mlDocumentsErrorMessage,
-  mlDocumentsMessage,
+  marketplaceDocumentsErrorMessage,
+  marketplaceDocumentsMessage,
   labelPath,
   latestTracking,
   shipmentFolder,
@@ -64,14 +64,18 @@ describe('regras', () => {
   });
 
   it('resumo da busca no Mercado Livre', () => {
-    expect(mlDocumentsMessage({ status: 'confirmed', attached: ['label', 'invoice_pdf'] })).toBe(
-      '2 documentos anexados.',
+    expect(
+      marketplaceDocumentsMessage({ status: 'confirmed', attached: ['label', 'invoice_pdf'] }),
+    ).toBe('2 documentos anexados.');
+    expect(marketplaceDocumentsMessage({ status: 'confirmed', attached: [] })).toMatch(
+      /Nenhum documento/,
     );
-    expect(mlDocumentsMessage({ status: 'confirmed', attached: [] })).toMatch(/Nenhum documento/);
-    expect(mlDocumentsMessage({ status: 'pending' })).toMatch(/pendente/);
-    expect(mlDocumentsMessage({ skipped: 'pedido cancelled' })).toMatch(/cancelled/);
-    expect(mlDocumentsErrorMessage('not_mercadolivre')).toMatch(/não veio do Mercado Livre/);
-    expect(mlDocumentsErrorMessage(null)).toMatch(/Tente de novo/);
+    expect(marketplaceDocumentsMessage({ status: 'pending' })).toMatch(/pendente/);
+    expect(marketplaceDocumentsMessage({ skipped: 'pedido cancelled' })).toMatch(/cancelled/);
+    expect(marketplaceDocumentsErrorMessage('not_mercadolivre')).toMatch(
+      /não veio do Mercado Livre/,
+    );
+    expect(marketplaceDocumentsErrorMessage(null)).toMatch(/Tente de novo/);
   });
 
   it('rastreio mais recente ativo; erros legíveis', () => {

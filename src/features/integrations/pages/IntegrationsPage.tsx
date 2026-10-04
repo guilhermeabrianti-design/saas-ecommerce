@@ -7,8 +7,8 @@ import { useOrganization } from '@/features/organizations/organization-context';
 import { orgPermissions } from '@/features/organizations/roles';
 import { integrationErrorMessage, useConnections } from '../api';
 import { ConnectionStatusBadge } from '../components/ConnectionStatusBadge';
-import { MercadoLivreConnect } from '../components/MercadoLivreConnect';
-import { mercadoLivreReturnMessages } from '../mercadolivre';
+import { MarketplaceConnect } from '../components/MarketplaceConnect';
+import { returnMessageFromParams } from '../marketplaces';
 import { providerLabels } from '../schemas';
 
 export function IntegrationsPage() {
@@ -16,7 +16,7 @@ export function IntegrationsPage() {
   const orgId = active!.organization.id;
   const connections = useConnections(orgId);
   const [params] = useSearchParams();
-  const mlReturn = mercadoLivreReturnMessages[params.get('ml') ?? ''];
+  const oauthReturn = returnMessageFromParams(params);
 
   if (!orgPermissions.manageIntegrations(active!.role)) {
     return (
@@ -67,21 +67,28 @@ export function IntegrationsPage() {
         )}
       </Section>
 
-      {mlReturn && <Alert tone={mlReturn.tone}>{mlReturn.text}</Alert>}
+      {oauthReturn && <Alert tone={oauthReturn.tone}>{oauthReturn.text}</Alert>}
 
       <Section
         title="Mercado Livre"
         description="Pedidos pagos entram sozinhos (Mercado Envios; Full fica com o Mercado Livre) e o estoque sincroniza pelos SKUs."
       >
-        <MercadoLivreConnect orgId={orgId} />
+        <MarketplaceConnect provider="mercadolivre" orgId={orgId} />
       </Section>
 
       <Section
-        title="Shopee e TikTok Shop"
-        description="Em preparação: dependem da aprovação do app de cada plataforma."
+        title="Shopee"
+        description="Pedidos pagos entram sozinhos, vão ao fornecedor com a etiqueta da Shopee e o estoque sincroniza pelos SKUs."
+      >
+        <MarketplaceConnect provider="shopee" orgId={orgId} />
+      </Section>
+
+      <Section
+        title="TikTok Shop"
+        description="Em preparação: depende da aprovação do app na TikTok Shop."
       >
         <p className="text-muted text-sm">
-          Assim que liberadas, a conexão será feita por autorização, como no Mercado Livre.
+          Assim que liberada, a conexão será feita por autorização, como nos outros marketplaces.
         </p>
       </Section>
     </div>

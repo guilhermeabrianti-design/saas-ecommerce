@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.44.0] — Fase 38: Shopee
+
+### Adicionado
+
+- **Conectar Shopee** em Integrações: o vendedor autoriza a loja na própria Shopee e volta
+  conectado (nova Edge Function `shopee`). Uma loja da Shopee fica ligada a uma empresa por vez.
+  Reconectar e desconectar como no Mercado Livre.
+- **Pedidos pagos entram sozinhos** pelas notificações assinadas da Shopee (pedido relido na API):
+  aguardando envio, organizado, nova tentativa e aguardando nota. Não pagos, cancelados, já
+  enviados e Full (estoque da Shopee) ficam de fora.
+- **Envio automático ao fornecedor**, igual ao Mercado Livre (mesma opção da conexão). Com ele
+  ligado, o envio é **organizado na Shopee por postagem** quando ela não pede mais nada; coleta
+  ou dados extras ficam para o vendedor na Shopee (aviso na atividade da conexão).
+- **Etiqueta da Shopee no fornecimento**: gerada e baixada da API (PDF), com rastreio, e avisada ao
+  fornecedor. Botão no pedido: **Buscar etiqueta na Shopee**.
+- **Estoque na Shopee** pela fila de estoque: acha o anúncio/variação pelo SKU e guarda a
+  referência no vínculo; variações são reconhecidas a partir do primeiro pedido.
+- **Testes**: 7 de banco, 23 do módulo da Shopee e 5 de tela (conexão genérica de marketplace).
+
+### Alterado
+
+- Documentos de marketplace (etiqueta e nota) e o botão do pedido passaram a valer para qualquer
+  marketplace; o pedido sabe de onde veio.
+- A renovação de token OAuth virou um módulo comum (Mercado Livre e Shopee).
+
+### Limitações conhecidas
+
+- **Não exercitado contra contas reais** (respostas simuladas). Precisa de `SHOPEE_PARTNER_ID`,
+  `SHOPEE_PARTNER_KEY` (e `SHOPEE_ENV=test` para o sandbox), `CREDENTIALS_ENCRYPTION_KEY`,
+  `APP_URL` e da URL de push apontando para `shopee/push`.
+- Nota fiscal: a Shopee não emite; o vendedor emite fora e anexa no pedido. Pedidos divididos em
+  vários pacotes usam só a etiqueta do pedido. Publicar anúncio na Shopee fica para depois.
+
 ## [0.43.0] — Fase 43: Campanhas patrocinadas
 
 ### Adicionado

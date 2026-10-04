@@ -119,3 +119,57 @@ export async function verifySignature(
   if (!signature) return false;
   return timingSafeEqual(await hmacBase64(secret, rawBody), signature.trim());
 }
+
+/** HMAC-SHA256 em hexadecimal minúsculo (Shopee e TikTok Shop assinam assim). */
+export async function hmacSha256Hex(secret: string, message: string): Promise<string> {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    enc.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+  const sig = new Uint8Array(await crypto.subtle.sign('HMAC', key, enc.encode(message)));
+  return Array.from(sig, (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+const UF_BY_NAME: Record<string, string> = {
+  acre: 'AC',
+  alagoas: 'AL',
+  amapa: 'AP',
+  amazonas: 'AM',
+  bahia: 'BA',
+  ceara: 'CE',
+  'distrito federal': 'DF',
+  'espirito santo': 'ES',
+  goias: 'GO',
+  maranhao: 'MA',
+  'mato grosso': 'MT',
+  'mato grosso do sul': 'MS',
+  'minas gerais': 'MG',
+  para: 'PA',
+  paraiba: 'PB',
+  parana: 'PR',
+  pernambuco: 'PE',
+  piaui: 'PI',
+  'rio de janeiro': 'RJ',
+  'rio grande do norte': 'RN',
+  'rio grande do sul': 'RS',
+  rondonia: 'RO',
+  roraima: 'RR',
+  'santa catarina': 'SC',
+  'sao paulo': 'SP',
+  sergipe: 'SE',
+  tocantins: 'TO',
+};
+const UFS = new Set(Object.values(UF_BY_NAME));
+
+/** "São Paulo", "SP" ou "BR-SP" → "SP"; desconhecido → "". */
+export function toUf(value: unknown): string {
+  const text = str(value);
+  const code = text.toUpperCase().replace(/^BR-/, '');
+  if (UFS.has(code)) return code;
+  const key = text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ');
+  return UF_BY_NAME[key] ?? '';
+}

@@ -133,7 +133,7 @@ export async function getAccessToken(deps: {
     }
     throw e instanceof StockPushError
       ? e
-      : new StockPushError('Mercado Livre: não foi possível renovar o acesso (reconecte a conta)');
+      : new StockPushError('Não foi possível renovar o acesso ao marketplace (reconecte a conta)');
   }
   const next: StoredMlCredentials = {
     secret: { access_token: tokens.access_token, refresh_token: tokens.refresh_token },

@@ -151,6 +151,7 @@ export function LabelsSection({
                 <p className="text-muted text-xs">
                   {documentKindLabels[l.kind]}
                   {l.source === 'mercadolivre' && ' · Mercado Livre'}
+                  {l.source === 'shopee' && ' · Shopee'}
                   {' · '}
                   {when(l.created_at)}
                   {l.carrier && ` · ${l.carrier}`}

@@ -553,6 +553,21 @@ receita da TheSigns**. Nenhuma taxa fica no código; o cálculo é feito só no 
   execução em andamento; grava o anúncio e cria/atualiza os `listing_links` com o SKU; na falha volta
   ao estado anterior ou "error").
 
+### Shopee (Fase 38)
+
+- `oauth_begin` aceita `shopee` (só vendedor); a conexão usa o mesmo `oauth_states`/`oauth_complete`
+  (loja da Shopee em uma empresa por vez). `marketplace_connection(provider, conta)` acha a conexão
+  ativa pelas notificações (service role).
+- `listing_links.external_ref`: referência do item no marketplace (Shopee: `item_id:model_id`),
+  guardada por `remember_listing_refs` (service role; pedidos e worker de estoque) e esquecida ao
+  trocar o SKU do vínculo. `claim_stock_sync` passou a devolver `link_id` e `external_ref`.
+- Documentos de marketplace deixam de ser só do Mercado Livre: `shipping_labels.source` aceita
+  `shopee`; unicidade por envio × origem × tipo × referência; `attach_marketplace_document` ganhou
+  `p_source` e `p_carrier`. `marketplace_forward_order` (service role) é o encaminhamento do
+  Mercado Livre sem envio; `existing` considera só documentos da mesma origem.
+- Botão do pedido: `order_marketplace` (membros do vendedor: de onde veio o pedido) e
+  `marketplace_documents_request` (limite de 20/10 min; devolve conexão, pedido e conta).
+
 ### Gamificação (Fase 41)
 
 - `gamification_rules` (evento, rótulo, tipo de conta, pontos, limite diário, ativa),

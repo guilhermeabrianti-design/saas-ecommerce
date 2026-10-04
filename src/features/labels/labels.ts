@@ -40,7 +40,7 @@ export const labelSchema = z.object({
   voided_at: z.string().nullable(),
   created_at: z.string(),
   kind: z.enum(documentKinds),
-  source: z.enum(['upload', 'mercadolivre']),
+  source: z.enum(['upload', 'mercadolivre', 'shopee']),
 });
 
 export type ShippingLabel = z.infer<typeof labelSchema>;
@@ -108,27 +108,52 @@ export function labelErrorMessage(error: unknown): string {
   return 'Não foi possível concluir. Tente de novo.';
 }
 
-/** Resposta da Edge Function ao buscar documentos no Mercado Livre. */
-export function mlDocumentsMessage(
-  result: { status?: string; attached?: string[]; skipped?: string } | null,
+/** Marketplaces que anexam documentos ao envio. */
+export type DocumentsMarketplace = 'mercadolivre' | 'shopee';
+
+const marketplaceNames: Record<DocumentsMarketplace, { name: string; in: string; from: string }> = {
+  mercadolivre: { name: 'Mercado Livre', in: 'no Mercado Livre', from: 'do Mercado Livre' },
+  shopee: { name: 'Shopee', in: 'na Shopee', from: 'da Shopee' },
+};
+
+export const documentsButtonLabel = (m: DocumentsMarketplace) =>
+  m === 'mercadolivre'
+    ? 'Buscar etiqueta e nota no Mercado Livre'
+    : `Buscar etiqueta ${marketplaceNames[m].in}`;
+
+/** Resposta da Edge Function ao buscar documentos no marketplace. */
+export function marketplaceDocumentsMessage(
+  result: { status?: string; attached?: string[]; skipped?: string; waiting?: string } | null,
+  m: DocumentsMarketplace = 'mercadolivre',
 ): string {
-  if (!result) return 'Nada novo no Mercado Livre.';
-  if (result.skipped) return `Mercado Livre: ${result.skipped}.`;
+  const { name, in: inName } = marketplaceNames[m];
+  if (!result) return `Nada novo ${inName}.`;
+  if (result.skipped) return `${name}: ${result.skipped}.`;
   if (result.status === 'pending')
     return 'O pedido ainda está pendente: confirme-o para enviar ao fornecedor.';
   const n = result.attached?.length ?? 0;
-  if (n === 0)
-    return 'Nenhum documento novo. A etiqueta sai quando o envio fica pronto e a nota quando é autorizada no Mercado Livre.';
+  if (n === 0) {
+    if (result.waiting) return `Nenhum documento novo: ${result.waiting}.`;
+    return m === 'mercadolivre'
+      ? 'Nenhum documento novo. A etiqueta sai quando o envio fica pronto e a nota quando é autorizada no Mercado Livre.'
+      : `Nenhum documento novo. A etiqueta sai quando o envio é organizado ${inName}.`;
+  }
   return `${n} documento${n > 1 ? 's' : ''} anexado${n > 1 ? 's' : ''}.`;
 }
 
-const mlErrors: Record<string, string> = {
-  not_configured: 'Integração com o Mercado Livre não configurada na plataforma.',
-  not_mercadolivre: 'Este pedido não veio do Mercado Livre.',
-  rate_limited: 'Muitas buscas seguidas. Aguarde alguns minutos.',
-  forbidden: 'Sem permissão para este pedido.',
-  provider_unavailable: 'O Mercado Livre não respondeu. Tente de novo em instantes.',
-};
-
-export const mlDocumentsErrorMessage = (code: string | null) =>
-  (code && mlErrors[code]) || 'Não foi possível buscar no Mercado Livre. Tente de novo.';
+export function marketplaceDocumentsErrorMessage(
+  code: string | null,
+  m: DocumentsMarketplace = 'mercadolivre',
+): string {
+  const { name, in: inName, from } = marketplaceNames[m];
+  const article = m === 'mercadolivre' ? 'o' : 'a';
+  const errors: Record<string, string> = {
+    not_configured: `Integração com ${article} ${name} não configurada na plataforma.`,
+    not_mercadolivre: `Este pedido não veio ${from}.`,
+    not_marketplace: `Este pedido não veio ${from}.`,
+    rate_limited: 'Muitas buscas seguidas. Aguarde alguns minutos.',
+    forbidden: 'Sem permissão para este pedido.',
+    provider_unavailable: `${article.toUpperCase()} ${name} não respondeu. Tente de novo em instantes.`,
+  };
+  return (code && errors[code]) || `Não foi possível buscar ${inName}. Tente de novo.`;
+}

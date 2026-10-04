@@ -435,3 +435,8 @@ verify_jwt = false
 # chamam o banco com o token de quem pediu.
 [functions.billing]
 verify_jwt = false
+
+# shopee: retorno da autorização e push vêm da Shopee (sem JWT; o push é
+# assinado com a partner key); /connect e /documents conferem o JWT pelas RPCs.
+[functions.shopee]
+verify_jwt = false

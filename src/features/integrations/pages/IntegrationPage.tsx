@@ -29,8 +29,8 @@ import {
   type IntegrationEvent,
 } from '../api';
 import { ConnectionStatusBadge } from '../components/ConnectionStatusBadge';
-import { MercadoLivreConnect } from '../components/MercadoLivreConnect';
-import { mercadoLivreReturnMessages } from '../mercadolivre';
+import { MarketplaceConnect } from '../components/MarketplaceConnect';
+import { returnMessageFromParams } from '../marketplaces';
 import { linkFormSchema, providerLabels, type LinkFormValues } from '../schemas';
 
 const when = (iso: string) => new Date(iso).toLocaleString('pt-BR');
@@ -278,12 +278,15 @@ function Activity({ connection, canEdit }: { connection: Connection; canEdit: bo
 export function IntegrationPage() {
   const { connectionId = '' } = useParams();
   const [params] = useSearchParams();
-  const mlParam = params.get('ml') ?? '';
   const { active } = useOrganization();
   const orgId = active!.organization.id;
   const canEdit = orgPermissions.manageIntegrations(active!.role);
   const connection = useConnection(orgId, connectionId);
   const c = connection.data;
+  const oauthReturn =
+    c && (c.provider === 'mercadolivre' || c.provider === 'shopee')
+      ? returnMessageFromParams(params, c.provider)
+      : null;
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -320,11 +323,7 @@ export function IntegrationPage() {
 
           <Status connection={c} />
 
-          {c.provider === 'mercadolivre' && mercadoLivreReturnMessages[mlParam] && (
-            <Alert tone={mercadoLivreReturnMessages[mlParam].tone}>
-              {mercadoLivreReturnMessages[mlParam].text}
-            </Alert>
-          )}
+          {oauthReturn && <Alert tone={oauthReturn.tone}>{oauthReturn.text}</Alert>}
 
           {c.provider === 'mercadolivre' && (
             <Section
@@ -350,13 +349,54 @@ export function IntegrationPage() {
                   </li>
                   <li>
                     Estoque: use o mesmo SKU no campo "SKU" (SELLER_SKU) do anúncio no Mercado Livre
-                    e vincule abaixo.
+                    e vincule abaixo. Anúncios publicados pela TheSigns já saem vinculados.
                   </li>
-                  <li>Publicar anúncio no Mercado Livre pela TheSigns ainda não é suportado.</li>
                 </ul>
                 {canEdit && c.status !== 'disconnected' && <AutoForwardToggle connection={c} />}
                 {canEdit && c.status !== 'disconnected' && (
-                  <MercadoLivreConnect
+                  <MarketplaceConnect
+                    provider="mercadolivre"
+                    orgId={active!.organization.id}
+                    defaultName={c.name}
+                    label="Reconectar"
+                  />
+                )}
+              </div>
+            </Section>
+          )}
+
+          {c.provider === 'shopee' && (
+            <Section
+              title="Shopee"
+              description="Loja conectada por autorização. Nada para configurar no painel da Shopee."
+            >
+              <div className="space-y-4 text-sm">
+                <ul className="text-muted list-disc space-y-1 pl-5">
+                  <li>
+                    Pedidos pagos entram pelas notificações da Shopee
+                    {c.auto_forward
+                      ? ' e vão direto ao fornecedor (confirmados automaticamente).'
+                      : ' como pendentes, para você confirmar.'}
+                  </li>
+                  <li>
+                    {c.auto_forward
+                      ? 'O envio é organizado na Shopee por postagem e a etiqueta é anexada ao envio do fornecedor. Se a Shopee pedir coleta ou dados extras, organize o envio lá; a etiqueta chega depois.'
+                      : 'Depois de organizar o envio na Shopee, a etiqueta é anexada ao envio do fornecedor.'}
+                  </li>
+                  <li>
+                    Nota fiscal: emita no seu sistema e informe na Shopee; anexe no pedido para o
+                    fornecedor.
+                  </li>
+                  <li>Pedidos enviados pelo estoque da Shopee (Full) não entram.</li>
+                  <li>
+                    Estoque: use o mesmo SKU do anúncio (ou da variação) na Shopee e vincule abaixo.
+                    Variações são reconhecidas a partir do primeiro pedido.
+                  </li>
+                </ul>
+                {canEdit && c.status !== 'disconnected' && <AutoForwardToggle connection={c} />}
+                {canEdit && c.status !== 'disconnected' && (
+                  <MarketplaceConnect
+                    provider="shopee"
                     orgId={active!.organization.id}
                     defaultName={c.name}
                     label="Reconectar"

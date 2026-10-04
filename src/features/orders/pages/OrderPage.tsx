@@ -7,7 +7,8 @@ import { PageLoader } from '@/components/ui/PageLoader';
 import { Section } from '@/components/ui/Section';
 import { CheckoutPaymentSection } from '@/features/checkout/components/CheckoutPaymentSection';
 import { financeErrorMessage, usePaySupplierOrder } from '@/features/finance/api';
-import { useFetchMlDocuments } from '@/features/labels/api';
+import { useFetchMarketplaceDocuments, useOrderMarketplace } from '@/features/labels/api';
+import { documentsButtonLabel, type DocumentsMarketplace } from '@/features/labels/labels';
 import { LabelsSection } from '@/features/labels/components/LabelsSection';
 import { useMySupplierReviews } from '@/features/reviews/api';
 import { SupplierReviewForm } from '@/features/reviews/components/SupplierReviewForm';
@@ -28,9 +29,21 @@ import { inTransit } from '../schemas';
 
 const when = (iso: string | null) => (iso ? new Date(iso).toLocaleString('pt-BR') : null);
 
-/** Relê o pedido no Mercado Livre e anexa etiqueta e nota que já estiverem prontas. */
-function MlDocumentsButton({ orderId }: { orderId: string }) {
-  const fetchDocs = useFetchMlDocuments(orderId);
+/** Relê o pedido no marketplace e anexa os documentos que já estiverem prontos. */
+function MarketplaceDocumentsButton({ orderId }: { orderId: string }) {
+  const marketplace = useOrderMarketplace(orderId, true);
+  if (!marketplace.data) return null;
+  return <DocumentsButton orderId={orderId} marketplace={marketplace.data} />;
+}
+
+function DocumentsButton({
+  orderId,
+  marketplace,
+}: {
+  orderId: string;
+  marketplace: DocumentsMarketplace;
+}) {
+  const fetchDocs = useFetchMarketplaceDocuments(orderId, marketplace);
   return (
     <div className="space-y-2">
       {fetchDocs.isError && (
@@ -39,7 +52,7 @@ function MlDocumentsButton({ orderId }: { orderId: string }) {
       {fetchDocs.isSuccess && <Alert tone="info">{fetchDocs.data}</Alert>}
       <Button variant="secondary" loading={fetchDocs.isPending} onClick={() => fetchDocs.mutate()}>
         <RefreshCw className="size-4" aria-hidden />
-        Buscar etiqueta e nota no Mercado Livre
+        {documentsButtonLabel(marketplace)}
       </Button>
     </div>
   );
@@ -250,7 +263,9 @@ export function OrderPage() {
               }
             >
               <div className="space-y-6">
-                {o.channel === 'marketplace' && canEdit && <MlDocumentsButton orderId={o.id} />}
+                {o.channel === 'marketplace' && canEdit && (
+                  <MarketplaceDocumentsButton orderId={o.id} />
+                )}
                 {o.supplier_orders.map((s) => (
                   <div key={s.id} className="space-y-2">
                     <p className="text-sm font-medium">Fornecimento #{s.number}</p>

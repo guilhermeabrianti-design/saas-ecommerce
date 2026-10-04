@@ -5,14 +5,17 @@ import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { TextField } from '@/components/ui/TextField';
 import { getSupabase } from '@/lib/supabase';
-import { connectErrorMessage } from '../mercadolivre';
+import { connectErrorMessage, isAuthorizationUrl, type OAuthProvider } from '../marketplaces';
+import { providerLabels } from '../schemas';
 
-/** Começa o OAuth e leva a pessoa para autorizar no Mercado Livre. */
-export function MercadoLivreConnect({
+/** Começa a autorização e leva a pessoa para autorizar no próprio marketplace. */
+export function MarketplaceConnect({
+  provider,
   orgId,
-  defaultName = 'Mercado Livre',
-  label = 'Conectar Mercado Livre',
+  defaultName = providerLabels[provider],
+  label = `Conectar ${providerLabels[provider]}`,
 }: {
+  provider: OAuthProvider;
   orgId: string;
   defaultName?: string;
   label?: string;
@@ -20,7 +23,7 @@ export function MercadoLivreConnect({
   const [name, setName] = useState(defaultName);
   const connect = useMutation({
     mutationFn: async () => {
-      const { data, error } = await getSupabase().functions.invoke('mercadolivre/connect', {
+      const { data, error } = await getSupabase().functions.invoke(`${provider}/connect`, {
         body: { organization_id: orgId, name: name.trim() },
       });
       if (error) {
@@ -30,11 +33,11 @@ export function MercadoLivreConnect({
             ((await error.context.json().catch(() => null)) as { error?: string } | null)?.error ??
             null;
         }
-        throw { message: connectErrorMessage(code) };
+        throw { message: connectErrorMessage(code, provider) };
       }
-      const url = (data as { url?: string }).url;
-      if (!url?.startsWith('https://auth.mercadolivre.com.br/'))
-        throw { message: connectErrorMessage(null) };
+      const url = (data as { url?: string }).url ?? '';
+      if (!isAuthorizationUrl(provider, url))
+        throw { message: connectErrorMessage(null, provider) };
       window.location.assign(url);
     },
   });
@@ -63,8 +66,9 @@ export function MercadoLivreConnect({
         </Button>
       </div>
       <p className="text-muted text-xs">
-        Você autoriza no próprio Mercado Livre; a TheSigns recebe um acesso que pode ser revogado lá
-        a qualquer momento.
+        Você autoriza {provider === 'mercadolivre' ? 'no próprio' : 'na própria'}{' '}
+        {providerLabels[provider]}; a TheSigns recebe um acesso que pode ser revogado lá a qualquer
+        momento.
       </p>
     </form>
   );

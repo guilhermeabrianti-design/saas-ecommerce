@@ -12,7 +12,7 @@
  *
  * Agendamento (pg_cron + pg_net, a cada minuto) — ver DATABASE.md.
  *
- * Canais: Mercado Livre. Shopee e TikTok Shop entram nas próximas fases.
+ * Canais: Mercado Livre e Shopee (Fase 38: referência item/variação guardada no vínculo).
  *
  * ATENÇÃO: roda em Deno e não foi executada nos testes do projeto; as chamadas
  * à API não foram exercitadas contra contas reais.
@@ -22,6 +22,8 @@ import { timingSafeEqualText } from '../_shared/integrations/crypto.ts';
 import { StockPushError } from '../_shared/integrations/stock.ts';
 import { pushMercadoLivreStock } from '../_shared/integrations/mercadolivre.ts';
 import { mlAccessToken } from '../_shared/integrations/mltoken.ts';
+import { pushShopeeStock, shopeeClient } from '../_shared/integrations/shopee.ts';
+import { shopeeAccessToken, shopeeAppFromEnv } from '../_shared/integrations/shopeetoken.ts';
 
 const BATCH = 5;
 const DEADLINE_MS = 90_000;
@@ -33,6 +35,8 @@ interface Claimed {
   external_account_id: string;
   external_id: string;
   available: number;
+  link_id: string;
+  external_ref: string | null;
 }
 
 const json = (status: number, body: Record<string, unknown>) =>
@@ -58,6 +62,7 @@ Deno.serve(async (req) => {
 
   // Mercado Livre (Fase 31): token OAuth renovado quando preciso, um por conexão.
   const mlTokens = new Map<string, Promise<string>>();
+  const shopeeTokens = new Map<string, Promise<string>>();
 
   const push = async (row: Claimed): Promise<void> => {
     if (row.provider === 'mercadolivre') {
@@ -72,6 +77,32 @@ Deno.serve(async (req) => {
         sku: row.external_id,
         available: row.available,
       });
+      return;
+    }
+    if (row.provider === 'shopee') {
+      const app = shopeeAppFromEnv();
+      if (!app) throw new StockPushError('Shopee não configurada');
+      let token = shopeeTokens.get(row.connection_id);
+      if (!token) {
+        token = shopeeAccessToken(supabase, fetch, row.connection_id, row.external_account_id);
+        shopeeTokens.set(row.connection_id, token);
+      }
+      const api = shopeeClient(fetch, app, {
+        accessToken: await token,
+        shopId: row.external_account_id,
+      });
+      const ref = await pushShopeeStock(api, {
+        sku: row.external_id,
+        available: row.available,
+        ref: row.external_ref,
+      });
+      if (ref !== row.external_ref) {
+        const { error } = await supabase.rpc('remember_listing_refs', {
+          p_connection: row.connection_id,
+          p_refs: [{ sku: row.external_id, ref }],
+        });
+        if (error) console.error('stock-sync: falha ao guardar referência', error.message);
+      }
       return;
     }
     throw new StockPushError('marketplace sem suporte a envio de estoque');

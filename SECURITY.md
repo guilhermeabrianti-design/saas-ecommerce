@@ -228,6 +228,18 @@ Documento vivo — cada fase acrescenta os controles que implementa. Status atua
 - Fotos vão ao Mercado Livre por URL assinada de 1 hora (o bucket continua privado). Link do anúncio
   gravado só se for `https://`. Chamadas de saída só para a API do Mercado Livre, sem redirecionamento.
 
+## Implementado (Fase 38)
+
+- Shopee: push aceito só com a assinatura `HMAC-SHA256(partner_key, url|corpo)` (comparação em
+  tempo constante), para uma loja conectada e ativa; o pedido é sempre relido na API com o token
+  da loja. Tokens (acesso de 4 h, renovação de 30 dias) cifrados como os do Mercado Livre, com a
+  mesma renovação versionada. A partner key nunca sai das Edge Functions.
+- O `state` da autorização vai no endereço de volta (a Shopee não tem parâmetro próprio) e vale
+  uma vez em 10 minutos, como no Mercado Livre. O navegador só segue para `partner.shopeemobile.com`
+  (ou o sandbox).
+- Etiqueta baixada só da API da Shopee, conferida como PDF de até 5 MB, gravada na pasta do envio.
+  Chamadas de saída só para o host da Shopee, sem redirecionamento.
+
 ## Implementado (Fase 41)
 
 - Pontos só nascem de gatilhos no banco sobre eventos reais; o navegador não lança nem altera nada.

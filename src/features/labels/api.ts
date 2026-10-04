@@ -6,9 +6,10 @@ import {
   fileType,
   labelPath,
   labelSchema,
-  mlDocumentsErrorMessage,
-  mlDocumentsMessage,
+  marketplaceDocumentsErrorMessage,
+  marketplaceDocumentsMessage,
   type DocumentKind,
+  type DocumentsMarketplace,
   type Shipment,
 } from './labels';
 
@@ -83,12 +84,26 @@ export function useVoidLabel(s: Shipment) {
   });
 }
 
-/** Relê o pedido no Mercado Livre e anexa etiqueta e nota disponíveis. Devolve o resumo. */
-export function useFetchMlDocuments(orderId: string) {
+/** Marketplace de onde veio o pedido (null: manual, checkout ou marketplace sem documentos). */
+export function useOrderMarketplace(orderId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ['order-marketplace', orderId],
+    enabled,
+    staleTime: Infinity,
+    queryFn: async (): Promise<DocumentsMarketplace | null> => {
+      const { data, error } = await getSupabase().rpc('order_marketplace', { p_order: orderId });
+      if (error) throw error;
+      return data === 'mercadolivre' || data === 'shopee' ? data : null;
+    },
+  });
+}
+
+/** Relê o pedido no marketplace e anexa os documentos disponíveis. Devolve o resumo. */
+export function useFetchMarketplaceDocuments(orderId: string, marketplace: DocumentsMarketplace) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async () => {
-      const { data, error } = await getSupabase().functions.invoke('mercadolivre/documents', {
+      const { data, error } = await getSupabase().functions.invoke(`${marketplace}/documents`, {
         body: { order_id: orderId },
       });
       if (error) {
@@ -98,9 +113,12 @@ export function useFetchMlDocuments(orderId: string) {
             ((await error.context.json().catch(() => null)) as { error?: string } | null)?.error ??
             null;
         }
-        throw { message: mlDocumentsErrorMessage(code) };
+        throw { message: marketplaceDocumentsErrorMessage(code, marketplace) };
       }
-      return mlDocumentsMessage(data as Parameters<typeof mlDocumentsMessage>[0]);
+      return marketplaceDocumentsMessage(
+        data as Parameters<typeof marketplaceDocumentsMessage>[0],
+        marketplace,
+      );
     },
     onSuccess: () => queryClient.invalidateQueries(),
   });
