@@ -85,11 +85,9 @@ export function IntegrationsPage() {
 
       <Section
         title="TikTok Shop"
-        description="Em preparação: depende da aprovação do app na TikTok Shop."
+        description="Pedidos pagos entram sozinhos, vão ao fornecedor com a etiqueta da TikTok Shop e o estoque sincroniza pelos SKUs."
       >
-        <p className="text-muted text-sm">
-          Assim que liberada, a conexão será feita por autorização, como nos outros marketplaces.
-        </p>
+        <MarketplaceConnect provider="tiktok" orgId={orgId} />
       </Section>
     </div>
   );

@@ -40,7 +40,7 @@ export const labelSchema = z.object({
   voided_at: z.string().nullable(),
   created_at: z.string(),
   kind: z.enum(documentKinds),
-  source: z.enum(['upload', 'mercadolivre', 'shopee']),
+  source: z.enum(['upload', 'mercadolivre', 'shopee', 'tiktok']),
 });
 
 export type ShippingLabel = z.infer<typeof labelSchema>;
@@ -109,11 +109,12 @@ export function labelErrorMessage(error: unknown): string {
 }
 
 /** Marketplaces que anexam documentos ao envio. */
-export type DocumentsMarketplace = 'mercadolivre' | 'shopee';
+export type DocumentsMarketplace = 'mercadolivre' | 'shopee' | 'tiktok';
 
 const marketplaceNames: Record<DocumentsMarketplace, { name: string; in: string; from: string }> = {
   mercadolivre: { name: 'Mercado Livre', in: 'no Mercado Livre', from: 'do Mercado Livre' },
   shopee: { name: 'Shopee', in: 'na Shopee', from: 'da Shopee' },
+  tiktok: { name: 'TikTok Shop', in: 'na TikTok Shop', from: 'da TikTok Shop' },
 };
 
 export const documentsButtonLabel = (m: DocumentsMarketplace) =>

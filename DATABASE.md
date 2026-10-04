@@ -568,6 +568,14 @@ receita da TheSigns**. Nenhuma taxa fica no código; o cálculo é feito só no 
 - Botão do pedido: `order_marketplace` (membros do vendedor: de onde veio o pedido) e
   `marketplace_documents_request` (limite de 20/10 min; devolve conexão, pedido e conta).
 
+### TikTok Shop (Fase 39)
+
+- `oauth_begin` aceita `tiktok` (só vendedor). A conexão guarda a loja (id) e, junto das
+  credenciais cifradas, o `shop_cipher` e a região em `integration_credentials.config`.
+- `shipping_labels.source` aceita `tiktok` (etiqueta por pacote: `external_ref` = id do pacote);
+  `attach_marketplace_document` com transportadora e avisos da TikTok Shop.
+- Estoque: `listing_links.external_ref` = `produto:sku:depósito`.
+
 ### Gamificação (Fase 41)
 
 - `gamification_rules` (evento, rótulo, tipo de conta, pontos, limite diário, ativa),

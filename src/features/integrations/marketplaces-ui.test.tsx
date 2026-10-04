@@ -32,6 +32,11 @@ describe('Conexão de marketplace na tela', () => {
     expect(connectErrorMessage('not_configured', 'mercadolivre')).toMatch(/app do Mercado Livre/);
     expect(connectErrorMessage('not_configured', 'shopee')).toMatch(/app da Shopee/);
     expect(connectErrorMessage(null, 'shopee')).toMatch(/Tente de novo/);
+    expect(connectErrorMessage('not_configured', 'tiktok')).toMatch(/app da TikTok Shop/);
+    expect(returnMessage('tiktok', 'sem_loja')!.text).toMatch(/Nenhuma loja da TikTok Shop/);
+    expect(returnMessageFromParams(new URLSearchParams('tiktok=conectado'))!.text).toMatch(
+      /TikTok Shop conectada/,
+    );
   });
 
   it('só aceita a página de autorização do próprio marketplace', () => {
@@ -52,6 +57,12 @@ describe('Conexão de marketplace na tela', () => {
     );
     expect(isAuthorizationUrl('shopee', 'http://partner.shopeemobile.com/')).toBe(false);
     expect(isAuthorizationUrl('mercadolivre', 'https://partner.shopeemobile.com/')).toBe(false);
+    expect(
+      isAuthorizationUrl('tiktok', 'https://services.tiktokshop.com/open/authorize?service_id=1'),
+    ).toBe(true);
+    expect(isAuthorizationUrl('tiktok', 'https://services.tiktokshop.com.evil.example/')).toBe(
+      false,
+    );
   });
 
   it('pede a URL e leva para a autorização do Mercado Livre', async () => {

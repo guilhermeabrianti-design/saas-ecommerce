@@ -240,6 +240,15 @@ Documento vivo — cada fase acrescenta os controles que implementa. Status atua
 - Etiqueta baixada só da API da Shopee, conferida como PDF de até 5 MB, gravada na pasta do envio.
   Chamadas de saída só para o host da Shopee, sem redirecionamento.
 
+## Implementado (Fase 39)
+
+- TikTok Shop: webhook aceito só com a assinatura `HMAC-SHA256(app_secret, app_key + corpo)`
+  (tempo constante), para uma loja conectada e ativa; pedido sempre relido na API. Chamadas da loja
+  assinadas com a app secret; o token vai em cabeçalho, nunca na URL. Tokens cifrados com a mesma
+  renovação versionada; `shop_cipher` guardado junto (não é segredo, mas não sai do servidor).
+- Etiqueta baixada só de hosts da TikTok Shop (`https`, sem redirecionamento), conferida como PDF
+  de até 5 MB. O navegador só segue para `services.tiktokshop.com` ao autorizar.
+
 ## Implementado (Fase 41)
 
 - Pontos só nascem de gatilhos no banco sobre eventos reais; o navegador não lança nem altera nada.

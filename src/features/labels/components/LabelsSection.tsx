@@ -152,6 +152,7 @@ export function LabelsSection({
                   {documentKindLabels[l.kind]}
                   {l.source === 'mercadolivre' && ' · Mercado Livre'}
                   {l.source === 'shopee' && ' · Shopee'}
+                  {l.source === 'tiktok' && ' · TikTok Shop'}
                   {' · '}
                   {when(l.created_at)}
                   {l.carrier && ` · ${l.carrier}`}

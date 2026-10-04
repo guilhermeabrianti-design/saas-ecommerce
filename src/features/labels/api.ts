@@ -93,7 +93,7 @@ export function useOrderMarketplace(orderId: string, enabled: boolean) {
     queryFn: async (): Promise<DocumentsMarketplace | null> => {
       const { data, error } = await getSupabase().rpc('order_marketplace', { p_order: orderId });
       if (error) throw error;
-      return data === 'mercadolivre' || data === 'shopee' ? data : null;
+      return data === 'mercadolivre' || data === 'shopee' || data === 'tiktok' ? data : null;
     },
   });
 }

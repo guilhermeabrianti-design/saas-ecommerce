@@ -6,6 +6,7 @@ import {
   labelErrorMessage,
   marketplaceDocumentsErrorMessage,
   marketplaceDocumentsMessage,
+  documentsButtonLabel,
   labelPath,
   latestTracking,
   shipmentFolder,
@@ -61,6 +62,25 @@ describe('regras', () => {
     expect(labelPath({ supplierOrderId: so, orderId: null }, 'text/xml', 'x')).toBe(
       `so-${so}/x.xml`,
     );
+  });
+
+  it('resumo da busca na Shopee e na TikTok Shop', () => {
+    expect(marketplaceDocumentsMessage({ status: 'confirmed', attached: [] }, 'shopee')).toMatch(
+      /organizado na Shopee/,
+    );
+    expect(
+      marketplaceDocumentsMessage(
+        { status: 'confirmed', attached: [], waiting: 'etiqueta ainda não liberada' },
+        'tiktok',
+      ),
+    ).toBe('Nenhum documento novo: etiqueta ainda não liberada.');
+    expect(marketplaceDocumentsErrorMessage('not_marketplace', 'tiktok')).toBe(
+      'Este pedido não veio da TikTok Shop.',
+    );
+    expect(marketplaceDocumentsErrorMessage('provider_unavailable', 'shopee')).toMatch(
+      /^A Shopee não respondeu/,
+    );
+    expect(documentsButtonLabel('tiktok')).toBe('Buscar etiqueta na TikTok Shop');
   });
 
   it('resumo da busca no Mercado Livre', () => {

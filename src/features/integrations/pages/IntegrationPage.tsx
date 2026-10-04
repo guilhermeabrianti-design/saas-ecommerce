@@ -283,10 +283,7 @@ export function IntegrationPage() {
   const canEdit = orgPermissions.manageIntegrations(active!.role);
   const connection = useConnection(orgId, connectionId);
   const c = connection.data;
-  const oauthReturn =
-    c && (c.provider === 'mercadolivre' || c.provider === 'shopee')
-      ? returnMessageFromParams(params, c.provider)
-      : null;
+  const oauthReturn = c ? returnMessageFromParams(params, c.provider) : null;
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -397,6 +394,47 @@ export function IntegrationPage() {
                 {canEdit && c.status !== 'disconnected' && (
                   <MarketplaceConnect
                     provider="shopee"
+                    orgId={active!.organization.id}
+                    defaultName={c.name}
+                    label="Reconectar"
+                  />
+                )}
+              </div>
+            </Section>
+          )}
+
+          {c.provider === 'tiktok' && (
+            <Section
+              title="TikTok Shop"
+              description="Loja conectada por autorização. Nada para configurar no painel da TikTok Shop."
+            >
+              <div className="space-y-4 text-sm">
+                <ul className="text-muted list-disc space-y-1 pl-5">
+                  <li>
+                    Pedidos entram quando ficam "aguardando envio" na TikTok Shop (depois do período
+                    de espera)
+                    {c.auto_forward
+                      ? ' e vão direto ao fornecedor (confirmados automaticamente).'
+                      : ' como pendentes, para você confirmar.'}
+                  </li>
+                  <li>
+                    {c.auto_forward
+                      ? 'O envio de cada pacote é organizado por postagem e a etiqueta é anexada ao envio do fornecedor. Se não der, organize o envio na TikTok Shop; a etiqueta chega depois.'
+                      : 'Depois de organizar o envio na TikTok Shop, a etiqueta é anexada ao envio do fornecedor.'}
+                  </li>
+                  <li>
+                    Logística própria e pedidos enviados pelo estoque da TikTok Shop não têm
+                    etiqueta aqui.
+                  </li>
+                  <li>
+                    Estoque: use o mesmo SKU do vendedor na TikTok Shop e vincule abaixo. O saldo
+                    vai para o depósito do SKU.
+                  </li>
+                </ul>
+                {canEdit && c.status !== 'disconnected' && <AutoForwardToggle connection={c} />}
+                {canEdit && c.status !== 'disconnected' && (
+                  <MarketplaceConnect
+                    provider="tiktok"
                     orgId={active!.organization.id}
                     defaultName={c.name}
                     label="Reconectar"

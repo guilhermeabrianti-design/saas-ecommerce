@@ -440,3 +440,8 @@ verify_jwt = false
 # assinado com a partner key); /connect e /documents conferem o JWT pelas RPCs.
 [functions.shopee]
 verify_jwt = false
+
+# tiktok: retorno da autorização e webhook vêm da TikTok Shop (sem JWT; o webhook
+# é assinado com a app secret); /connect e /documents conferem o JWT pelas RPCs.
+[functions.tiktok]
+verify_jwt = false

@@ -12,7 +12,8 @@
  *
  * Agendamento (pg_cron + pg_net, a cada minuto) — ver DATABASE.md.
  *
- * Canais: Mercado Livre e Shopee (Fase 38: referência item/variação guardada no vínculo).
+ * Canais: Mercado Livre, Shopee (Fase 38) e TikTok Shop (Fase 39). Na Shopee e na TikTok
+ * Shop a referência do item (variação, depósito) fica guardada no vínculo.
  *
  * ATENÇÃO: roda em Deno e não foi executada nos testes do projeto; as chamadas
  * à API não foram exercitadas contra contas reais.
@@ -24,6 +25,8 @@ import { pushMercadoLivreStock } from '../_shared/integrations/mercadolivre.ts';
 import { mlAccessToken } from '../_shared/integrations/mltoken.ts';
 import { pushShopeeStock, shopeeClient } from '../_shared/integrations/shopee.ts';
 import { shopeeAccessToken, shopeeAppFromEnv } from '../_shared/integrations/shopeetoken.ts';
+import { pushTikTokStock, type TikTokClient } from '../_shared/integrations/tiktok.ts';
+import { tiktokShopClient } from '../_shared/integrations/tiktoktoken.ts';
 
 const BATCH = 5;
 const DEADLINE_MS = 90_000;
@@ -63,6 +66,16 @@ Deno.serve(async (req) => {
   // Mercado Livre (Fase 31): token OAuth renovado quando preciso, um por conexão.
   const mlTokens = new Map<string, Promise<string>>();
   const shopeeTokens = new Map<string, Promise<string>>();
+  const tiktokClients = new Map<string, Promise<TikTokClient>>();
+
+  const remember = async (row: Claimed, ref: string) => {
+    if (ref === row.external_ref) return;
+    const { error } = await supabase.rpc('remember_listing_refs', {
+      p_connection: row.connection_id,
+      p_refs: [{ sku: row.external_id, ref }],
+    });
+    if (error) console.error('stock-sync: falha ao guardar referência', error.message);
+  };
 
   const push = async (row: Claimed): Promise<void> => {
     if (row.provider === 'mercadolivre') {
@@ -96,13 +109,21 @@ Deno.serve(async (req) => {
         available: row.available,
         ref: row.external_ref,
       });
-      if (ref !== row.external_ref) {
-        const { error } = await supabase.rpc('remember_listing_refs', {
-          p_connection: row.connection_id,
-          p_refs: [{ sku: row.external_id, ref }],
-        });
-        if (error) console.error('stock-sync: falha ao guardar referência', error.message);
+      await remember(row, ref);
+      return;
+    }
+    if (row.provider === 'tiktok') {
+      let client = tiktokClients.get(row.connection_id);
+      if (!client) {
+        client = tiktokShopClient(supabase, fetch, row.connection_id);
+        tiktokClients.set(row.connection_id, client);
       }
+      const ref = await pushTikTokStock(await client, {
+        sku: row.external_id,
+        available: row.available,
+        ref: row.external_ref,
+      });
+      await remember(row, ref);
       return;
     }
     throw new StockPushError('marketplace sem suporte a envio de estoque');

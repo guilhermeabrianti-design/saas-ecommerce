@@ -142,7 +142,7 @@ afterEach(async () => {
 });
 
 describe('conexão da Shopee', () => {
-  it('só vendedor owner/admin começa; TikTok Shop ainda não', async () => {
+  it('só vendedor owner/admin começa; canais fora do produto não', async () => {
     await expect(
       scalar(sellerMember, "select public.oauth_begin($1, 'shopee', 'Loja', $2)", [
         sellerOrg,
@@ -156,7 +156,7 @@ describe('conexão da Shopee', () => {
       ]),
     ).rejects.toThrow(/sellers_only/);
     await expect(
-      scalar(seller, "select public.oauth_begin($1, 'tiktok', 'Loja', $2)", [
+      scalar(seller, "select public.oauth_begin($1, 'shopify', 'Loja', $2)", [
         sellerOrg,
         'b'.repeat(43),
       ]),

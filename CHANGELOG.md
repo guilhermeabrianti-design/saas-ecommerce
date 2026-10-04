@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.45.0] — Fase 39: TikTok Shop
+
+### Adicionado
+
+- **Conectar TikTok Shop** em Integrações: o vendedor autoriza na própria TikTok Shop e volta
+  conectado (nova Edge Function `tiktok`). A loja do Brasil é escolhida quando a autorização
+  traz mais de uma; uma loja fica ligada a uma empresa por vez.
+- **Pedidos entram sozinhos** pelo webhook assinado da TikTok Shop quando ficam "aguardando
+  envio" (depois do período de espera). Não pagos, em espera, cancelados, já enviados e enviados
+  pelo estoque da TikTok ficam de fora. Unidades do mesmo SKU viram uma linha; brindes não entram.
+- **Envio automático ao fornecedor** (mesma opção da conexão): com ele ligado, cada pacote é
+  organizado por postagem e a **etiqueta da TikTok Shop** vai para o envio do fornecedor, com
+  rastreio e aviso. Botão no pedido: **Buscar etiqueta na TikTok Shop**.
+- **Estoque na TikTok Shop** pela fila de estoque: acha produto, SKU e depósito pelo SKU do
+  vendedor e guarda a referência no vínculo.
+- **Testes**: 2 de banco, 21 do módulo da TikTok Shop e 1 de tela (mais casos nos de conexão).
+
+### Limitações conhecidas
+
+- **Não exercitado contra contas reais** (respostas simuladas). Precisa de `TIKTOK_APP_KEY`,
+  `TIKTOK_APP_SECRET`, `TIKTOK_SERVICE_ID`, `CREDENTIALS_ENCRYPTION_KEY` e `APP_URL`, do
+  endereço de volta e do webhook de pedidos configurados no Partner Center.
+- Logística própria do vendedor não tem etiqueta da TikTok Shop. Publicar produto na TikTok Shop
+  fica para depois.
+
 ## [0.44.0] — Fase 38: Shopee
 
 ### Adicionado

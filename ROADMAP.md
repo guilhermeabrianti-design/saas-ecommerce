@@ -31,22 +31,22 @@ integração fictícia** ("Não configurado" / "Não suportado pela API atual").
 | Ferramentas com IA                                      | Reaproveita a Edge Function `ai` (cota por organização, saída revisável, nada salvo sem revisão).                                                                                                                                                                        |
 | Dados de exemplo                                        | Seed só em desenvolvimento, marcado como tal. Depoimentos/produtos da landing não podem ser inventados.                                                                                                                                                                  |
 
-## Entregue (v0.1 – v0.44)
+## Entregue (v0.1 – v0.45)
 
 1 Setup · 2 Auth/sessão/RBAC · 3 Organizações + RLS · 4 Produtos · 5 Variações/imagens · 6 Estoque
 (ledger) · 7 Catálogo de fornecedores · 8 Pedidos + roteamento ao fornecedor · 9 Financeiro (ledger)
 · 10 Integrações (núcleo, webhooks Shopify/Woo) · 11 Analytics · 12 Admin da plataforma · 13 IA
 (descrição) · 14 Credenciais criptografadas + envio de estoque · **15 Taxas de marketplace, comissão
-do vendedor, categorias e calculadora da divisão** · **16 Moderação de fornecedores e anúncios** · **17 Academia (YouTube)** · **18 Onboarding e painel do vendedor** · **19 Central de Vendas e campanhas para lives** · **20 Ferramentas (preço-alvo, simulador de lucro, textos com IA)** · **21 Checkout próprio + Mercado Pago** · **22 Carteira e saques** · **23 Afiliados e indicação (links, vitrine, QR Code, atribuição e indique e ganhe)** · **24 Notificações em tempo real e alertas** · **25 Landing page** · **26 Rate limiting, endurecimento e MFA da equipe** · **27 Suporte e denúncias** · **28 Avaliações e reputação** · **29 Gerenciador de anúncios e publicação (Shopify/WooCommerce)** · **30 Etiquetas de envio (upload e vínculo)** · **31 Mercado Livre (OAuth, pedidos e estoque)** · **32 Envio automático ao fornecedor com etiqueta e nota fiscal do Mercado Livre** · **33 Ambientes separados (vendedor, fornecedor e equipe) e só Mercado Livre, Shopee e TikTok Shop** · **34 Configuração por canal no cadastro do produto** · **35 Catálogo aberto (sem aprovação), lojas de fornecedores, exportar com ferramentas no produto** · **36 Estoque por planilha e integração com Bling/Tiny** · **37 Publicar no Mercado Livre (categoria, atributos, fotos, variações, pausar/reativar)** · **41 Gamificação (pontos por eventos reais, níveis, conquistas, ranking)** · **42 Planos e assinaturas (Mercado Pago), limites por plano e destaque no catálogo** · **43 Campanhas patrocinadas (Catálogo e Central de Vendas, pagamento único)** · **38 Shopee (pedidos, envio ao fornecedor com etiqueta, estoque)**.
+do vendedor, categorias e calculadora da divisão** · **16 Moderação de fornecedores e anúncios** · **17 Academia (YouTube)** · **18 Onboarding e painel do vendedor** · **19 Central de Vendas e campanhas para lives** · **20 Ferramentas (preço-alvo, simulador de lucro, textos com IA)** · **21 Checkout próprio + Mercado Pago** · **22 Carteira e saques** · **23 Afiliados e indicação (links, vitrine, QR Code, atribuição e indique e ganhe)** · **24 Notificações em tempo real e alertas** · **25 Landing page** · **26 Rate limiting, endurecimento e MFA da equipe** · **27 Suporte e denúncias** · **28 Avaliações e reputação** · **29 Gerenciador de anúncios e publicação (Shopify/WooCommerce)** · **30 Etiquetas de envio (upload e vínculo)** · **31 Mercado Livre (OAuth, pedidos e estoque)** · **32 Envio automático ao fornecedor com etiqueta e nota fiscal do Mercado Livre** · **33 Ambientes separados (vendedor, fornecedor e equipe) e só Mercado Livre, Shopee e TikTok Shop** · **34 Configuração por canal no cadastro do produto** · **35 Catálogo aberto (sem aprovação), lojas de fornecedores, exportar com ferramentas no produto** · **36 Estoque por planilha e integração com Bling/Tiny** · **37 Publicar no Mercado Livre (categoria, atributos, fotos, variações, pausar/reativar)** · **41 Gamificação (pontos por eventos reais, níveis, conquistas, ranking)** · **42 Planos e assinaturas (Mercado Pago), limites por plano e destaque no catálogo** · **43 Campanhas patrocinadas (Catálogo e Central de Vendas, pagamento único)** · **38 Shopee (pedidos, envio ao fornecedor com etiqueta, estoque)** · **39 TikTok Shop (pedidos, envio ao fornecedor com etiqueta, estoque)**.
 
 ## Próximas fases
 
 Ordem pensada para fechar primeiro o **MVP da seção 26** e depois o ecossistema.
 
-| Fase | Entrega                                                                                                       | Seções |
-| ---- | ------------------------------------------------------------------------------------------------------------- | ------ |
-| 39   | **TikTok Shop** — pedidos, envio ao fornecedor com etiqueta e estoque (estrutura pronta para o app aprovado). | 11, 38 |
-| 40   | **Mentoria e Comunidade** (fora do MVP): mentores, comissão de mentor, aulas ao vivo, grupos, desafios.       | 8, 44  |
+| Fase | Entrega                                                                                                 | Seções |
+| ---- | ------------------------------------------------------------------------------------------------------- | ------ |
+| 44   | **Publicar na Shopee e na TikTok Shop** — categoria, atributos, fotos e variações, como na Fase 37.     | 11, 38 |
+| 40   | **Mentoria e Comunidade** (fora do MVP): mentores, comissão de mentor, aulas ao vivo, grupos, desafios. | 8, 44  |
 
 Cada fase segue o mesmo fechamento: migração com RLS, testes de banco e frontend, `npm run check`
 verde, revisão de segurança e entrada no [CHANGELOG.md](CHANGELOG.md).
@@ -109,3 +109,9 @@ verde, revisão de segurança e entrada no [CHANGELOG.md](CHANGELOG.md).
     (dropoff) — coleta exige escolher endereço e horário. Nota fiscal fica com o vendedor. Validar
     formato do endereço do Brasil e a busca por SKU com uma loja de teste. Publicar anúncio na
     Shopee ainda não existe.
+18. **TikTok Shop (Fase 39)**: criar o app no TikTok Shop Partner Center e cadastrar
+    `TIKTOK_APP_KEY`, `TIKTOK_APP_SECRET`, `TIKTOK_SERVICE_ID` (do link de autorização) e
+    `APP_URL`. Endereço de volta: `<SUPABASE_URL>/functions/v1/tiktok/callback`; webhook de
+    pedidos (tipo 1, mudança de status): `<SUPABASE_URL>/functions/v1/tiktok/webhook`. Pedir os
+    escopos de pedidos, logística/envio e produtos. Validar o endereço do Brasil (níveis
+    estado/cidade/bairro) e os hosts dos documentos de etiqueta com uma loja de teste.
