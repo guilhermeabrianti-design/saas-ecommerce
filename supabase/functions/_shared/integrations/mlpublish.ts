@@ -122,12 +122,15 @@ export interface MlAttributeInput {
   value_name?: string;
 }
 
-/** O que `ml_publish_begin` devolve. */
+/** O que `ml_publish_begin` / `marketplace_publish_begin` devolvem. */
 export interface PublishData {
   run_id: string;
   action: 'publish' | 'pause' | 'activate';
+  provider?: 'mercadolivre' | 'shopee' | 'tiktok';
   organization_id: string;
   connection_id: string;
+  /** Conta no marketplace (loja da Shopee, TikTok Shop). */
+  account_id?: string;
   external_id: string | null;
   config: {
     title: string;
@@ -144,6 +147,10 @@ export interface PublishData {
     description: string;
     brand: string | null;
     gtin: string | null;
+    weight_grams?: number | null;
+    length_mm?: number | null;
+    width_mm?: number | null;
+    height_mm?: number | null;
     inventory_item_id: string | null;
     available: number | null;
   };

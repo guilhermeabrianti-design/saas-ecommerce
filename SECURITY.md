@@ -249,6 +249,15 @@ Documento vivo — cada fase acrescenta os controles que implementa. Status atua
 - Etiqueta baixada só de hosts da TikTok Shop (`https`, sem redirecionamento), conferida como PDF
   de até 5 MB. O navegador só segue para `services.tiktokshop.com` ao autorizar.
 
+## Implementado (Fase 44)
+
+- Publicar na Shopee e na TikTok Shop com as mesmas travas do Mercado Livre: só owner/admin do
+  vendedor, limite de 30 execuções/10 min por usuário e marketplace, uma execução por anúncio,
+  conclusão só pelo service role e vínculos só para itens do próprio produto.
+- Consultas de categoria usam o token da loja só no servidor, depois de `marketplace_lookup_connection`
+  conferir o papel e aplicar o limite. Fotos saem do bucket privado direto para a API do
+  marketplace (sem URL pública).
+
 ## Implementado (Fase 41)
 
 - Pontos só nascem de gatilhos no banco sobre eventos reais; o navegador não lança nem altera nada.

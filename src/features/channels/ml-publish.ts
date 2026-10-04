@@ -1,7 +1,8 @@
 import { z } from 'zod';
 import type { StatusTone } from '@/components/ui/StatusDot';
+import { providerLabels, type Provider } from '@/features/integrations/schemas';
 
-/** Publicação no Mercado Livre (Fase 37): lógica da tela. */
+/** Publicação no Mercado Livre (Fase 37), na Shopee e na TikTok Shop (Fase 44): lógica da tela. */
 
 const valueSchema = z.object({ id: z.string(), name: z.string() });
 
@@ -39,7 +40,14 @@ export const savedAttributeSchema = z.object({
 });
 export type SavedAttribute = z.infer<typeof savedAttributeSchema>;
 
-export const publishStatuses = ['publishing', 'active', 'paused', 'closed', 'error'] as const;
+export const publishStatuses = [
+  'publishing',
+  'active',
+  'review',
+  'paused',
+  'closed',
+  'error',
+] as const;
 export type PublishStatus = (typeof publishStatuses)[number];
 
 /** Valor escolhido na tela: da lista (value_id) ou digitado (value_name). */
@@ -143,41 +151,80 @@ export function variantKeys(
   return [...keys];
 }
 
-export const publishStatusInfo: Record<
-  PublishStatus | 'none',
-  { label: string; tone: StatusTone }
-> = {
-  none: { label: 'Ainda não publicado', tone: 'idle' },
-  publishing: { label: 'Publicando…', tone: 'warn' },
-  active: { label: 'Ativo no Mercado Livre', tone: 'ok' },
-  paused: { label: 'Pausado no Mercado Livre', tone: 'warn' },
-  closed: { label: 'Encerrado no Mercado Livre', tone: 'idle' },
-  error: { label: 'Não publicado (erro)', tone: 'error' },
+/** "no Mercado Livre", "na Shopee", "na TikTok Shop". */
+export const inMarketplace = (provider: Provider) =>
+  `${provider === 'mercadolivre' ? 'no' : 'na'} ${providerLabels[provider]}`;
+const ofMarketplace = (provider: Provider) =>
+  `${provider === 'mercadolivre' ? 'do' : 'da'} ${providerLabels[provider]}`;
+
+const statusTones: Record<PublishStatus | 'none', StatusTone> = {
+  none: 'idle',
+  publishing: 'warn',
+  active: 'ok',
+  review: 'warn',
+  paused: 'warn',
+  closed: 'idle',
+  error: 'error',
 };
 
-const publishMessages: Record<string, string> = {
-  'products.not_found': 'Produto não encontrado ou sem permissão.',
-  'channels.sellers_only': 'Publicação é exclusiva de vendedores.',
-  'channels.save_first': 'Salve a configuração do Mercado Livre antes.',
-  'channels.disabled': 'Marque "Vender neste canal" e salve antes de publicar.',
-  'channels.invalid': 'Dados inválidos. Revise os atributos.',
-  'ml.category_required': 'Escolha a categoria do Mercado Livre e salve antes de publicar.',
-  'ml.not_connected': 'Conecte sua conta do Mercado Livre em Integrações antes de publicar.',
-  'ml.connection_inactive':
-    'A conta do Mercado Livre deste anúncio está pausada ou desconectada. Reative em Integrações.',
-  'ml.not_published': 'O anúncio ainda não foi publicado.',
-  'ml.busy': 'Já existe uma publicação em andamento. Aguarde alguns instantes.',
-  'ml.no_active_variants': 'Ative ao menos uma variação do produto.',
-  rate_limited: 'Muitas tentativas seguidas. Aguarde alguns minutos.',
-  not_configured:
-    'A integração com o Mercado Livre ainda não foi configurada pela equipe TheSigns.',
-  unauthorized: 'Sua sessão expirou. Entre de novo.',
-  forbidden: 'Sem permissão para esta ação.',
-};
+/** Rótulo e cor do estado do anúncio no marketplace. */
+export function publishStatusInfo(
+  provider: Provider,
+  status: PublishStatus | null,
+): { label: string; tone: StatusTone } {
+  const s = status ?? 'none';
+  const where = inMarketplace(provider);
+  const labels: Record<PublishStatus | 'none', string> = {
+    none: 'Ainda não publicado',
+    publishing: 'Publicando…',
+    active: `Ativo ${where}`,
+    review: `Em análise ${where}`,
+    paused: `Pausado ${where}`,
+    closed: `Encerrado ${where}`,
+    error: 'Não publicado (erro)',
+  };
+  return { label: labels[s], tone: statusTones[s] };
+}
 
-export function mlPublishErrorMessage(code: string | null, detail?: string | null): string {
+function publishMessages(provider: Provider): Record<string, string> {
+  const name = providerLabels[provider];
+  const of = ofMarketplace(provider);
+  const account = provider === 'mercadolivre' ? 'sua conta do Mercado Livre' : `sua loja ${of}`;
+  const messages: Record<string, string> = {
+    'products.not_found': 'Produto não encontrado ou sem permissão.',
+    'channels.sellers_only': 'Publicação é exclusiva de vendedores.',
+    'channels.save_first': `Salve a configuração ${of} antes.`,
+    'channels.disabled': 'Marque "Vender neste canal" e salve antes de publicar.',
+    'channels.invalid': 'Dados inválidos. Revise os atributos.',
+    'publish.category_required': `Escolha a categoria ${of} e salve antes de publicar.`,
+    'publish.not_connected': `Conecte ${account} em Integrações antes de publicar.`,
+    'publish.connection_inactive': `A conta ${of} deste anúncio está pausada ou desconectada. Reative em Integrações.`,
+    'publish.not_published': 'O anúncio ainda não foi publicado.',
+    'publish.busy': 'Já existe uma publicação em andamento. Aguarde alguns instantes.',
+    'publish.no_active_variants': 'Ative ao menos uma variação do produto.',
+    rate_limited: 'Muitas tentativas seguidas. Aguarde alguns minutos.',
+    not_configured: `A integração com ${provider === 'mercadolivre' ? 'o' : 'a'} ${name} ainda não foi configurada pela equipe TheSigns.`,
+    unauthorized: 'Sua sessão expirou. Entre de novo.',
+    forbidden: 'Sem permissão para esta ação.',
+  };
+  // Mercado Livre responde com os mesmos erros prefixados (ml.*).
+  for (const [k, v] of Object.entries(messages))
+    if (k.startsWith('publish.')) messages[`ml.${k.slice(8)}`] = v;
+  return messages;
+}
+
+export function publishErrorMessage(
+  code: string | null,
+  detail?: string | null,
+  provider: Provider = 'mercadolivre',
+): string {
   if (detail) return detail;
   return (
-    (code && publishMessages[code]) || 'Não foi possível falar com o Mercado Livre. Tente de novo.'
+    (code && publishMessages(provider)[code]) ||
+    `Não foi possível falar com ${provider === 'mercadolivre' ? 'o' : 'a'} ${providerLabels[provider]}. Tente de novo.`
   );
 }
+
+/** Compatibilidade: mensagens do Mercado Livre. */
+export const mlPublishErrorMessage = (code: string | null, detail?: string | null) =>
+  publishErrorMessage(code, detail, 'mercadolivre');

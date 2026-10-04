@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.46.0] — Fase 44: Publicar na Shopee e na TikTok Shop
+
+### Adicionado
+
+- **Publicar na Shopee e na TikTok Shop** direto do produto (Exportar para…), como no Mercado
+  Livre: sugerir categoria pelo título, atributos da categoria (obrigatórios e opcionais) e os
+  botões publicar/atualizar, pausar e reativar. As consultas usam a loja conectada.
+- **Shopee**: fotos enviadas ao espaço de mídia, peso e medidas do produto, canais de envio
+  ligados na loja (frete grátis marcado neles), variações com até 2 características (Cor,
+  Tamanho). Atualizar mexe no anúncio, no preço e no estoque das variações que já existem.
+- **TikTok Shop**: fotos enviadas à TikTok, descrição em HTML, depósito de venda padrão,
+  variações com até 3 características pelo nome. Atualizar mantém os SKUs já criados.
+- Estado **Em análise** quando o marketplace revisa o anúncio. Ao publicar, cada SKU vira vínculo
+  com a referência do item no marketplace: pedidos e estoque sincronizam sozinhos.
+- **Gamificação**: anúncio publicado na Shopee ou na TikTok Shop pontua (5 pontos, até 10 por dia).
+- **Testes**: 5 de banco, 13 dos módulos de publicação e 1 de tela.
+
+### Alterado
+
+- A publicação do Mercado Livre passou a usar as mesmas funções genéricas do banco (mesmos erros
+  `ml.*` e comportamento).
+
+### Limitações conhecidas
+
+- **Não exercitado contra contas reais** (respostas simuladas). Usa os mesmos apps e segredos das
+  Fases 38 e 39 (com os escopos de produto liberados).
+- Shopee: marca vai como "sem marca" (`brand_id` 0); variação nova em anúncio já publicado
+  precisa ser criada na Shopee. TikTok Shop: sem link público do anúncio.
+
 ## [0.45.0] — Fase 39: TikTok Shop
 
 ### Adicionado

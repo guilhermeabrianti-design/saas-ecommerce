@@ -3,6 +3,8 @@ import {
   attributesPayload,
   missingRequired,
   mlPublishErrorMessage,
+  publishErrorMessage,
+  publishStatusInfo,
   variantKeys,
   variationMapDraft,
   type MlAttribute,
@@ -83,5 +85,22 @@ describe('atributos na tela', () => {
     expect(mlPublishErrorMessage('ml.not_connected')).toMatch(/Integrações/);
     expect(mlPublishErrorMessage(null, 'Mercado Livre: limite')).toBe('Mercado Livre: limite');
     expect(mlPublishErrorMessage('???')).toMatch(/Tente de novo/);
+  });
+
+  it('Shopee e TikTok Shop: estado e erros com o nome do canal', () => {
+    expect(publishStatusInfo('shopee', 'review')).toEqual({
+      label: 'Em análise na Shopee',
+      tone: 'warn',
+    });
+    expect(publishStatusInfo('mercadolivre', 'active').label).toBe('Ativo no Mercado Livre');
+    expect(publishStatusInfo('tiktok', null).label).toBe('Ainda não publicado');
+    expect(publishErrorMessage('publish.not_connected', null, 'tiktok')).toBe(
+      'Conecte sua loja da TikTok Shop em Integrações antes de publicar.',
+    );
+    expect(publishErrorMessage('ml.busy')).toMatch(/em andamento/);
+    expect(publishErrorMessage('not_configured', null, 'shopee')).toMatch(/com a Shopee/);
+    expect(publishErrorMessage(null, null, 'tiktok')).toBe(
+      'Não foi possível falar com a TikTok Shop. Tente de novo.',
+    );
   });
 });

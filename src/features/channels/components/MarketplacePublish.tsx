@@ -8,13 +8,20 @@ import { StatusDot } from '@/components/ui/StatusDot';
 import { TextField } from '@/components/ui/TextField';
 import type { Product } from '@/features/products/api';
 import { useVariants } from '@/features/products/variants';
-import { MlRequestError, useMlCategory, useMlPublish, useSaveMlAttributes } from '../api';
+import { providerLabels, type Provider } from '@/features/integrations/schemas';
+import {
+  PublishRequestError,
+  useMarketplaceCategory,
+  usePublish,
+  useSaveListingAttributes,
+} from '../api';
 import type { ChannelConfig } from '../channels';
 import { channelErrorMessage } from '../channels';
 import {
   attributeDraft,
   attributesPayload,
   missingRequired,
+  inMarketplace,
   publishStatusInfo,
   variantKeys,
   variationMapDraft,
@@ -68,19 +75,23 @@ function AttributeField({
 }
 
 function AttributesForm({
+  provider,
   product,
   saved,
   category,
   keys,
   canEdit,
 }: {
+  provider: Provider;
   product: Product;
   saved: ChannelConfig;
   category: MlCategory;
   keys: string[];
   canEdit: boolean;
 }) {
-  const save = useSaveMlAttributes(product.id);
+  const save = useSaveListingAttributes(provider, product.id);
+  // Só o Mercado Livre associa as características das variações a atributos.
+  const mapsVariations = provider === 'mercadolivre';
   const [draft, setDraft] = useState<AttributeDraft>(() => attributeDraft(saved.attributes));
   const [map, setMap] = useState<Record<string, string>>(() =>
     variationMapDraft(keys, category.attributes, saved.variation_map),
@@ -91,7 +102,7 @@ function AttributesForm({
   const shownOptional = showAll ? optional : optional.slice(0, OPTIONAL_SHOWN);
   const variationOptions = category.attributes.filter((a) => a.variation);
   const missing = missingRequired(category.attributes, draft, product, map);
-  const unmapped = keys.filter((k) => !map[k]);
+  const unmapped = mapsVariations ? keys.filter((k) => !map[k]) : [];
 
   const field = (a: MlAttribute) => (
     <AttributeField
@@ -118,7 +129,7 @@ function AttributesForm({
       {save.isError && <Alert tone="error">{channelErrorMessage(save.error)}</Alert>}
       {save.isSuccess && <Alert tone="success">Atributos salvos.</Alert>}
 
-      {keys.length > 0 && (
+      {mapsVariations && keys.length > 0 && (
         <div className="space-y-2">
           <p className="text-sm font-medium">Variações</p>
           <p className="text-muted text-xs">
@@ -159,9 +170,11 @@ function AttributesForm({
       {required.length > 0 && (
         <div className="space-y-2">
           <p className="text-sm font-medium">Obrigatórios</p>
-          <p className="text-muted text-xs">
-            Marca e código de barras do produto entram sozinhos quando preenchidos no cadastro.
-          </p>
+          {mapsVariations && (
+            <p className="text-muted text-xs">
+              Marca e código de barras do produto entram sozinhos quando preenchidos no cadastro.
+            </p>
+          )}
           <div className="grid gap-4 sm:grid-cols-2">{required.map(field)}</div>
         </div>
       )}
@@ -192,33 +205,52 @@ function AttributesForm({
   );
 }
 
+/** Regras de variação de cada marketplace, para o rodapé. */
+const variationNote: Record<Provider, string> = {
+  mercadolivre: 'Com variações, todas saem pelo preço deste canal (regra do Mercado Livre).',
+  shopee:
+    'Com variações (até 2 características, ex.: Cor e Tamanho), todas saem pelo preço deste canal. Variação nova num anúncio já publicado precisa ser criada na Shopee. A Shopee exige o peso do produto.',
+  tiktok:
+    'Com variações (até 3 características), todas saem pelo preço deste canal. A TikTok Shop exige o peso do produto.',
+};
+
 /**
- * Publicar no Mercado Livre (Fase 37): atributos da categoria, mapa das
- * variações e os botões de publicar/atualizar, pausar e reativar. O que
- * aparece aqui é o que ficou gravado no banco pela última execução.
+ * Publicar no marketplace (Mercado Livre, Fase 37; Shopee e TikTok Shop,
+ * Fase 44): atributos da categoria, mapa das variações (só Mercado Livre)
+ * e os botões de publicar/atualizar, pausar e reativar. O que aparece aqui
+ * é o que ficou gravado no banco pela última execução.
  */
-export function MercadoLivrePublish({
+export function MarketplacePublish({
+  provider,
   product,
   saved,
   canEdit,
 }: {
+  provider: Provider;
   product: Product;
   saved: ChannelConfig;
   canEdit: boolean;
 }) {
-  const category = useMlCategory(saved.marketplace_category);
+  const category = useMarketplaceCategory(
+    provider,
+    product.organization_id,
+    saved.marketplace_category,
+  );
   const variants = useVariants(product.organization_id, product.id);
-  const publish = useMlPublish(product.id);
+  const publish = usePublish(provider, product.id);
   const keys = useMemo(() => variantKeys(variants.data ?? []), [variants.data]);
-  const info = publishStatusInfo[saved.publish_status ?? 'none'];
+  const info = publishStatusInfo(provider, saved.publish_status);
+  const name = providerLabels[provider];
+  const article = provider === 'mercadolivre' ? 'o' : 'a';
+  const where = inMarketplace(provider);
   const published = Boolean(saved.external_id);
   const busy = publish.isPending || saved.publish_status === 'publishing';
-  const error = publish.error instanceof MlRequestError ? publish.error : null;
+  const error = publish.error instanceof PublishRequestError ? publish.error : null;
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3">
-        <h3 className="font-semibold">Publicar no Mercado Livre</h3>
+        <h3 className="font-semibold">Publicar {where}</h3>
         <span className="flex items-center gap-2 text-sm">
           <StatusDot tone={info.tone} />
           {info.label}
@@ -233,6 +265,9 @@ export function MercadoLivrePublish({
             Ver anúncio {saved.external_id}
           </a>
         )}
+        {!saved.external_url && saved.external_id && (
+          <span className="text-muted text-sm">Anúncio {saved.external_id}</span>
+        )}
       </div>
 
       {saved.last_error && !publish.isPending && (
@@ -241,14 +276,14 @@ export function MercadoLivrePublish({
 
       {!saved.marketplace_category ? (
         <Alert tone="info">
-          Informe o código da categoria do Mercado Livre acima (use "Sugerir categoria") e salve
-          para ver os atributos que ela pede.
+          Informe o código da categoria {provider === 'mercadolivre' ? 'do' : 'da'} {name} acima
+          (use "Sugerir categoria") e salve para ver os atributos que ela pede.
         </Alert>
       ) : category.isPending || variants.isPending ? (
         <PageLoader />
       ) : category.isError ? (
         <Alert tone="error">
-          {category.error instanceof MlRequestError
+          {category.error instanceof PublishRequestError
             ? category.error.message
             : 'Não foi possível carregar a categoria.'}{' '}
           Confira o código {saved.marketplace_category}.
@@ -260,6 +295,7 @@ export function MercadoLivrePublish({
           </p>
           <AttributesForm
             key={`${saved.updated_at}:${category.data.category_id}`}
+            provider={provider}
             product={product}
             saved={saved}
             category={category.data}
@@ -275,19 +311,20 @@ export function MercadoLivrePublish({
             ? 'Anúncio pausado.'
             : publish.variables === 'activate'
               ? 'Anúncio reativado.'
-              : 'Anúncio enviado ao Mercado Livre. Pedidos e estoque deste produto passam a sincronizar.'}
+              : `Anúncio enviado ${article === 'o' ? 'ao' : 'à'} ${name}. Pedidos e estoque deste produto passam a sincronizar.`}
           {publish.data.skipped && publish.data.skipped.length > 0 && (
             <>
               {' '}
-              Variações sem estoque ficaram de fora: {publish.data.skipped.join(', ')}. Publique de
-              novo quando tiverem estoque.
+              {provider === 'mercadolivre'
+                ? `Variações sem estoque ficaram de fora: ${publish.data.skipped.join(', ')}. Publique de novo quando tiverem estoque.`
+                : `Variações que ainda não existem no anúncio ficaram de fora: ${publish.data.skipped.join(', ')}. Crie-as ${where}.`}
             </>
           )}
         </Alert>
       )}
       {publish.isError && (
         <Alert tone="error">
-          {error?.message ?? 'Não foi possível falar com o Mercado Livre.'}
+          {error?.message ?? `Não foi possível falar com ${article} ${name}.`}
           {error && error.messages.length > 0 && (
             <ul className="mt-1 list-disc pl-5">
               {error.messages.map((m) => (
@@ -313,7 +350,7 @@ export function MercadoLivrePublish({
             disabled={busy || !saved.enabled}
             onClick={() => publish.mutate('publish')}
           >
-            {published ? 'Atualizar anúncio' : 'Publicar no Mercado Livre'}
+            {published ? 'Atualizar anúncio' : `Publicar ${where}`}
           </Button>
           {published && saved.publish_status === 'active' && (
             <Button
@@ -339,8 +376,7 @@ export function MercadoLivrePublish({
       )}
       <p className="text-muted text-xs">
         Publicar usa o título, preço, tipo de anúncio e frete salvos acima, as fotos e a descrição
-        do produto. Com variações, todas saem pelo preço deste canal (regra do Mercado Livre). Mudou
-        algo? Salve e clique em "Atualizar anúncio".
+        do produto. {variationNote[provider]} Mudou algo? Salve e clique em "Atualizar anúncio".
       </p>
     </div>
   );

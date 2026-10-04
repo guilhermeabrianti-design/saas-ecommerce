@@ -184,6 +184,7 @@ export function unwrapTikTok(status: number, body: unknown): Json {
 export interface TikTokClient {
   get(path: string, query?: Record<string, string>): Promise<Json>;
   post(path: string, body: unknown, query?: Record<string, string>): Promise<Json>;
+  put(path: string, body: unknown): Promise<Json>;
 }
 
 /** URL assinada de uma chamada (app_key, timestamp, shop_cipher quando há loja). */
@@ -235,6 +236,13 @@ export function tiktokClient(
       const raw = JSON.stringify(body);
       return send(await tiktokUrl(app, path, { shopCipher: auth.shopCipher, query, body: raw }), {
         method: 'POST',
+        body: raw,
+      });
+    },
+    async put(path, body) {
+      const raw = JSON.stringify(body);
+      return send(await tiktokUrl(app, path, { shopCipher: auth.shopCipher, body: raw }), {
+        method: 'PUT',
         body: raw,
       });
     },

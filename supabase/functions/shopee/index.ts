@@ -7,6 +7,9 @@
  *   POST /push       notificações assinadas (pedido mudou de status, rastreio) → pedido
  *                    relido na API → ingestão → encaminhamento → envio por postagem → etiqueta
  *   POST /documents  (JWT) relê um pedido e busca a etiqueta (botão do pedido)
+ *   POST /categories (JWT) sugere categorias pelo título (Fase 44)
+ *   POST /category   (JWT) nome, caminho e atributos de uma categoria (Fase 44)
+ *   POST /publish    (JWT) publica/atualiza, pausa ou reativa o anúncio do produto (Fase 44)
  *
  * Implantada sem verificação de JWT (callback e push vêm da Shopee); /connect
  * e /documents conferem o JWT de quem chamou pelas RPCs. O push vale só com
@@ -38,7 +41,31 @@ import {
   shopeeClient,
   shopeeItemRefs,
   verifyShopeePush,
+  type ShopeeClient,
 } from '../_shared/integrations/shopee.ts';
+import {
+  categoryPath,
+  searchCategories,
+  suggestionsFromIds,
+  type CategoryNode,
+} from '../_shared/integrations/publishcommon.ts';
+import { beginPublish, finishPublish, productImages } from '../_shared/integrations/publishflow.ts';
+import {
+  SHOPEE_LANGUAGE,
+  SHOPEE_MAX_IMAGES,
+  buildShopeeItem,
+  modelIds,
+  parseShopeeAttributes,
+  parseShopeeCategories,
+  parseShopeeLogistics,
+  parseShopeeRecommend,
+  shopeeItemStatus,
+  shopeeItemUrl,
+  tierVariationBody,
+  updateItemBody,
+  uploadShopeeImage,
+  validShopeeCategory,
+} from '../_shared/integrations/shopeepublish.ts';
 import { shopeeAccessToken, shopeeAppFromEnv } from '../_shared/integrations/shopeetoken.ts';
 import { StockPushError } from '../_shared/integrations/stock.ts';
 
@@ -394,6 +421,259 @@ async function documents(req: Request) {
   );
 }
 
+// ---------------------------------------------------------------------
+// Publicar (Fase 44)
+// ---------------------------------------------------------------------
+
+/** Árvore de categorias (igual para todas as lojas do Brasil): 6 horas em memória. */
+let categoryCache: { at: number; nodes: Map<string, CategoryNode> } | null = null;
+
+async function categoryTree(api: ShopeeClient) {
+  if (categoryCache && Date.now() - categoryCache.at < 6 * 3600_000) return categoryCache.nodes;
+  const nodes = parseShopeeCategories(
+    await api.get('/api/v2/product/get_category', { language: SHOPEE_LANGUAGE }),
+  );
+  categoryCache = { at: Date.now(), nodes };
+  return nodes;
+}
+
+/**
+ * Consulta de categoria/atributos com a loja de quem chamou: confere o
+ * papel e o limite pela RPC e devolve o cliente da loja.
+ */
+async function lookupApi(
+  req: Request,
+  input: Record<string, unknown> | null,
+): Promise<{ api: ShopeeClient } | Response> {
+  const cfg = config();
+  if (!cfg) return json(503, { error: 'not_configured' });
+  const authorization = req.headers.get('Authorization');
+  if (!authorization) return json(401, { error: 'unauthorized' });
+  const orgId = String(input?.organization_id ?? '');
+  if (!UUID.test(orgId)) return json(400, { error: 'invalid_body' });
+  const { data, error } = await callerClient(authorization).rpc('marketplace_lookup_connection', {
+    p_org: orgId,
+    p_provider: 'shopee',
+  });
+  if (error) {
+    if (/jwt/i.test(error.message)) return json(401, { error: 'unauthorized' });
+    if (error.message === 'rate_limited') return json(429, { error: 'rate_limited' });
+    if (error.message === 'publish.not_connected') return json(409, { error: error.message });
+    return json(403, { error: 'forbidden' });
+  }
+  const db = service();
+  const connectionId = String(data);
+  const { data: conn } = await db
+    .from('integration_connections')
+    .select('external_account_id')
+    .eq('id', connectionId)
+    .single();
+  if (!conn) return json(409, { error: 'publish.not_connected' });
+  const shopId = String(conn.external_account_id);
+  const accessToken = await shopeeAccessToken(db, fetch, connectionId, shopId);
+  return { api: shopeeClient(fetch, cfg.app, { accessToken, shopId }) };
+}
+
+/** Roda a consulta com a loja de quem chamou (erros de permissão respondem antes). */
+async function withLookup(
+  req: Request,
+  input: Record<string, unknown> | null,
+  fn: (api: ShopeeClient) => Promise<Record<string, unknown>>,
+) {
+  let gate: Awaited<ReturnType<typeof lookupApi>>;
+  try {
+    gate = await lookupApi(req, input);
+  } catch (e) {
+    return run(() => Promise.reject(e));
+  }
+  if (gate instanceof Response) return gate;
+  const { api } = gate;
+  return run(() => fn(api));
+}
+
+/** Sugestões de categoria pelo título (recomendação da Shopee; senão busca na árvore). */
+async function categories(req: Request) {
+  const input = await readBody(req);
+  const q = String(input?.q ?? '').trim();
+  if (q.length < 3 || q.length > 120) return json(400, { error: 'invalid_body' });
+  return withLookup(req, input, async (api) => {
+    const nodes = await categoryTree(api);
+    const ids = parseShopeeRecommend(
+      await api.get('/api/v2/product/category_recommend', { item_name: q }),
+    );
+    const suggestions = suggestionsFromIds(nodes, ids);
+    return { suggestions: suggestions.length ? suggestions : searchCategories(nodes, q) };
+  });
+}
+
+/** Nome, caminho e atributos de uma categoria. */
+async function category(req: Request) {
+  const input = await readBody(req);
+  const id = String(input?.category_id ?? '');
+  if (!validShopeeCategory(id)) return json(400, { error: 'invalid_body' });
+  return withLookup(req, input, async (api) => {
+    const nodes = await categoryTree(api);
+    const attrs = parseShopeeAttributes(
+      await api.get('/api/v2/product/get_attributes', {
+        category_id: id,
+        language: SHOPEE_LANGUAGE,
+      }),
+    );
+    return {
+      category_id: id,
+      name: nodes.get(id)?.name ?? id,
+      path: categoryPath(nodes, id),
+      attributes: attrs,
+    };
+  });
+}
+
+/**
+ * Publica (cria ou atualiza), pausa ou reativa o anúncio do produto na
+ * Shopee. `marketplace_publish_begin` (JWT) confere tudo; o resultado
+ * sempre é gravado por `marketplace_publish_finish`, inclusive a falha.
+ */
+async function publish(req: Request) {
+  const cfg = config();
+  if (!cfg) return json(503, { error: 'not_configured' });
+  const authorization = req.headers.get('Authorization');
+  if (!authorization) return json(401, { error: 'unauthorized' });
+  const input = await readBody(req);
+  const productId = String(input?.product_id ?? '');
+  const action = String(input?.action ?? '');
+  if (!UUID.test(productId) || !['publish', 'pause', 'activate'].includes(action))
+    return json(400, { error: 'invalid_body' });
+
+  const begun = await beginPublish(callerClient(authorization), productId, 'shopee', action);
+  if (!begun.ok) return json(begun.status, { error: begun.error });
+  const data = begun.data;
+  const db = service();
+  const shopId = String(data.account_id ?? '');
+
+  try {
+    const accessToken = await shopeeAccessToken(db, fetch, data.connection_id, shopId);
+    const api = shopeeClient(fetch, cfg.app, { accessToken, shopId });
+    const readStatus = async (itemId: string) => {
+      const info = await api.get('/api/v2/product/get_item_base_info', { item_id_list: itemId });
+      const list = Array.isArray(info.item_list)
+        ? (info.item_list as Record<string, unknown>[])
+        : [];
+      return shopeeItemStatus(list[0]?.item_status);
+    };
+
+    if (data.action !== 'publish') {
+      await api.post('/api/v2/product/unlist_item', {
+        item_list: [{ item_id: Number(data.external_id), unlist: data.action === 'pause' }],
+      });
+      const status = await readStatus(data.external_id!);
+      await finishPublish(db, data.run_id, { ok: true, status });
+      return json(200, { ok: true, status });
+    }
+
+    const categoryId = String(data.config.category);
+    const attrs = parseShopeeAttributes(
+      await api.get('/api/v2/product/get_attributes', {
+        category_id: categoryId,
+        language: SHOPEE_LANGUAGE,
+      }),
+    );
+    const logistics = parseShopeeLogistics(await api.get('/api/v2/logistics/get_channel_list'));
+    const imageIds: string[] = [];
+    for (const img of await productImages(db, data.images, SHOPEE_MAX_IMAGES)) {
+      imageIds.push(await uploadShopeeImage(fetch, cfg.app, img.bytes, img.contentType));
+    }
+
+    const built = buildShopeeItem(data, imageIds, attrs, logistics);
+    if (!built.ok) {
+      await finishPublish(db, data.run_id, { ok: false, error: built.errors.join(' ') });
+      return json(422, { error: 'invalid_listing', messages: built.errors });
+    }
+    const item = built.item;
+    let itemId = data.external_id;
+    const skipped: string[] = [];
+    const links: { inventory_item_id: string; sku: string; ref: string }[] = [];
+
+    if (itemId) {
+      await api.post('/api/v2/product/update_item', updateItemBody(itemId, item));
+      if (item.tiers) {
+        const ids = modelIds(await api.get('/api/v2/product/get_model_list', { item_id: itemId }));
+        const known = item.models.filter((m) => ids.has(m.sku));
+        skipped.push(...item.models.filter((m) => !ids.has(m.sku)).map((m) => m.sku));
+        if (known.length) {
+          await api.post('/api/v2/product/update_price', {
+            item_id: Number(itemId),
+            price_list: known.map((m) => ({
+              model_id: Number(ids.get(m.sku)),
+              original_price: item.price,
+            })),
+          });
+          await api.post('/api/v2/product/update_stock', {
+            item_id: Number(itemId),
+            stock_list: known.map((m) => ({
+              model_id: Number(ids.get(m.sku)),
+              seller_stock: [{ stock: m.stock }],
+            })),
+          });
+        }
+        for (const m of known) {
+          links.push({
+            inventory_item_id: m.inventory_item_id,
+            sku: m.sku,
+            ref: `${itemId}:${ids.get(m.sku)}`,
+          });
+        }
+      } else {
+        await api.post('/api/v2/product/update_price', {
+          item_id: Number(itemId),
+          price_list: [{ model_id: 0, original_price: item.price }],
+        });
+        await api.post('/api/v2/product/update_stock', {
+          item_id: Number(itemId),
+          stock_list: [{ model_id: 0, seller_stock: [{ stock: item.single!.stock }] }],
+        });
+      }
+    } else {
+      const created = await api.post('/api/v2/product/add_item', item.body);
+      itemId = String(created.item_id ?? '');
+      if (!/^\d{1,20}$/.test(itemId))
+        throw new StockPushError('Shopee: resposta sem id do anúncio');
+      if (item.tiers) {
+        await api.post('/api/v2/product/init_tier_variation', tierVariationBody(itemId, item));
+        const ids = modelIds(await api.get('/api/v2/product/get_model_list', { item_id: itemId }));
+        for (const m of item.models) {
+          const modelId = ids.get(m.sku);
+          if (modelId) {
+            links.push({
+              inventory_item_id: m.inventory_item_id,
+              sku: m.sku,
+              ref: `${itemId}:${modelId}`,
+            });
+          }
+        }
+      }
+    }
+    if (item.single?.inventory_item_id) {
+      links.push({
+        inventory_item_id: item.single.inventory_item_id,
+        sku: item.single.sku,
+        ref: `${itemId}:0`,
+      });
+    }
+
+    const status = await readStatus(itemId);
+    const url = shopeeItemUrl(shopId, itemId);
+    await finishPublish(db, data.run_id, { ok: true, externalId: itemId, url, status, links });
+    return json(200, { ok: true, external_id: itemId, url, status, skipped });
+  } catch (e) {
+    const message =
+      e instanceof StockPushError ? e.message : 'Falha inesperada ao falar com a Shopee.';
+    if (!(e instanceof StockPushError))
+      console.error('shopee publish: falha', e instanceof Error ? e.message : '');
+    await finishPublish(db, data.run_id, { ok: false, error: message }).catch(() => {});
+    return json(502, { error: 'provider_error', message });
+  }
+}
+
 async function run(fn: () => Promise<Record<string, unknown>>) {
   try {
     return json(200, await fn());
@@ -423,5 +703,8 @@ Deno.serve(async (req) => {
   if (path.endsWith('/connect')) return connect(req);
   if (path.endsWith('/push')) return push(req);
   if (path.endsWith('/documents')) return documents(req);
+  if (path.endsWith('/categories')) return categories(req);
+  if (path.endsWith('/category')) return category(req);
+  if (path.endsWith('/publish')) return publish(req);
   return json(404, { error: 'not_found' });
 });

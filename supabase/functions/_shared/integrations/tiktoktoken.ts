@@ -28,16 +28,25 @@ export function tiktokAccessToken(
   );
 }
 
-/** Cliente da loja da conexão: token renovado + shop_cipher guardado na conexão. */
-export async function tiktokShopClient(
+/** Sessão da loja da conexão: token renovado + shop_cipher guardado na conexão. */
+export async function tiktokShopSession(
   service: SupabaseClient,
   fetchFn: FetchFn,
   connectionId: string,
-): Promise<TikTokClient> {
+): Promise<{ app: TikTokApp; accessToken: string; api: TikTokClient }> {
   const app = tiktokAppFromEnv();
   if (!app) throw new StockPushError('TikTok Shop não configurada');
   const accessToken = await tiktokAccessToken(service, fetchFn, connectionId);
   const cipher = String((await connectionConfig(service, connectionId)).shop_cipher ?? '');
   if (!cipher) throw new StockPushError('TikTok Shop: loja sem identificador (reconecte a loja)');
-  return tiktokClient(fetchFn, app, { accessToken, shopCipher: cipher });
+  return { app, accessToken, api: tiktokClient(fetchFn, app, { accessToken, shopCipher: cipher }) };
+}
+
+/** Cliente da loja da conexão. */
+export async function tiktokShopClient(
+  service: SupabaseClient,
+  fetchFn: FetchFn,
+  connectionId: string,
+): Promise<TikTokClient> {
+  return (await tiktokShopSession(service, fetchFn, connectionId)).api;
 }

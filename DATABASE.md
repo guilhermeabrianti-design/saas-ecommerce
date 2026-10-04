@@ -576,6 +576,18 @@ receita da TheSigns**. Nenhuma taxa fica no código; o cálculo é feito só no 
   `attach_marketplace_document` com transportadora e avisos da TikTok Shop.
 - Estoque: `listing_links.external_ref` = `produto:sku:depósito`.
 
+### Publicar na Shopee e na TikTok Shop (Fase 44)
+
+- Publicação genérica: `marketplace_publish_begin(produto, marketplace, ação)` (owner/admin do
+  vendedor; erros `publish.*`; devolve também `provider` e `account_id`) e
+  `marketplace_publish_finish` (service role; vínculos com `ref` gravam `listing_links.external_ref`).
+  `ml_publish_begin`/`ml_publish_finish` viraram camadas finas por cima (erros `ml.*`).
+- `save_listing_attributes(produto, marketplace, atributos, mapa)` (mapa só no Mercado Livre;
+  `save_ml_listing_attributes` chama esta). `marketplace_lookup_connection(org, marketplace)`:
+  conexão ativa para consultar categorias (owner/admin, 120/10 min).
+- `product_channel_configs.publish_status` aceita `review` (em análise no marketplace).
+- Gamificação: evento `marketplace_listing_published` (Shopee e TikTok Shop).
+
 ### Gamificação (Fase 41)
 
 - `gamification_rules` (evento, rótulo, tipo de conta, pontos, limite diário, ativa),

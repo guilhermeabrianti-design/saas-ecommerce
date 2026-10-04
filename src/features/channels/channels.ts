@@ -26,7 +26,7 @@ export const channelConfigSchema = z.object({
   marketplace_category: z.string().nullable(),
   free_shipping: z.boolean(),
   updated_at: z.string(),
-  // Publicação no Mercado Livre (Fase 37).
+  // Publicação no marketplace (Fases 37 e 44).
   attributes: z.array(savedAttributeSchema),
   variation_map: z.record(z.string(), z.string()),
   external_id: z.string().nullable(),
@@ -108,7 +108,7 @@ export function validateChannel(provider: Provider, f: ChannelForm): ChannelErro
   if (price === null || price < 1) errors.price = 'Preço inválido, ex.: 59,90';
   if (!f.listingType) errors.listingType = 'Sem tipo de anúncio com taxa cadastrada';
   if (f.marketplaceCategory.trim() && !/^[A-Za-z0-9_-]{1,60}$/.test(f.marketplaceCategory.trim()))
-    errors.marketplaceCategory = 'Use o código do canal (ex.: MLB1234)';
+    errors.marketplaceCategory = 'Use o código da categoria no canal (ex.: MLB1234)';
   return errors;
 }
 
@@ -126,7 +126,7 @@ const messages: Record<string, string> = {
   'channels.sellers_only': 'Configuração de canais é exclusiva de vendedores.',
   'channels.invalid': 'Dados inválidos. Revise os campos.',
   'channels.title_too_long': 'Título acima do limite do canal.',
-  'channels.save_first': 'Salve a configuração do Mercado Livre antes.',
+  'channels.save_first': 'Salve a configuração do canal antes.',
   'channels.listing_type_unavailable':
     'Tipo de anúncio sem taxa cadastrada. A equipe TheSigns cadastra em Taxas e comissões.',
 };

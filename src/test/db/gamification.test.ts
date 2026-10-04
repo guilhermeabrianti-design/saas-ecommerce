@@ -313,7 +313,7 @@ describe('equipe', () => {
       admin,
       'select public.admin_gamification_config()',
     );
-    expect(config.rules).toHaveLength(7);
+    expect(config.rules).toHaveLength(8);
     expect(config.levels).toHaveLength(5);
 
     await expect(

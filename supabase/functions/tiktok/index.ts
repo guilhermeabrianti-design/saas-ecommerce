@@ -8,6 +8,9 @@
  *   POST /webhook    notificações assinadas (pedido mudou de status) → pedido relido na
  *                    API → ingestão → encaminhamento → envio por postagem → etiqueta
  *   POST /documents  (JWT) relê um pedido e busca a etiqueta (botão do pedido)
+ *   POST /categories (JWT) sugere categorias pelo título (Fase 44)
+ *   POST /category   (JWT) nome, caminho e atributos de uma categoria (Fase 44)
+ *   POST /publish    (JWT) publica/atualiza, pausa ou reativa o produto (Fase 44)
  *
  * Implantada sem verificação de JWT (callback e webhook vêm da TikTok Shop);
  * /connect e /documents conferem o JWT de quem chamou pelas RPCs. O webhook
@@ -42,7 +45,30 @@ import {
   verifyTikTokWebhook,
   type TikTokClient,
 } from '../_shared/integrations/tiktok.ts';
-import { tiktokAppFromEnv, tiktokShopClient } from '../_shared/integrations/tiktoktoken.ts';
+import {
+  categoryPath,
+  searchCategories,
+  type CategoryNode,
+} from '../_shared/integrations/publishcommon.ts';
+import { beginPublish, finishPublish, productImages } from '../_shared/integrations/publishflow.ts';
+import {
+  TIKTOK_LOCALE,
+  TIKTOK_MAX_IMAGES,
+  buildTikTokProduct,
+  defaultWarehouse,
+  parseTikTokAttributes,
+  parseTikTokCategories,
+  parseTikTokRecommend,
+  tiktokProductStatus,
+  tiktokSkuIds,
+  uploadTikTokImage,
+  validTikTokCategory,
+} from '../_shared/integrations/tiktokpublish.ts';
+import {
+  tiktokAppFromEnv,
+  tiktokShopClient,
+  tiktokShopSession,
+} from '../_shared/integrations/tiktoktoken.ts';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -383,6 +409,192 @@ async function documents(req: Request) {
   return run(() => processOrder(service(), row.connection_id, row.external_id));
 }
 
+// ---------------------------------------------------------------------
+// Publicar (Fase 44)
+// ---------------------------------------------------------------------
+
+/** Árvore de categorias por loja (a TikTok Shop libera categorias por loja): 6 horas. */
+const categoryCache = new Map<string, { at: number; nodes: Map<string, CategoryNode> }>();
+
+async function categoryTree(api: TikTokClient, connectionId: string) {
+  const hit = categoryCache.get(connectionId);
+  if (hit && Date.now() - hit.at < 6 * 3600_000) return hit.nodes;
+  const nodes = parseTikTokCategories(
+    await api.get('/product/202309/categories', { locale: TIKTOK_LOCALE }),
+  );
+  categoryCache.set(connectionId, { at: Date.now(), nodes });
+  return nodes;
+}
+
+const attributesOf = async (api: TikTokClient, categoryId: string) =>
+  parseTikTokAttributes(
+    await api.get(`/product/202309/categories/${categoryId}/attributes`, { locale: TIKTOK_LOCALE }),
+  );
+
+/**
+ * Consulta de categoria/atributos com a loja de quem chamou: confere o
+ * papel e o limite pela RPC e devolve o cliente da loja.
+ */
+async function lookupApi(
+  req: Request,
+  input: Record<string, unknown> | null,
+): Promise<{ api: TikTokClient; connectionId: string } | Response> {
+  if (!config()) return json(503, { error: 'not_configured' });
+  const authorization = req.headers.get('Authorization');
+  if (!authorization) return json(401, { error: 'unauthorized' });
+  const orgId = String(input?.organization_id ?? '');
+  if (!UUID.test(orgId)) return json(400, { error: 'invalid_body' });
+  const { data, error } = await callerClient(authorization).rpc('marketplace_lookup_connection', {
+    p_org: orgId,
+    p_provider: 'tiktok',
+  });
+  if (error) {
+    if (/jwt/i.test(error.message)) return json(401, { error: 'unauthorized' });
+    if (error.message === 'rate_limited') return json(429, { error: 'rate_limited' });
+    if (error.message === 'publish.not_connected') return json(409, { error: error.message });
+    return json(403, { error: 'forbidden' });
+  }
+  const connectionId = String(data);
+  return { api: await tiktokShopClient(service(), fetch, connectionId), connectionId };
+}
+
+/** Roda a consulta com a loja de quem chamou (erros de permissão respondem antes). */
+async function withLookup(
+  req: Request,
+  input: Record<string, unknown> | null,
+  fn: (api: TikTokClient, connectionId: string) => Promise<Record<string, unknown>>,
+) {
+  let gate: Awaited<ReturnType<typeof lookupApi>>;
+  try {
+    gate = await lookupApi(req, input);
+  } catch (e) {
+    return run(() => Promise.reject(e));
+  }
+  if (gate instanceof Response) return gate;
+  const { api, connectionId } = gate;
+  return run(() => fn(api, connectionId));
+}
+
+/** Sugestão de categoria pelo título (recomendação da TikTok; senão busca na árvore). */
+async function categories(req: Request) {
+  const input = await readBody(req);
+  const q = String(input?.q ?? '').trim();
+  if (q.length < 3 || q.length > 120) return json(400, { error: 'invalid_body' });
+  return withLookup(req, input, async (api, connectionId) => {
+    const suggestions = parseTikTokRecommend(
+      await api.post('/product/202309/categories/recommend', { product_title: q }),
+    );
+    if (suggestions.length) return { suggestions };
+    return { suggestions: searchCategories(await categoryTree(api, connectionId), q) };
+  });
+}
+
+/** Nome, caminho e atributos de uma categoria. */
+async function category(req: Request) {
+  const input = await readBody(req);
+  const id = String(input?.category_id ?? '');
+  if (!validTikTokCategory(id)) return json(400, { error: 'invalid_body' });
+  return withLookup(req, input, async (api, connectionId) => {
+    const nodes = await categoryTree(api, connectionId);
+    return {
+      category_id: id,
+      name: nodes.get(id)?.name ?? id,
+      path: categoryPath(nodes, id),
+      attributes: await attributesOf(api, id),
+    };
+  });
+}
+
+/**
+ * Publica (cria ou atualiza), pausa ou reativa o produto na TikTok Shop.
+ * `marketplace_publish_begin` (JWT) confere tudo; o resultado sempre é
+ * gravado por `marketplace_publish_finish`, inclusive a falha.
+ */
+async function publish(req: Request) {
+  if (!config()) return json(503, { error: 'not_configured' });
+  const authorization = req.headers.get('Authorization');
+  if (!authorization) return json(401, { error: 'unauthorized' });
+  const input = await readBody(req);
+  const productId = String(input?.product_id ?? '');
+  const action = String(input?.action ?? '');
+  if (!UUID.test(productId) || !['publish', 'pause', 'activate'].includes(action))
+    return json(400, { error: 'invalid_body' });
+
+  const begun = await beginPublish(callerClient(authorization), productId, 'tiktok', action);
+  if (!begun.ok) return json(begun.status, { error: begun.error });
+  const data = begun.data;
+  const db = service();
+
+  try {
+    const { app, accessToken, api } = await tiktokShopSession(db, fetch, data.connection_id);
+    const readStatus = async (id: string) =>
+      tiktokProductStatus((await api.get(`/product/202309/products/${id}`)).status);
+
+    if (data.action !== 'publish') {
+      await api.post(
+        `/product/202309/products/${data.action === 'pause' ? 'deactivate' : 'activate'}`,
+        { product_ids: [data.external_id] },
+      );
+      const status = await readStatus(data.external_id!);
+      await finishPublish(db, data.run_id, { ok: true, status });
+      return json(200, { ok: true, status });
+    }
+
+    const attrs = await attributesOf(api, String(data.config.category));
+    const warehouse = defaultWarehouse(await api.get('/logistics/202309/warehouses'));
+    const existing = data.external_id
+      ? tiktokSkuIds(await api.get(`/product/202309/products/${data.external_id}`))
+      : new Map<string, string>();
+    const uris: string[] = [];
+    for (const img of await productImages(db, data.images, TIKTOK_MAX_IMAGES)) {
+      uris.push(await uploadTikTokImage(fetch, app, accessToken, img.bytes, img.contentType));
+    }
+
+    const built = buildTikTokProduct(data, uris, attrs, warehouse, existing);
+    if (!built.ok) {
+      await finishPublish(db, data.run_id, { ok: false, error: built.errors.join(' ') });
+      return json(422, { error: 'invalid_listing', messages: built.errors });
+    }
+
+    let productIdOut = data.external_id;
+    let skuIds: Map<string, string>;
+    if (productIdOut) {
+      skuIds = tiktokSkuIds(
+        await api.put(`/product/202309/products/${productIdOut}`, built.item.body),
+      );
+      if (skuIds.size === 0) {
+        skuIds = tiktokSkuIds(await api.get(`/product/202309/products/${productIdOut}`));
+      }
+    } else {
+      const created = await api.post('/product/202309/products', built.item.body);
+      productIdOut = String(created.product_id ?? '');
+      if (!/^\d{1,30}$/.test(productIdOut))
+        throw new StockPushError('TikTok Shop: resposta sem id do produto');
+      skuIds = tiktokSkuIds(created);
+    }
+
+    const links = built.item.links.map((l) => {
+      const skuId = skuIds.get(l.sku);
+      return skuId ? { ...l, ref: `${productIdOut}:${skuId}:${warehouse}` } : l;
+    });
+    const status = await readStatus(productIdOut);
+    await finishPublish(db, data.run_id, {
+      ok: true,
+      externalId: productIdOut,
+      status,
+      links,
+    });
+    return json(200, { ok: true, external_id: productIdOut, url: null, status, skipped: [] });
+  } catch (e) {
+    const message =
+      e instanceof StockPushError ? e.message : 'Falha inesperada ao falar com a TikTok Shop.';
+    if (!(e instanceof StockPushError))
+      console.error('tiktok publish: falha', e instanceof Error ? e.message : '');
+    await finishPublish(db, data.run_id, { ok: false, error: message }).catch(() => {});
+    return json(502, { error: 'provider_error', message });
+  }
+}
+
 async function run(fn: () => Promise<Record<string, unknown>>) {
   try {
     return json(200, await fn());
@@ -412,5 +624,8 @@ Deno.serve(async (req) => {
   if (path.endsWith('/connect')) return connect(req);
   if (path.endsWith('/webhook')) return webhook(req);
   if (path.endsWith('/documents')) return documents(req);
+  if (path.endsWith('/categories')) return categories(req);
+  if (path.endsWith('/category')) return category(req);
+  if (path.endsWith('/publish')) return publish(req);
   return json(404, { error: 'not_found' });
 });

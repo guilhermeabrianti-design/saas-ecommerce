@@ -14,9 +14,9 @@ import { ProductToolsPanel } from '@/features/tools/components/ProductToolsPanel
 import { cn } from '@/utils/cn';
 import { formatBRL, parseBRL } from '@/utils/money';
 import {
-  MlRequestError,
+  PublishRequestError,
+  useCategorySuggestions,
   useChannelConfigs,
-  useMlCategorySuggestions,
   useSaveChannelConfig,
 } from '../api';
 import {
@@ -28,19 +28,23 @@ import {
   type ChannelConfig,
   type ChannelForm,
 } from '../channels';
-import { MercadoLivrePublish } from './MercadoLivrePublish';
+import { MarketplacePublish } from './MarketplacePublish';
 
-/** Sugestões de categoria do Mercado Livre pelo título. */
+/** Sugestões de categoria do marketplace pelo título. */
 function CategorySuggestions({
+  provider,
+  orgId,
   title,
   disabled,
   onPick,
 }: {
+  provider: Provider;
+  orgId: string;
   title: string;
   disabled: boolean;
   onPick: (categoryId: string) => void;
 }) {
-  const suggest = useMlCategorySuggestions();
+  const suggest = useCategorySuggestions(provider, orgId);
   const q = title.trim();
   return (
     <div className="space-y-2 sm:col-span-2">
@@ -54,7 +58,7 @@ function CategorySuggestions({
       </Button>
       {suggest.isError && (
         <Alert tone="error">
-          {suggest.error instanceof MlRequestError
+          {suggest.error instanceof PublishRequestError
             ? suggest.error.message
             : 'Não foi possível buscar categorias.'}
         </Alert>
@@ -228,15 +232,17 @@ function ChannelTab({
         </Select>
         <TextField
           label={`Código da categoria no ${providerLabels[provider]} (opcional)`}
-          placeholder={provider === 'mercadolivre' ? 'Ex.: MLB1234' : 'Código do canal'}
+          placeholder={provider === 'mercadolivre' ? 'Ex.: MLB1234' : 'Ex.: 100017'}
           className="font-mono"
           value={form.marketplaceCategory}
           disabled={!canEdit}
           error={touched ? errors.marketplaceCategory : undefined}
           onChange={(e) => set({ marketplaceCategory: e.target.value })}
         />
-        {provider === 'mercadolivre' && canEdit && (
+        {canEdit && (
           <CategorySuggestions
+            provider={provider}
+            orgId={product.organization_id}
             title={form.title}
             disabled={!canEdit}
             onPick={(id) => set({ marketplaceCategory: id })}
@@ -320,20 +326,20 @@ export function ChannelsSection({ product, canEdit }: { product: Product; canEdi
                 options={options}
                 canEdit={canEdit}
               />
-              {open === 'mercadolivre' && current && (
+              {current && (
                 <div className="border-border border-t pt-6">
-                  <MercadoLivrePublish product={product} saved={current} canEdit={canEdit} />
+                  <MarketplacePublish
+                    key={open}
+                    provider={open}
+                    product={product}
+                    saved={current}
+                    canEdit={canEdit}
+                  />
                 </div>
               )}
               <div className="border-border border-t pt-6">
                 <ProductToolsPanel key={open} product={product} provider={open} />
               </div>
-              {open !== 'mercadolivre' && (
-                <p className="text-muted text-xs">
-                  Publicar direto na {providerLabels[open]} depende do app de desenvolvedor aprovado
-                  (próximas fases). No Mercado Livre já dá para publicar daqui.
-                </p>
-              )}
             </>
           )}
         </div>

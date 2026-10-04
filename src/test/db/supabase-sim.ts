@@ -133,18 +133,32 @@ export async function approveCatalog(db: PGlite): Promise<void> {
  * Conexão do Mercado Livre pelo fluxo real de OAuth (começa como o
  * usuário, conclui como a Edge Function). `account` = id do usuário lá.
  */
-export async function connectMercadoLivre(
+export function connectMercadoLivre(
   db: PGlite,
   userId: string,
   orgId: string,
   account = '777',
   name = 'Minha conta ML',
 ): Promise<string> {
+  return connectMarketplace(db, userId, orgId, 'mercadolivre', account, name);
+}
+
+/** Conecta um marketplace pelo fluxo de autorização (estado → conclusão). */
+export async function connectMarketplace(
+  db: PGlite,
+  userId: string,
+  orgId: string,
+  provider: 'mercadolivre' | 'shopee' | 'tiktok',
+  account: string,
+  name = 'Minha loja',
+): Promise<string> {
   const state = await asUser(db, userId, async (tx) => {
-    const res = await tx.query<{ s: string }>(
-      "select public.oauth_begin($1, 'mercadolivre', $2, $3) as s",
-      [orgId, name, 'a'.repeat(43)],
-    );
+    const res = await tx.query<{ s: string }>('select public.oauth_begin($1, $2, $3, $4) as s', [
+      orgId,
+      provider,
+      name,
+      'a'.repeat(43),
+    ]);
     return res.rows[0]!.s;
   });
   return db.transaction(async (tx) => {
@@ -155,8 +169,8 @@ export async function connectMercadoLivre(
     );
     const { organization_id, user_id, name: n } = c.rows[0]!.c;
     const res = await tx.query<{ id: string }>(
-      "select public.oauth_complete($1, $2, 'mercadolivre', $3, $4, null, null) as id",
-      [organization_id, user_id, n, account],
+      'select public.oauth_complete($1, $2, $3, $4, $5, null, null) as id',
+      [organization_id, user_id, provider, n, account],
     );
     return res.rows[0]!.id;
   });

@@ -1,20 +1,21 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FunctionsHttpError } from '@supabase/supabase-js';
 import { z } from 'zod';
-import type { Provider } from '@/features/integrations/schemas';
+import { providerLabels, type Provider } from '@/features/integrations/schemas';
 import { getSupabase } from '@/lib/supabase';
 import { parseBRL } from '@/utils/money';
 import { channelConfigSchema, type ChannelForm } from './channels';
 import {
   mlCategorySchema,
-  mlPublishErrorMessage,
   mlSuggestionSchema,
+  publishErrorMessage,
   type SavedAttribute,
 } from './ml-publish';
 
 export const channelKeys = {
   product: (productId: string) => ['channel-configs', productId] as const,
-  mlCategory: (categoryId: string) => ['ml-category', categoryId] as const,
+  category: (provider: Provider, categoryId: string) =>
+    ['marketplace-category', provider, categoryId] as const,
 };
 
 export function useChannelConfigs(productId: string) {
@@ -54,17 +55,18 @@ export function useSaveChannelConfig(productId: string) {
   });
 }
 
-export function useSaveMlAttributes(productId: string) {
+export function useSaveListingAttributes(provider: Provider, productId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (args: {
       attributes: SavedAttribute[];
       variationMap: Record<string, string>;
     }) => {
-      const { error } = await getSupabase().rpc('save_ml_listing_attributes', {
+      const { error } = await getSupabase().rpc('save_listing_attributes', {
         p_product: productId,
+        p_provider: provider,
         p_attributes: args.attributes,
-        p_variation_map: args.variationMap,
+        p_variation_map: provider === 'mercadolivre' ? args.variationMap : {},
       });
       if (error) throw error;
     },
@@ -73,7 +75,7 @@ export function useSaveMlAttributes(productId: string) {
 }
 
 /** Erro da Edge Function com mensagem pronta para a tela. */
-export class MlRequestError extends Error {
+export class PublishRequestError extends Error {
   constructor(
     message: string,
     readonly messages: string[] = [],
@@ -82,8 +84,12 @@ export class MlRequestError extends Error {
   }
 }
 
-async function invokeMl(path: string, body: Record<string, unknown>): Promise<unknown> {
-  const { data, error } = await getSupabase().functions.invoke(`mercadolivre/${path}`, { body });
+async function invokeMarketplace(
+  provider: Provider,
+  path: string,
+  body: Record<string, unknown>,
+): Promise<unknown> {
+  const { data, error } = await getSupabase().functions.invoke(`${provider}/${path}`, { body });
   if (!error) return data;
   type ErrorBody = { error?: string; message?: string; messages?: unknown };
   const parsed: ErrorBody | null =
@@ -92,31 +98,41 @@ async function invokeMl(path: string, body: Record<string, unknown>): Promise<un
       : null;
   const list: unknown[] = Array.isArray(parsed?.messages) ? parsed.messages : [];
   const messages = list.filter((m): m is string => typeof m === 'string');
-  throw new MlRequestError(
+  throw new PublishRequestError(
     messages.length
-      ? 'O Mercado Livre recusaria este anúncio:'
-      : mlPublishErrorMessage(parsed?.error ?? null, parsed?.message ?? null),
+      ? `${provider === 'mercadolivre' ? 'O' : 'A'} ${providerLabels[provider]} recusaria este anúncio:`
+      : publishErrorMessage(parsed?.error ?? null, parsed?.message ?? null, provider),
     messages,
   );
 }
 
-export function useMlCategorySuggestions() {
+/** Sugestões de categoria pelo título (Shopee e TikTok Shop usam a loja conectada). */
+export function useCategorySuggestions(provider: Provider, orgId: string) {
   return useMutation({
     mutationFn: async (q: string) => {
-      const data = await invokeMl('categories', { q });
+      const data = await invokeMarketplace(provider, 'categories', { q, organization_id: orgId });
       return z.object({ suggestions: z.array(mlSuggestionSchema) }).parse(data).suggestions;
     },
   });
 }
 
-export function useMlCategory(categoryId: string | null) {
+export function useMarketplaceCategory(
+  provider: Provider,
+  orgId: string,
+  categoryId: string | null,
+) {
   return useQuery({
-    queryKey: channelKeys.mlCategory(categoryId ?? ''),
+    queryKey: channelKeys.category(provider, categoryId ?? ''),
     enabled: Boolean(categoryId),
     staleTime: 60 * 60 * 1000,
     retry: false,
     queryFn: async () =>
-      mlCategorySchema.parse(await invokeMl('category', { category_id: categoryId })),
+      mlCategorySchema.parse(
+        await invokeMarketplace(provider, 'category', {
+          category_id: categoryId,
+          organization_id: orgId,
+        }),
+      ),
   });
 }
 
@@ -128,11 +144,13 @@ const publishResultSchema = z.object({
   skipped: z.array(z.string()).optional(),
 });
 
-export function useMlPublish(productId: string) {
+export function usePublish(provider: Provider, productId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (action: 'publish' | 'pause' | 'activate') =>
-      publishResultSchema.parse(await invokeMl('publish', { product_id: productId, action })),
+      publishResultSchema.parse(
+        await invokeMarketplace(provider, 'publish', { product_id: productId, action }),
+      ),
     // Sucesso ou falha: o estado gravado no banco muda.
     onSettled: () => queryClient.invalidateQueries({ queryKey: channelKeys.product(productId) }),
   });

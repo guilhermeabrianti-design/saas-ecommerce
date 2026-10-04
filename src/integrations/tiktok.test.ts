@@ -65,6 +65,7 @@ function fakeClient(routes: Record<string, (arg?: unknown) => unknown>) {
   const client: TikTokClient = {
     get: async (path, query) => handle(path, query),
     post: async (path, body) => handle(path, body),
+    put: async (path, body) => handle(path, body),
   };
   return { client, calls };
 }
